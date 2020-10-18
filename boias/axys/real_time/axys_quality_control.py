@@ -8,7 +8,7 @@ Created on Thu Jun 05 14:47:23 2014
 import numpy as np
 from numpy import *
 import ocean_data_qc as qc
-import limits
+import axys_limits
 
 
 def arredondar(num):
@@ -37,13 +37,13 @@ def qualitycontrol(df, buoy):
     parameters = ['wdir1', 'wspd1', 'gust1', 'wdir2', 'wspd2', 'gust2', 'swvht', 'mxwvht', 'tp', 'wvdir', 'pres', 'rh', 'atmp', 'sst', 'dewpt', 'cspd1', 'cdir1', 'cspd2', 'cdir2', 'cspd3', 'cdir3']
     for parameter in parameters:
         # missing value checks
-        flag_data = qc.mis_value_check(df, limits.mis_value_limits, flag_data, parameter)
+        flag_data = qc.mis_value_check(df, axys_limits.mis_value_axys_limits, flag_data, parameter)
         # coarse range check
-        flag_data = qc.range_check(df, limits.range_limits, flag_data, parameter)
+        flag_data = qc.range_check(df, axys_limits.range_axys_limits, flag_data, parameter)
         # soft range check
-        flag_data = qc.range_check_climate(df, limits.climate_limits, flag_data, parameter)
+        flag_data = qc.range_check_climate(df, axys_limits.climate_axys_limits, flag_data, parameter)
         # soft range check
-        # flag_data = qc.range_check_std(df, limits.std_mean_values, flag_data, parameter)
+        # flag_data = qc.range_check_std(df, axys_limits.std_mean_values, flag_data, parameter)
 
 
 
@@ -63,7 +63,7 @@ def qualitycontrol(df, buoy):
 
     #Stucksensorcheck
     for parameter in parameters:
-        flag_data = qc.stuck_sensor_check(df, limits.stuck_limits, flag_data, parameter)
+        flag_data = qc.stuck_sensor_check(df, axys_limits.stuck_axys_limits, flag_data, parameter)
 
 
     # comparison with scaterometer data
@@ -77,12 +77,12 @@ def qualitycontrol(df, buoy):
     (df, flag_data) = qc.related_meas_check(df, flag_data, parameters)
 
     #Time continuity check
-    flag_data = qc.t_continuity_check(df, limits.sigma_limits, limits.continuity_limits, flag_data, "swvht")
-    flag_data = qc.t_continuity_check(df, limits.sigma_limits, limits.continuity_limits, flag_data, "rh")
-    flag_data = qc.t_continuity_check(df, limits.sigma_limits, limits.continuity_limits, flag_data, "pres")
-    flag_data = qc.t_continuity_check(df, limits.sigma_limits, limits.continuity_limits, flag_data, "atmp")
-    flag_data = qc.t_continuity_check(df, limits.sigma_limits, limits.continuity_limits, flag_data, "wspd")
-    flag_data = qc.t_continuity_check(df, limits.sigma_limits, limits.continuity_limits, flag_data, "sst")
+    flag_data = qc.t_continuity_check(df, axys_limits.sigma_axys_limits, axys_limits.continuity_axys_limits, flag_data, "swvht")
+    flag_data = qc.t_continuity_check(df, axys_limits.sigma_axys_limits, axys_limits.continuity_axys_limits, flag_data, "rh")
+    flag_data = qc.t_continuity_check(df, axys_limits.sigma_axys_limits, axys_limits.continuity_axys_limits, flag_data, "pres")
+    flag_data = qc.t_continuity_check(df, axys_limits.sigma_axys_limits, axys_limits.continuity_axys_limits, flag_data, "atmp")
+    flag_data = qc.t_continuity_check(df, axys_limits.sigma_axys_limits, axys_limits.continuity_axys_limits, flag_data, "wspd")
+    flag_data = qc.t_continuity_check(df, axys_limits.sigma_axys_limits, axys_limits.continuity_axys_limits, flag_data, "sst")
 
 
 
