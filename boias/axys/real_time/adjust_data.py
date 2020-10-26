@@ -17,9 +17,7 @@ def adjust_data(raw_data):
     epoca = []
 
     for data in raw_data:
-
-        if int(float(data[5])) == 1 and float(data[7]) <= 12 and float(data[8]) <= 23:
-
+        if int(float(data[5])) == 1 and float(data[7]) <= 12 and float(data[8]) <= 23 and float(data[6]) <= datetime.now().year and type(data[19]) != str:
             year0.append(int(data[4].year))
             month0.append(int(data[4].month))
             day0.append(int(data[4].day))
@@ -70,7 +68,7 @@ def adjust_data(raw_data):
 
             epoca.append((datetime(int(float(data[6])),int(float(data[7])),int(float(data[8])),int(float(data[9])),0) - datetime(1970,1,1)).total_seconds())
 
-        elif int(float(data[5]))==2:
+        elif int(float(data[5]))==2 and float(data[6]) <= 23 :
             year0.append(int(data[4].year))
             month0.append(int(data[4].month))
             day0.append(int(data[4].day))
@@ -201,6 +199,14 @@ def adjust_data(raw_data):
             else:
                 day[-1]=day0[-1]
 
+    print(len(lat))
+    print(len(sensor00))
+    print(len(sst))
+    print(len(wspd1))
+    print(len(tp))
+    print(len(compass))
+
+
     df = pd.DataFrame({
         'lat': lat,
         'lon': lon,
@@ -239,7 +245,6 @@ def adjust_data(raw_data):
         'wvspread': wvspread,
         'compass': compass,
         })
-
 
     df['data'] = [datetime.strptime(str(int(df.year[i])) +  \
         str(int(df.month[i])).zfill(2) + str(int(df.day[i])).zfill(2) + \

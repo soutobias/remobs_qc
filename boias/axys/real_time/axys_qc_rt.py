@@ -16,15 +16,15 @@ def rename_merge(data, flag):
     return pd.merge(data, flag, left_index=True, right_index=True, how='outer')
 
 
-
-
 import sys
 import os
 cwd = os.getcwd()
 sys.path.insert(0, cwd)
 sys.path.insert(0, cwd + '/../bd/')
 sys.path.insert(0, cwd + '/../limits/')
-sys.path.insert(0, cwd + '/../qc_checks/')
+sys.path.insert(0, cwd + '/../not_real_time/')
+
+sys.path.insert(0, cwd + '/../../../qc_checks/')
 
 from os.path import expanduser
 home = expanduser("~")
@@ -33,21 +33,17 @@ import user_config1 as user_config
 os.chdir( user_config.path )
 
 
-from quality_control import *
-import sql_queries
+from axys_quality_control import *
+import axys_database
 import time_codes
 from adjust_data import *
 
-buoys = sql_queries.working_buoys(user_config)
+buoys = axys_database.working_buoys(user_config)
 
 for buoy in buoys:
     print(buoy["nome"])
 
-    raw_data = sql_queries.select_raw_data_bd(buoy["argos_id"], user_config)
-
-    adjusted_data = adjust_data(raw_data)
-
-    adjusted_data = adjust_different_message_data(adjusted_data)
+    adjusted_data = axys_database.select_adjusted_data_bd(buoy["argos_num"], user_config)
 
     (flag_data, qc_data) = qualitycontrol(adjusted_data, buoy)
 
@@ -55,12 +51,10 @@ for buoy in buoys:
 
     qc_data = rename_merge(qc_data, flag_data)
 
-    sql_queries.delete_qc_old_data(str(qc_data.index[0]), buoy["estacao_id"], user_config)
+    axys_database.delete_qc_old_data(str(qc_data.index[0]), buoy["estacao_id"], user_config)
 
     qc_data["estacao_id"] = buoy["estacao_id"]
 
     qc_data.reset_index().set_index(["data", "estacao_id"])
 
-    sql_queries.insert_qc_data_bd(qc_data, user_config)
-
-
+    axys_database.insert_qc_data_bd(qc_data, user_config)

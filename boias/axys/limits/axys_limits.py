@@ -1,4 +1,4 @@
-range_limits = {
+range_axys_limits = {
     "swvht": [0.1, 19.9],
     "mxwvht": [0.1, 19.9],
     "tp": [1.7, 30],
@@ -23,7 +23,7 @@ range_limits = {
     "apd": [1.7, 30],
     }
 
-sigma_limits = {
+sigma_axys_limits = {
     "swvht": 6,
     "rh": 20,
     "pres": 21,
@@ -32,7 +32,7 @@ sigma_limits = {
     "sst": 8.6,
     }
 
-mis_value_limits = {
+mis_value_axys_limits = {
     "rh": 11,
     "cspd1": 409.5,
     "cdir1": 511,
@@ -50,7 +50,7 @@ mis_value_limits = {
     "spred": 381,
     }
 
-climate_limits = {
+climate_axys_limits = {
     "wwht": [0, 15],
     "mxwvht": [0, 19],
     "tp": [1.7, 20],
@@ -91,6 +91,6 @@ std_mean_values = {
     "cspd3": [-2500, 2500],
     }
 
-stuck_limits = 7
+stuck_axys_limits = 7
 
-continuity_limits = 3
+continuity_axys_limits = 3
