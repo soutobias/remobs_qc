@@ -52,7 +52,7 @@ def insert_raw_data_bd(raw_data, buoy, user_config):
     cur = db.cursor()
 
     bd_data = []
-    cur.execute("SELECT data FROM pnboia_raw_rt WHERE argos_id = %s\
+    cur.execute("SELECT data FROM pnboia_raw_rt WHERE argos_num = %s\
     ORDER BY data DESC limit 5" % buoy)
     for row in cur.fetchall():
         bd_data.append(row)
@@ -63,7 +63,7 @@ def insert_raw_data_bd(raw_data, buoy, user_config):
         if bd_data != []:
             print(raw_data)
             if data[3] > bd_data[0]:
-                sql = "INSERT INTO pnboia_raw_rt (argos_id, lat, lon, data, sensor00, sensor01, \
+                sql = "INSERT INTO pnboia_raw_rt (argos_num, lat, lon, date_time, sensor00, sensor01, \
                 sensor02, sensor03, sensor04, sensor05, sensor06, sensor07, sensor08, sensor09, \
                 sensor10, sensor11, sensor12, sensor13, sensor14, sensor15, sensor16, sensor17, \
                 sensor18, sensor19, sensor20, sensor21, sensor22, sensor23, sensor24, sensor25)\
@@ -82,7 +82,7 @@ def insert_raw_data_bd(raw_data, buoy, user_config):
                 db.commit()
         else:
             print(raw_data)
-            sql = "INSERT INTO pnboia_raw_rt (argos_id, lat, lon, data, sensor00, sensor01, \
+            sql = "INSERT INTO pnboia_raw_rt (argos_num, lat, lon, date_time, sensor00, sensor01, \
             sensor02, sensor03, sensor04, sensor05, sensor06, sensor07, sensor08, sensor09, \
             sensor10, sensor11, sensor12, sensor13, sensor14, sensor15, sensor16, sensor17, \
             sensor18, sensor19, sensor20, sensor21, sensor22, sensor23, sensor24, sensor25)\
@@ -109,8 +109,8 @@ def select_raw_data_bd(buoy, user_config):
     raw_data = []
     time_last_month = last_month()
 
-    cur.execute("SELECT * FROm pnboia_raw_rt wheRe argos_id = %s and data >= '%s' \
-    ORdeR by data" % (buoy, time_last_month))
+    cur.execute("SELECT * FROm pnboia_raw_rt wheRe argos_num = %s and date_time >= '%s' \
+    ORdeR by date_time" % (buoy, time_last_month))
 
     for row in cur.fetchall():
         raw_data.append(row[:])
@@ -118,6 +118,40 @@ def select_raw_data_bd(buoy, user_config):
     cur.close()
     db.close()
     return raw_data
+
+def select_adjusted_data_bd(buoy, user_config):
+
+    db = connect_db(user_config)
+
+    cur = db.cursor()
+
+    raw_data = []
+    time_last_month = last_month()
+
+    cur.execute("SELECT * FROm pnboia_raw_rt wheRe argos_num = %s and date_time >= '%s' \
+    ORdeR by date_time" % (buoy, time_last_month))
+
+    for row in cur.fetchall():
+        raw_data.append(row[:])
+
+    cur.close()
+    db.close()
+    return raw_data
+
+
+def insert_adjusted_data_bd(qc_data, user_config):
+
+    con = sqlalchemy.create_engine('mysql+mysqlconnector://{0}:{1}@{2}/{3}?auth_plugin=mysql_native_password'.
+                                            format(user_config.username,
+                                                user_config.password,
+                                                user_config.host,
+                                                user_config.database))
+
+
+    qc_data.to_sql(con=con, name='axys', if_exists='append')
+
+    print('data inserted')
+
 
 def delete_qc_old_data(initial_time, buoy, user_config):
 
@@ -130,6 +164,19 @@ def delete_qc_old_data(initial_time, buoy, user_config):
     db.commit()
     cur.close()
     db.close()
+
+def delete_adjusted_old_data(initial_time, buoy, user_config):
+
+    db = connect_db(user_config)
+
+    cur=db.cursor()
+
+    cur.execute("DELETE FROm pnboia WHERE data>='%s' AND estacao_id = '%s'"% (initial_time, buoy))
+    # cur.execute("SELECT wmo FROm deriva_estacao")
+    db.commit()
+    cur.close()
+    db.close()
+
 
 def insert_qc_data_bd(qc_data, user_config):
 

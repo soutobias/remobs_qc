@@ -28,5 +28,5 @@ buoys = axys_database.working_buoys(user_config)
 
 for buoy in buoys:
     print(buoy["nome"])
-    raw_data = telnet_download.download_raw_data(buoy["argos_id"], user_config)
-    axys_database.insert_raw_data_bd(raw_data, buoy["argos_id"], user_config)
+    raw_data = telnet_download.download_raw_data(buoy["argos_num"], user_config)
+    axys_database.insert_raw_data_bd(raw_data, buoy["argos_num"], user_config)
