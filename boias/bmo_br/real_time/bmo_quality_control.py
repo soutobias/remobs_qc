@@ -1,7 +1,16 @@
+
 import numpy as np
-from numpy import *
-import ocean_data_qc as qc
+
+
+
+import sys
+import os
+cwd = os.getcwd()
+sys.path.insert(0, cwd + '/../limits/')
+sys.path.insert(0, cwd + '/../../../qc_checks/')
+
 import bmo_limits as limits
+import ocean_data_qc as qc
 
 
 def arredondar(num):
