@@ -184,3 +184,72 @@ def rename_flag_data(flag):
     return flag
 
 
+
+
+
+def adjust_bmo_qc(bmo_qc_data):
+    import pandas as pd
+
+
+    columns_data = ['id_buoy', 'id',
+                       'date_time', 'lat', 'lon',
+                        'battery', 'wspd', 'gust',
+                       'wdir', 'atmp', 'rh', 'dewpt',
+                       'pres', 'sst', 'compass',
+                       'arad', 'cspd1', 'cdir1',
+                       'cspd2', 'cdir2', 'cspd3',
+                       'cdir3', 'swvht1', 'tp1',
+                       'mxwvht1', 'wvdir1', 'wvspread1',
+                       'swvht2', 'tp2', 'wvdir2']
+
+    bmo_qc_adjusted = pd.DataFrame(columns = columns_data)
+
+
+    bmo_qc_adjusted['id_buoy'] = bmo_qc_data['id_buoy'].astype(int)
+    bmo_qc_adjusted['id'] = bmo_qc_data['id'].astype(int)
+    bmo_qc_adjusted['date_time'] = bmo_qc_data.index
+    bmo_qc_adjusted['lat'] = pd.to_numeric(bmo_qc_data['lat'], errors = 'coerce').round(4)
+    bmo_qc_adjusted['lon'] = pd.to_numeric(bmo_qc_data['lon'], errors = 'coerce').round(4)
+    bmo_qc_adjusted['battery'] = pd.to_numeric(bmo_qc_data['battery'], errors = 'coerce').round(1)
+    bmo_qc_adjusted['wspd'] = pd.to_numeric(bmo_qc_data['wspd'], errors = 'coerce').round(2)
+    bmo_qc_adjusted['gust'] = pd.to_numeric(bmo_qc_data['gust'], errors = 'coerce').round(2)
+    bmo_qc_adjusted['wdir'] = pd.to_numeric(bmo_qc_data['wdir'], errors= 'coerce', downcast = 'signed').astype(int)
+    bmo_qc_adjusted['atmp'] = pd.to_numeric(bmo_qc_data['atmp'], errors = 'coerce').round(2)
+    bmo_qc_adjusted['rh'] = pd.to_numeric(bmo_qc_data['rh'], errors = 'coerce').round(2)
+    bmo_qc_adjusted['dewpt'] = pd.to_numeric(bmo_qc_data['dewpt'], errors = 'coerce').round(2)
+    bmo_qc_adjusted['pres'] = pd.to_numeric(bmo_qc_data['pres'], errors = 'coerce').round(1)
+    bmo_qc_adjusted['sst'] = pd.to_numeric(bmo_qc_data['sst'], errors = 'coerce').round(2)
+    bmo_qc_adjusted['compass'] = pd.to_numeric(bmo_qc_data['compass'], errors= 'coerce', downcast = 'signed').astype(int)
+    bmo_qc_adjusted['arad'] = pd.to_numeric(bmo_qc_data['arad'], errors = 'coerce').round(2)
+    bmo_qc_adjusted['cspd1'] = pd.to_numeric(bmo_qc_data['cspd1'],errors = 'coerce').round(1)
+    bmo_qc_adjusted['cdir1'] = pd.to_numeric(bmo_qc_data['cdir1'], errors='coerce',  downcast='signed').astype(int)
+    bmo_qc_adjusted['cspd2'] = pd.to_numeric(bmo_qc_data['cspd2'], errors = 'coerce').round(1)
+    bmo_qc_adjusted['cdir2'] = pd.to_numeric(bmo_qc_data['cdir2'], errors='coerce',  downcast='signed').astype(int)
+    bmo_qc_adjusted['cspd3'] = pd.to_numeric(bmo_qc_data['cspd3'], errors = 'coerce').round(1)
+    bmo_qc_adjusted['cdir3'] = pd.to_numeric(bmo_qc_data['cdir3'], errors='coerce',  downcast='signed').astype(int)
+    bmo_qc_adjusted['swvht1'] = pd.to_numeric(bmo_qc_data['swvht1'], errors = 'coerce').round(2)
+    bmo_qc_adjusted['tp1'] = pd.to_numeric(bmo_qc_data['tp1'], errors = 'coerce').round(1)
+    bmo_qc_adjusted['mxwvht1'] = pd.to_numeric(bmo_qc_data['mxwvht1'], errors = 'coerce').round(2)
+    bmo_qc_adjusted['wvdir1'] = pd.to_numeric(bmo_qc_data['wvdir1'], errors='coerce',  downcast='signed').astype(int)
+    bmo_qc_adjusted['wvspread1'] = pd.to_numeric(bmo_qc_data['wvspread1'], errors='coerce',  downcast='signed').astype(int)
+    bmo_qc_adjusted['swvht2'] = pd.to_numeric(bmo_qc_data['swvht2'], errors = 'coerce').round(2)
+    bmo_qc_adjusted['tp2'] = pd.to_numeric(bmo_qc_data['tp2'], errors = 'coerce').round(1)
+    bmo_qc_adjusted['wvdir2'] = pd.to_numeric(bmo_qc_data['wvdir2'], errors='coerce', downcast='signed').astype(int)
+
+
+
+
+
+    # flags_columns
+
+    flag_columns = [col for col in bmo_qc_data if col.startswith('flag_')]
+
+    for col in flag_columns:
+        bmo_qc_adjusted[col] = pd.to_numeric(bmo_qc_data[col],
+                                             errors='coerce',
+                                             downcast='signed').astype(int)
+
+    bmo_qc_adjusted.set_index('date_time', inplace=True)
+
+
+    return bmo_qc_adjusted

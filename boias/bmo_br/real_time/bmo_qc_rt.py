@@ -57,7 +57,9 @@ for id in id_buoy['id_buoy']:
     print("Connecting with Qualified Database")
     conn_qc = conn_qc_db() # Open connection with Qualified Database
 
-    insert_bmo_qc_data(conn_qc, bmo_merged)
+    bmo_qc_data = adjust_bmo_qc(bmo_merged)
+
+    insert_bmo_qc_data(conn_qc, bmo_qc_data)
     conn_qc.close()
 
 
