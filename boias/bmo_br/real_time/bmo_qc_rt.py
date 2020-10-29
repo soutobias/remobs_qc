@@ -9,8 +9,6 @@ import os
 cwd = os.getcwd()
 sys.path.insert(0, cwd)
 sys.path.insert(0, cwd + '/../bd/')
-sys.path.insert(0, cwd + '/../limits/')
-sys.path.insert(0, cwd + '/../qc_checks/')
 
 
 from bmo_database import *
@@ -52,6 +50,16 @@ for id in id_buoy['id_buoy']:
     print("General Data ready.")
     print('\n'*2)
 
+    print("Closing connection with Raw Database")
+    conn.close() # Closing connection with raw database
+    print("Connection closed.")
+    ###########################################################################
+    print("Connecting with Qualified Database")
+    conn_qc = conn_qc_db() # Open connection with Qualified Database
+
+    insert_bmo_qc_data(conn_qc, bmo_merged)
+    conn_qc.close()
+
 
    # bmo_current = bmo_current[~bmo_current.index.duplicated(keep = 'first')]
 
@@ -59,7 +67,7 @@ for id in id_buoy['id_buoy']:
    # flag, bmo_qualified = bqc.qualitycontrol(bmo_general, id)
 
 
-    conn.close()
+
 
 
 
