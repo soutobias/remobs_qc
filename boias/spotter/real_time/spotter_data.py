@@ -74,10 +74,14 @@ for n_buoy in range(len(devices)):
 
         status_spotter = pd.DataFrame(status_values)
 
+        print("Last status:")
+        print(status_values)
+
+        print("Inserting on database...")
         insert_spotter_status(conn, status_spotter, id)
 
-        if last_date_status == None:
-            last_date_status = date
+        last_date_status = date_spotter
+
 
     else:
         print("No new status for spotter %s." % id)

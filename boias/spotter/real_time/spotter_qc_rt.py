@@ -1,5 +1,5 @@
 
-import numpy as np
+
 import sys
 import os
 
@@ -11,7 +11,7 @@ from spotter_quality_control import *
 from spotter_database import *
 from spotter_adjust_data import *
 
-
+#os.chdir(os.getcwd() + '/real_time')
 
 
 conn = connect_database_remo()
@@ -22,7 +22,10 @@ for id_buoy in spotters_on_ids['id_buoy']:
     print(f"Starting Data Qualification for Spotter Buoy {id_buoy}")
     print("\n"*2)
 
-    raw_data = raw_data_spotter(id_buoy, conn)
+    last_date = check_last_date(conn, 'spotter_general', id_buoy)
+    last_date = last_date[0][0]
+
+    raw_data = get_data_spotter(conn, id_buoy, last_date, 24, 'spotter_general')
 
     # Treating values and index
     raw_data.set_index("date_time", inplace = True)
@@ -46,5 +49,13 @@ for id_buoy in spotters_on_ids['id_buoy']:
                                on = 'date_time', validate = 'one_to_one' )
 
 
-    print("Finished Spotter Data Qualification.")
+
+    print("Closing connection with raw database...")
+    conn.close()
+
+    print("Connecting with Qualified Database...")
+    conn_qc = conn_qc_db()
+    print("Connected!")
+
+
 

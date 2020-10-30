@@ -159,7 +159,7 @@ def insert_spotter_general(conn, spotter_df, id_buoy):
                      %(seaId)s);""", spotter_data)
 
     conn.commit()
-    print("Data entered succesfully! %s rows entered" % i)
+    print("Data entered succesfully! %s rows entered" % i + 1)
 
     return
 
@@ -199,7 +199,7 @@ def check_last_date(conn, table, id_buoy):
 ################################################################################
 
 
-def raw_data_spotter(id_buoy, conn):
+def raw_data_spotter(id_buoy, conn, interval):
     import pandas as pd
 
     cursor = conn.cursor()
@@ -222,3 +222,54 @@ def get_declination(conn, id_buoy):
     df = pd.read_sql_query(query, conn)
 
     return df
+
+
+
+def conn_qc_db():
+    """Short summary.
+
+    Returns
+    -------
+    type
+        psycopg2 connection
+        connection to REMO db
+
+    """
+
+    import psycopg2 as pg
+
+    try:
+        conn = pg.connect(user="postgres",
+                          password='chm@remobs11',
+                          host='localhost',
+                          port='5432',
+                          database='dw_remo')
+
+    except Exception as err:
+        print("Error: ", err)
+
+    return conn
+
+
+
+def get_data_spotter(conn, id_buoy, last_date, interval_hour, table):
+
+    import pandas as pd
+    from datetime import timedelta
+
+    # Getting data from the last x hours
+    date_period = last_date - timedelta(hours = interval_hour)
+
+    query = f"SELECT * FROM {table} WHERE date_time > '{date_period}' AND " \
+            f"id_buoy = {id_buoy};"
+
+    raw_data = pd.read_sql_query(query, conn)
+
+    return raw_data
+
+
+def insert_spotter_qc_data(conn_qc, spotter_qc_df):
+    return
+
+
+

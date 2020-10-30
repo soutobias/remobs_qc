@@ -5,14 +5,16 @@ import numpy as np
 
 
 
-import spotter_limits as limits
+
 
 import sys
 import os
 cwd = os.getcwd()
 sys.path.insert(0, cwd + '/../limits/')
-sys.path.insert(0, cwd + '/../qc_checks/')
+sys.path.insert(0, cwd + '/../../../qc_checks/')
 
+
+import spotter_limits as limits
 import ocean_data_qc as qc
 
 
