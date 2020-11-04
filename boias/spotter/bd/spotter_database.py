@@ -269,6 +269,61 @@ def get_data_spotter(conn, id_buoy, last_date, interval_hour, table):
 
 
 def insert_spotter_qc_data(conn_qc, spotter_qc_df):
+    cols = spotter_df_df.columns.tolist()
+
+    cursor = conn.cursor()
+    for i, row in spotter_df_qc[cols].iterrows():
+        id_buoy = id_buoy
+        date_time = row['timestamp']
+        lat = row['latitude']
+        lon = row['longitude']
+        wspd = row['wspd']
+        wdir = row['wdir']
+        swvht = row['swvht']
+        tp = row['peakPeriod']
+        mean_tp = row['meanPeriod']
+        peak_dir = row['peakDirection']
+        wvdir = row['meanDirection']
+        peak_dir_spread = row['peakDirectionalSpread']
+        wvspread = row['meanDirectionalSpread']
+
+        flag_wspd = row['flag_wspd']
+        flag_wdir = row['flag_wdir']
+        flag_swvht = row['flag_swvht']
+        flag_tp = row['flag_peakPeriod']
+        flag_mean_tp = row['flag_flag_meanPeriod']
+        flag_peak_dir = row['flag_peakDirection']
+        flag_wvdir = row['flag_meanDirection']
+        flag_peak_dir_spread = row['flag_peakDirectionalSpread']
+        flag_wvspread = row['flag_meanDirectionalSpread']
+
+
+
+        spotter_data = {'id': id_buoy, 'date': date_time, 'lat': lat, 'lon': lon,
+                        'wspd': wspd, 'wdir': wdir, 'seaId': seaId,
+                        'swvht': swvht, 'peak_tp': peak_tp, 'mean_tp': mean_tp,
+                        'pk_dir': peak_dir, 'mn_dir': mean_dir,
+                        'pk_dir_spread': peak_dir_spread,
+                        'mn_dir_spread': mean_dir_spread,
+
+                        'flag_wspd': wspd, 'flag_wdir': wdir,
+                        'flag_swvht': swvht, 'flag_peak_tp': peak_tp, 'flag_mean_tp': mean_tp,
+                        'flag_pk_dir': peak_dir, 'flag_mn_dir': mean_dir,
+                        'flag_pk_dir_spread': peak_dir_spread,
+                        'flag_mn_dir_spread': mean_dir_spread,
+
+
+                        }
+
+
+        cursor.execute("""INSERT INTO spotter_general (id_buoy, date_time, lat, lon,
+                    swvht, peak_tp, mean_tp, peak_dir, peak_dir_spread,
+                    mean_dir, mean_dir_spread, wspd, wdir, sea_surface_id) VALUES
+                    (%(id)s, %(date)s, %(lat)s, %(lon)s, %(swvht)s,
+                    %(peak_tp)s, %(mean_tp)s, %(pk_dir)s, %(mn_dir)s, 
+                    %(pk_dir_spread)s, %(mn_dir_spread)s,%(wspd)s, %(wdir)s,
+                     %(seaId)s);""", spotter_data)
+
     return
 
 
