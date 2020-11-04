@@ -57,5 +57,14 @@ for id_buoy in spotters_on_ids['id_buoy']:
     conn_qc = conn_qc_db()
     print("Connected!")
 
+    min_data = min(spotter_qc_data.index)
+    print("Deleting data...")
+    delete_data(conn_qc, 'data_buoys', min_data, id_buoy)
+    print("Data deleted!\n")
 
+    insert_spotter_qc_data(conn_qc, spotter_qc_data)
+    print("New Qualified Data Inserted \n")
+    print("Closing connection with Qualified Database...")
+    conn_qc.close()
 
+    print("Spotter Qualification Data Script Finished")

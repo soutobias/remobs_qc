@@ -26,11 +26,17 @@ def rotate_data(conn, df, flag, id_buoy):
     df.loc[flag['wdir'] == 0, "wdir"] = df['wdir'] - df['tmp_dec']
     df.loc[df["wdir"] < 0, "wdir"] = df["wdir"] + 360
 
-    df.loc[flag['peak_dir'] == 0, 'peak_dir'] = df['peak_dir'] - df['tmp_dec']
-    df.loc[df['peak_dir'] < 0, 'peak_dir'] = df['peak_dir'] + 360
+    df.loc[flag['pk_dir'] == 0, 'pk_dir'] = df['pk_dir'] - df['tmp_dec']
+    df.loc[df['pk_dir'] < 0, 'pk_dir'] = df['pk_dir'] + 360
 
-    df.loc[flag['mean_dir'] == 0, 'mean_dir'] = df['mean_dir'] - df['tmp_dec']
-    df.loc[df['mean_dir'] < 0, 'mean_dir'] = df['mean_dir'] + 360
+    df.loc[flag['wvdir'] == 0, 'wvdir'] = df['wvdir'] - df['tmp_dec']
+    df.loc[df['wvdir'] < 0, 'wvdir'] = df['wvdir'] + 360
+
+    df.loc[flag['wvspread'] == 0, 'wvspread'] = df['wvspread'] - df['tmp_dec']
+    df.loc[df['wvspread'] < 0, 'wvspread'] = df['wvspread'] + 360
+
+    df.loc[flag['pk_wvspread'] == 0, 'pk_wvspread'] = df['pk_wvspread'] - df['tmp_dec']
+    df.loc[df['pk_wvspread'] < 0, 'pk_wvspread'] = df['pk_wvspread'] + 360
 
 
 
