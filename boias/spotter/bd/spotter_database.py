@@ -137,25 +137,25 @@ def insert_spotter_general(conn, spotter_df, id_buoy):
         peak_tp = row['peakPeriod']
         mean_tp = row['meanPeriod']
         peak_dir = row['peakDirection']
-        mean_dir = row['meanDirection']
-        peak_dir_spread = row['peakDirectionalSpread']
-        mean_dir_spread = row['meanDirectionalSpread']
+        wvdir = row['meanDirection']
+        pk_wvspread = row['peakDirectionalSpread']
+        wvspread = row['meanDirectionalSpread']
 
-        spotter_data = {'id': id_buoy, 'date': date_time, 'lat': lat, 'lon': lon,
+        spotter_data = {'id_buoy': id_buoy, 'date': date_time, 'lat': lat, 'lon': lon,
                         'wspd': wspd, 'wdir': wdir, 'seaId': seaId,
-                        'swvht': swvht, 'peak_tp': peak_tp, 'mean_tp': mean_tp,
-                        'pk_dir': peak_dir, 'mn_dir': mean_dir,
-                        'pk_dir_spread': peak_dir_spread,
-                        'mn_dir_spread': mean_dir_spread
+                        'swvht': swvht, 'tp': peak_tp, 'mean_tp': mean_tp,
+                        'pk_dir': peak_dir, 'wvdir': wvdir,
+                        'pk_wvspread': pk_wvspread,
+                        'wvspread': wvspread
                         }
 
 
         cursor.execute("""INSERT INTO spotter_general (id_buoy, date_time, lat, lon,
-                    swvht, peak_tp, mean_tp, peak_dir, peak_dir_spread,
-                    mean_dir, mean_dir_spread, wspd, wdir, sea_surface_id) VALUES
-                    (%(id)s, %(date)s, %(lat)s, %(lon)s, %(swvht)s,
-                    %(peak_tp)s, %(mean_tp)s, %(pk_dir)s, %(mn_dir)s, 
-                    %(pk_dir_spread)s, %(mn_dir_spread)s,%(wspd)s, %(wdir)s,
+                    swvht, tp, mean_tp, pk_dir, pk_wvspread,
+                    wvdir, wvspread, wspd, wdir, sea_surface_id) VALUES
+                    (%(id_buoy)s, %(date)s, %(lat)s, %(lon)s, %(swvht)s,
+                    %(tp)s, %(mean_tp)s, %(pk_dir)s, %(wvdir)s, 
+                    %(pk_wvspread)s, %(wvspread)s,%(wspd)s, %(wdir)s,
                      %(seaId)s);""", spotter_data)
 
     conn.commit()
@@ -199,7 +199,7 @@ def check_last_date(conn, table, id_buoy):
 ################################################################################
 
 
-def raw_data_spotter(id_buoy, conn):
+def raw_data_spotter(id_buoy, conn, interval):
     import pandas as pd
 
     cursor = conn.cursor()
@@ -222,3 +222,159 @@ def get_declination(conn, id_buoy):
     df = pd.read_sql_query(query, conn)
 
     return df
+
+
+
+def conn_qc_db():
+    """Short summary.
+
+    Returns
+    -------
+    type
+        psycopg2 connection
+        connection to REMO db
+
+    """
+
+    import psycopg2 as pg
+
+    try:
+        conn = pg.connect(user="postgres",
+                          password='chm@remobs11',
+                          host='localhost',
+                          port='5432',
+                          database='dw_remo')
+
+    except Exception as err:
+        print("Error: ", err)
+
+    return conn
+
+
+
+def get_data_spotter(conn, id_buoy, last_date, interval_hour, table):
+
+    import pandas as pd
+    from datetime import timedelta
+
+    # Getting data from the last x hours
+    date_period = last_date - timedelta(hours = interval_hour)
+
+    query = f"SELECT * FROM {table} WHERE date_time > '{date_period}' AND " \
+            f"id_buoy = {id_buoy};"
+
+    raw_data = pd.read_sql_query(query, conn)
+
+    return raw_data
+
+def delete_data(conn_qc, table, date_min, id_buoy):
+
+    cursor = conn_qc.cursor()
+
+    cursor.execute(f"DELETE FROM {table} WHERE"
+                   f" date_time >= '{date_min}' AND"
+                   f" id_buoy = {id_buoy}")
+
+    conn_qc.commit()
+
+    print(f"Data from buoy {id_buoy} after {date_min} deleted from database.")
+
+    return
+
+
+
+
+
+
+
+def insert_spotter_qc_data(conn_qc, spotter_qc_df):
+    cols = spotter_qc_df.columns.tolist()
+
+    cursor = conn_qc.cursor()
+    row_index = 0
+    for index, row in spotter_qc_df[cols].iterrows():
+        id_buoy = row['id_buoy']
+        id = row['id']
+        date_time = index
+        lat = row['lat']
+        lon = row['lon']
+        wspd = row['wspd']
+        wdir = row['wdir']
+        swvht1 = row['swvht']
+        tp1 = row['tp']
+        mean_tp = row['mean_tp']
+        pk_dir = row['pk_dir']
+        wvdir1 = row['wvdir']
+        pk_wvspread = row['pk_wvspread']
+        wvspread1 = row['wvspread']
+        flag_wspd = row['flag_wspd']
+        flag_wdir = row['flag_wdir']
+        flag_swvht1 = row['flag_swvht']
+        flag_tp1 = row['flag_tp']
+        flag_mean_tp = row['flag_mean_tp']
+        flag_pk_dir = row['flag_pk_dir']
+        flag_wvdir1 = row['flag_wvdir']
+        flag_pk_wvspread = row['flag_pk_wvspread']
+        flag_wvspread1 = row['flag_wvspread']
+
+
+        spotter_qc_data = {'id_buoy': id_buoy,
+                           'id': id,
+                            'date': date_time,
+                            'lat': lat,
+                            'lon': lon,
+                            'wspd': wspd,
+                            'wdir': wdir,
+                            'swvht1': swvht1,
+                            'tp1': tp1,
+                            'wvdir1': wvdir1,
+                            'wvspread1': wvspread1,
+                            'pk_dir': pk_dir,
+                            'pk_wvspread': pk_wvspread,
+                            'mean_tp': mean_tp,
+                            'flag_wspd': flag_wspd,
+                            'flag_wdir': flag_wdir,
+                            'flag_swvht1': flag_swvht1,
+                            'flag_tp1': flag_tp1,
+                            'flag_mean_tp': flag_mean_tp,
+                            'flag_pk_dir': flag_pk_dir,
+                            'flag_wvdir1': flag_wvdir1,
+                            'flag_pk_wvspread': flag_pk_wvspread,
+                            'flag_wvspread1': flag_wvspread1,
+                        }
+
+
+        query_insert = """INSERT INTO data_buoys (id_buoy, id, date_time, lat, lon,
+                    wspd, wdir, swvht1, tp1, wvdir1, wvspread1, pk_dir, pk_wvspread,
+                    mean_tp, flag_wspd, flag_wdir, flag_swvht1, flag_tp1, 
+                    flag_wvdir1, flag_wvspread1, flag_pk_dir, flag_pk_wvspread,
+                    flag_mean_tp) 
+                    VALUES
+                    (%(id_buoy)s,%(id)s, %(date)s, %(lat)s, %(lon)s, %(wspd)s,
+                    %(wdir)s, %(swvht1)s, %(tp1)s, %(wvdir1)s, 
+                    %(wvspread1)s, %(pk_dir)s,%(pk_wvspread)s, %(mean_tp)s,
+                    %(flag_wspd)s, %(flag_wdir)s, %(flag_swvht1)s, %(flag_tp1)s,
+                    %(flag_wvdir1)s, %(flag_wvspread1)s, %(flag_pk_dir)s,
+                    %(flag_pk_wvspread)s, %(flag_mean_tp)s);"""
+
+
+        try:
+            cursor.execute(query_insert, spotter_qc_data)
+            print("Row %s inserted on Qualified Database table" % row_index)
+        except Exception as err:
+            print(err)
+            print("Rollback Transaction in row %s \n" % row_index)
+            print("Transaction Cancelled.")
+            conn_qc.rollback()
+
+            return
+
+        row_index += 1
+
+    conn_qc.commit()
+    print("Commited!")
+    print("All %s rows inserted" % row_index)
+    return
+
+
+

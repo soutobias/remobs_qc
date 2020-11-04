@@ -5,21 +5,24 @@ import numpy as np
 
 
 
-import spotter_limits as limits
+
 
 import sys
 import os
 cwd = os.getcwd()
 sys.path.insert(0, cwd + '/../limits/')
-sys.path.insert(0, cwd + '/../qc_checks/')
+sys.path.insert(0, cwd + '/../../../qc_checks/')
 
+
+import spotter_limits as limits
 import ocean_data_qc as qc
 
 
 def definition_flag_pandas(df):
 
-    flag_data = df [['wspd', 'wdir','sst', 'swvht', 'peak_tp',
-                     'mean_tp', 'peak_dir', 'mean_dir']] * 0
+    flag_data = df [['wspd', 'wdir','sst', 'swvht', 'tp',
+                     'mean_tp', 'pk_dir', 'wvdir',
+                     'wvspread', 'pk_wvspread']] * 0
 
     flag_data = flag_data.replace(np.nan, 0).astype(int)
 
@@ -37,8 +40,9 @@ def qualitycontrol(df):
     #RUN THE QC CHECKS
     ##############################################
 
-    parameters = ['wspd', 'wdir', 'sst', 'swvht', 'peak_tp',
-                     'mean_tp', 'peak_dir', 'mean_dir']
+    parameters = ['wspd', 'wdir','sst', 'swvht', 'tp',
+                     'mean_tp', 'pk_dir', 'wvdir',
+                     'wvspread', 'pk_wvspread']
     for parameter in parameters:
         # missing value checks
         flag_data = qc.mis_value_check(df, limits.mis_value_limits, flag_data, parameter)
