@@ -9,14 +9,13 @@ from time import gmtime, strftime
 import time
 from netCDF4 import Dataset
 import netCDF4
-import convert
 import numpy as np
+import pandas as pd
 
-    
 def timeforatributes (Year,Month,Day,Hour,Minute):
 
     t_now=strftime("%Y-%m-%dT%H:%M:%SZ", gmtime())
-    
+
     t=[0]*len(Year)
     for i in xrange(len(t)):
         t[i]=datetime.datetime(int(Year[i]),int(Month[i]),int(Day[i]),int(Hour[i]),0).strftime('%Y-%m-%dT%H:%M:%SZ')
@@ -24,23 +23,25 @@ def timeforatributes (Year,Month,Day,Hour,Minute):
     return t,t_now
 
 
-def timedimension(Epoch,NC):
-    
-    name='time'
-        
-    NC.createDimension(name, len(Epoch))
+def timedimension(df, NC):
+
+    name = 'time'
+
+    date_time = (df['date'] - datetime.datetime(1970,1,1)).dt.total_seconds()
+
+    NC.createDimension(name, len(date_time))
     times = NC.createVariable(name, 'i4', (name,))
     times.long_name = name
     times.standard_name = name
     times.units = 'seconds since 1970-01-01 00:00:00 UTC'
-    times[:] = Epoch
-    
-    return times,NC
+    times[:] = date_time
+
+    return times, NC
 
 def latvariable(Epoch,Lat,NC):
 
     name='latitude'
-    
+
     lat = NC.createVariable(name, 'f4', ('time',))
     lat.long_name=name
     lat.standard_name= name
@@ -53,7 +54,7 @@ def latvariable(Epoch,Lat,NC):
 def lonvariable(Epoch,Lon,NC):
 
     name='longitude'
-    
+
     lon = NC.createVariable(name, 'f4', ('time',))
     lon.long_name=name
     lon.standard_name=  name
@@ -68,7 +69,7 @@ def wvhtvariable(Var,flag,idf,NC):
 
     name="sea_surface_wave_significant_height"
     shortname="significant_wave_height"
-    unit="m"    
+    unit="m"
 
     var=NC.createVariable(shortname,'f4',('time',))
     var.long_name=name
@@ -89,9 +90,9 @@ def wvhtvariable(Var,flag,idf,NC):
     vardqc.short_name=shortname+'_detail_qc'
     vardqc.flag_values = 'see NDBC QC Manual'
     vardqc.flag_meanings='quality_good out_of_range sensor_nonfunctional questionable'
-  
+
     (Idf)=convert.liststr2str(idf)
-    
+
     vardqc[:] = Idf
 
     return var,varqc,vardqc,NC
@@ -121,19 +122,19 @@ def dpdvariable(Var,flag,idf,NC):
     vardqc.short_name=shortname+'_detail_qc'
     vardqc.flag_values = 'see NDBC QC Manual'
     vardqc.flag_meanings='quality_good out_of_range sensor_nonfunctional questionable'
-  
+
     (Idf)=convert.liststr2str(idf)
-    
+
     vardqc[:] = Idf
 
     return var,varqc,vardqc,NC
-    
+
 def apdvariable(Var,flag,idf,NC):
 
     name="sea_surface_wave_mean_period_from_variance_spectral_density_second_frequency_moment"
     shortname="average_period"
     unit="s"
-   
+
     var=NC.createVariable(shortname,'f4',('time',))
     var.long_name=name
     var.standard_name=name
@@ -153,9 +154,9 @@ def apdvariable(Var,flag,idf,NC):
     vardqc.short_name=shortname+'_detail_qc'
     vardqc.flag_values = 'see NDBC QC Manual'
     vardqc.flag_meanings='quality_good out_of_range sensor_nonfunctional questionable'
-  
+
     (Idf)=convert.liststr2str(idf)
-    
+
     vardqc[:] = Idf
 
     return var,varqc,vardqc,NC
@@ -185,9 +186,9 @@ def mwdvariable(Var,flag,idf,NC):
     vardqc.short_name=shortname+'_detail_qc'
     vardqc.flag_values = 'see NDBC QC Manual'
     vardqc.flag_meanings='quality_good out_of_range sensor_nonfunctional questionable'
-  
+
     (Idf)=convert.liststr2str(idf)
-    
+
     vardqc[:] = Idf
 
     return var,varqc,vardqc,NC
@@ -216,9 +217,9 @@ def atmpvariable(Var,flag,idf,NC):
     vardqc.short_name=shortname+'_detail_qc'
     vardqc.flag_values = 'see NDBC QC Manual'
     vardqc.flag_meanings='quality_good out_of_range sensor_nonfunctional questionable'
-  
+
     (Idf)=convert.liststr2str(idf)
-    
+
     vardqc[:] = Idf
 
     return var,varqc,vardqc,NC
@@ -247,9 +248,9 @@ def presvariable(Var,flag,idf,NC):
     vardqc.short_name=shortname+'_detail_qc'
     vardqc.flag_values = 'see NDBC QC Manual'
     vardqc.flag_meanings='quality_good out_of_range sensor_nonfunctional questionable'
-  
+
     (Idf)=convert.liststr2str(idf)
-    
+
     vardqc[:] = Idf
 
     return var,varqc,vardqc,NC
@@ -259,7 +260,7 @@ def dewpvariable(Var,flag,idf,NC):
     name="dew_point_temperature"
     shortname="dew_point_temperature"
     unit="K"
-    
+
     var=NC.createVariable(shortname,'f4',('time',))
     var.long_name=name
     var.standard_name=name
@@ -278,9 +279,9 @@ def dewpvariable(Var,flag,idf,NC):
     vardqc.short_name=shortname+'_detail_qc'
     vardqc.flag_values = 'see NDBC QC Manual'
     vardqc.flag_meanings='quality_good out_of_range sensor_nonfunctional questionable'
-  
+
     (Idf)=convert.liststr2str(idf)
-    
+
     vardqc[:] = Idf
 
     return var,varqc,vardqc,NC
@@ -309,9 +310,9 @@ def humivariable(Var,flag,idf,NC):
     vardqc.short_name=shortname+'_detail_qc'
     vardqc.flag_values = 'see NDBC QC Manual'
     vardqc.flag_meanings='quality_good out_of_range sensor_nonfunctional questionable'
-  
+
     (Idf)=convert.liststr2str(idf)
-    
+
     vardqc[:] = Idf
 
     return var,varqc,vardqc,NC
@@ -340,9 +341,9 @@ def wtmpvariable(Var,flag,idf,NC):
     vardqc.short_name=shortname+'_detail_qc'
     vardqc.flag_values = 'see NDBC QC Manual'
     vardqc.flag_meanings='quality_good out_of_range sensor_nonfunctional questionable'
-  
+
     (Idf)=convert.liststr2str(idf)
-    
+
     vardqc[:] = Idf
 
     return var,varqc,vardqc,NC
@@ -371,9 +372,9 @@ def wspdvariable(Var,flag,idf,NC):
     vardqc.short_name=shortname+'_detail_qc'
     vardqc.flag_values = 'see NDBC QC Manual'
     vardqc.flag_meanings='quality_good out_of_range sensor_nonfunctional questionable'
-  
+
     (Idf)=convert.liststr2str(idf)
-    
+
     vardqc[:] = Idf
 
     return var,varqc,vardqc,NC
@@ -402,9 +403,9 @@ def wdirvariable(Var,flag,idf,NC):
     vardqc.short_name=shortname+'_detail_qc'
     vardqc.flag_values = 'see NDBC QC Manual'
     vardqc.flag_meanings='quality_good out_of_range sensor_nonfunctional questionable'
-  
+
     (Idf)=convert.liststr2str(idf)
-    
+
     vardqc[:] = Idf
 
     return var,varqc,vardqc,NC
@@ -420,7 +421,7 @@ def gustvariable(Var,flag,idf,NC):
     var.standard_name=name
     var.units=unit
     var[:] = Var
-    
+
     varqc=NC.createVariable(shortname+'_qc','b',('time',),zlib=True, fill_value= -9)
     varqc.standard_name=name+'_qc'
     varqc.short_name=shortname+'_qc'
@@ -433,9 +434,9 @@ def gustvariable(Var,flag,idf,NC):
     vardqc.short_name=shortname+'_detail_qc'
     vardqc.flag_values = 'see NDBC QC Manual'
     vardqc.flag_meanings='quality_good out_of_range sensor_nonfunctional questionable'
-  
+
     (Idf)=convert.liststr2str(idf)
-    
+
     vardqc[:] = Idf
 
     return var,varqc,vardqc,NC
