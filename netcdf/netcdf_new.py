@@ -11,37 +11,19 @@ import createncdf as ncdf
 import re
 import time
 
-def netcdfndbc(name,Epoch,data,flag,flagid,variables,variables2):
+def generate_netcdf(df, df_status):
 
-    for i in xrange(len(variables)):
-        exec("%s=data[i]"% (variables[i]))
-    
-    for i in xrange(len(variables2)):
-        exec("%sflag=flag[i]"% (variables2[i]))
-        exec("%sflagid=flagid[i]"% (variables2[i]))
+    NC = Dataset(df['name'] + '.nc','w')
 
-    NC = Dataset('c:\\ndbc\\netcdf\\'+name+'.nc','w')
+    NC.wmo_id = df_status['wmo_number'][0]
 
+    NC.institution = 'Brazilian Navy Hydrographic Center'
+    NC.institution_abbreviation = 'CHM'
 
-    hd_new = re.search('(\d{5})h(\d{2})', name)
-    
-    wmo = hd_new.group(1)
-    year = hd_new.group(2)
-    station='Niteroi2'
-    depth=17
-    Lat=36.785
-    Lon=-122.469
-
-    NC.wmo_id = wmo
-    
-    NC.institution = 'National Data Buoy Center'
-    NC.institution_abbreviation = 'NDBC'
-    
     # Title
-    NC.title = "Meteorological and Oceanographic Data Collected from " \
-        "the National Data Buoy Center's Coastal Marine Automated " \
-        "Network and Weather Buoys"
-        
+    NC.title = "Meteorological and Oceanographic Data Collected by " \
+        "the Programa Nacional de Boias Weather Buoys"
+
     NC.summary = "The Coastal-Marine Automated Network (C-MAN) was " \
         "established by NDBC for the NWS in the early 1980's. " \
         "Approximately 50 stations make up the C-MAN and have been " \
@@ -56,57 +38,53 @@ def netcdfndbc(name,Epoch,data,flag,flagid,variables,variables2):
         "height, dominant wave period, and average wave period are " \
         "derived. The direction of wave propagation is also measured on " \
         "many moored weather buoys."
-    
-    
-    NC.station_name=station
-    NC.sea_floor_depth_below_sea_level=depth
-    
-    NC.qc_manual="http://www.ndbc.noaa.gov/NDBCHandbookofAutomatedDataQualityControl2009.pdf"
+
+
+    NC.station_name = df_status['name']
+    NC.sea_floor_depth_below_sea_level = df_status['depth']
+
+    NC.qc_manual = "https://www.marinha.mil.br/chm/sites/www.marinha.mil.br.chm/files/u1947/controle_de_qualidade_dos_dados.pdf"
     NC.keywords = "Atmospheric Pressure, Sea level Pressure, Atmospheric " \
         "Temperature, Surface Temperature, Dewpoint Temperature, Humidity, " \
         "Surface Winds, Ocean Winds, Ocean Temperature, Sea Surface Temperature," \
         "Ocean Waves,  Wave Height, Wave Period, Ocean Currents."
-    
-    NC.keywords_vocabulary="GCMD Science Keywords"
-    NC.standard_name_vocabulary="CF-16.0"
-    
-    NC.Metadata_Conventions= "Unidata Dataset Discovery v1.0"
-    
-    NC.citation="The National Data Buoy Center should be cited as the source " \
+
+    NC.keywords_vocabulary = "GCMD Science Keywords"
+    NC.standard_name_vocabulary = "CF-76"
+
+    NC.Metadata_Conventions = "Unidata Dataset Discovery v1.0"
+
+    NC.citation="Programa Nacional de Boias should be cited as the source " \
         "of these data if used in any publication."
-    
-    NC.publisher_name="NDBC"
-    NC.publisher_url="http://www.ndbc.noaa.gov"
-    NC.publisher_email="webmaster.ndbc@noaa.gov"
-    NC.nominal_latitude= Lat
-    NC.nominal_longitude=Lon
-    
 
-    (t, t_now)=ncdf.timeforatributes(Year,Month,Day,Hour,Minute)
+    NC.publisher_name = "PNBOIA"
+    NC.publisher_url = "https://www.marinha.mil.br/chm/dados-do-goos-brasil/pnboia"
+    NC.publisher_email = "chm.pnboia@marinha.mil.br"
+    NC.nominal_latitude = df_status['lat']
+    NC.nominal_longitude = df_status['lon']
 
-    NC.time_coverage_start=t[0]
-    NC.time_coverage_end= t[-1]
-    NC.date_created= t_now
+    NC.time_coverage_start = df.index[0]
+    NC.time_coverage_end = df.index[-1]
+    NC.date_created = strftime("%Y-%m-%d %H:%M:%SZ", gmtime())
 
-    
+
     ###########################
     # CREATE DIMENSIONS
     ###########################
 
-    (times,NC)=ncdf.timedimension(Epoch,NC)
-  
-    
+    (times,NC) = ncdf.time_dimension (df, NC)
+
     ###########################
     # CREATE VARIABLES
     ###########################
 
-    (lat,NC)=ncdf.latvariable(Epoch,Lat,NC)
-    
-    (lon,NC)=ncdf.lonvariable(Epoch,Lon,NC)
-    
-    
+    (lat,NC)=ncdf.latvariable(df, 'lat', NC)
+
+    (lon,NC)=ncdf.latvariable(df, 'lon', NC)
+
+
     (wvht,wvht_qc,wvht_dqc,NC)=ncdf.wvhtvariable(Wvht,Wvhtflag,Wvhtflagid,NC)
-    
+
     (dpd,dpd_qc,dpd_dqc,NC)=ncdf.dpdvariable(Dpd,Dpdflag,Dpdflagid,NC)
     (apd,apd_qc,apd_dqc,NC)=ncdf.apdvariable(Apd,Apdflag,Apdflagid,NC)
     (mwd,mwd_qc,mwd_dqc,NC)=ncdf.mwdvariable(Mwd,Mwdflag,Mwdflagid,NC)
