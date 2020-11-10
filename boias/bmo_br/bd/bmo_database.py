@@ -1,8 +1,13 @@
+import os
+import sys
+sys.path.insert(os.environ['HOME'])
+from user_config import *
+
 
 ###
 # Connecting to database
 ###############################################################################
-def connect_database_remo():
+def connect_database_remo(server):
     """Short summary.
 
     Returns
@@ -15,17 +20,33 @@ def connect_database_remo():
 
     import psycopg2 as pg
 
-    try:
-        conn = pg.connect(user="postgres",
-                          password='chm@remobs11',
-                          host='localhost',
-                          port='5432',
-                          database='remobs_raw')
+    if server == 'SMM':
+        try:
+            conn = pg.connect(user=USER_RAW,
+                              password=PASSWORD_RAW,
+                              host=HOST_RAW,
+                              database=DATABASE_RAW)
 
-    except Exception as err:
-        print("Error: ", err)
+        except Exception as err:
+            print("Error: ", err)
 
-    return conn
+        return conn
+
+    elif server = "PRI":
+        try:
+            conn = pg.connect(user=USER_RAW,
+                              password=PASSWORD_RAW,
+                              host=HOST_RAW,
+                              database=DATABASE_RAW)
+
+        except Exception as err:
+            print("Error: ", err)
+
+        return conn
+
+    else:
+        raise ValueError("Wrong database specification!")
+        return
 
 
 ###############################################################################
@@ -62,11 +83,67 @@ def check_buoy_id(conn, bmo_name):
     cursor.execute(f"SELECT id_buoy FROM buoys WHERE name_buoy = '{bmo_name}'")
 
     id_buoy = cursor.fetchall()
-
+    cursor.close()
     return id_buoy
 
 
 ###############################################################################
+
+def get_id_sat_message(conn, sat_number):
+
+    cursor = conn.cursor()
+
+    cursor.execute(f"SELECT max(id) as id FROM satellite_message"
+                   f" WHERE id_buoy = (SELECT id_buoy FROM buoys WHERE"
+				    f" sat_number = '{sat_number}')")
+
+    last_id = cursor.fetchall()
+
+    cursor.close()
+    return last_id
+
+
+def insert_sat_message_xml(conn, id_buoy, df_xml):
+
+
+    cursor = conn.cursor()
+    cols = df_xml.columns.tolist()
+
+    for i, row in df_xml[cols].iterrows():
+        id_message = row['id']
+        bmo_message_xml = { 'id': id_message,
+                            'id_buoy': id_buoy,
+                            'date_time': row['date'],
+                            'type': row['type'],
+                    }
+
+        query_insert_data = """INSERT INTO satellite_message (id, type,
+                                date_time, id_buoy) VALUES
+                                (%(id)s, %(type)s, %(date_time)s, %(id_buoy)s);"""
+
+        try:
+            cursor.execute(query_insert_data, bmo_message_xml)
+            print("ID %s message inserted on satellite_message table" % id_message)
+        except Exception as err:
+            print(err)
+            print("Rollback Transaction in message %s \n" % id_message)
+            print("Transaction Cancelled.")
+            conn.rollback()
+            return
+
+
+    conn.commit()
+    print("Commited!")
+    print("All %s messages inserted" % (i+1))
+    return
+
+
+
+
+
+
+
+
 
 def check_last_date(conn, table, id_buoy):
     """Short summary.
@@ -105,12 +182,12 @@ def get_data_table_db(conn, id_buoy, last_date, interval_hour, table):
 
     import pandas as pd
     from datetime import timedelta
-    cursor = conn.cursor()
 
     # Getting data from the last x hours
     date_period = last_date - timedelta(hours = interval_hour)
 
-    query = f"SELECT * FROM {table} WHERE date_time > '{date_period}' ;"
+    query = f"SELECT * FROM {table} WHERE date_time > '{date_period}' " \
+            f" AND id_buoy = {id_buoy};"
 
     raw_data = pd.read_sql_query(query, conn)
 
@@ -133,7 +210,7 @@ def insert_data_bmo_message(conn, bmo_message_df, id_buoy):
     """
     cursor = conn.cursor()
     cols = bmo_message_df.columns.tolist()
-
+    row_index = 0
     for i, row in bmo_message_df[cols].iterrows():
 
         bmo_message_data = {'id_buoy': id_buoy,
@@ -205,7 +282,7 @@ def insert_data_bmo_message(conn, bmo_message_df, id_buoy):
                             'wvdir2' : row['wvdir2']
                             }
 
-        query_insert_data = """INSERT INTO bmo_message (id_buoy, date_time, 
+        query_insert_data = """INSERT INTO bmo_message (id_buoy, date_time,
         year, month, day, hour, minute, lat, lon, battery, wspd1, gust1, wdir1,
         wspd2, gust2, wdir2, atmp, rh, dewpt, pres, sst, compass, arad,
         cspd1, cdir1, cspd2, cdir2, cspd3, cdir3, cspd4, cdir4, cspd5, cdir5,
@@ -214,8 +291,8 @@ def insert_data_bmo_message(conn, bmo_message_df, id_buoy):
         cdir15, cspd16, cdir16, cspd17, cdir17, cspd18, cdir18, swvht1, tp1,
         mxwvht1, wvdir1, wvspread1, swvht2, tp2, wvdir2) VALUES
         (%(id_buoy)s, %(date_time)s, %(year)s, %(month)s, %(day)s, %(hour)s, %(minute)s,
-        %(lat)s, %(lon)s, %(bat)s, %(wspd1)s, %(gust1)s, %(wdir1)s, %(wspd2)s, 
-        %(gust2)s, %(wdir2)s, %(atmp)s, %(rh)s, %(dewpt)s, %(press)s, %(sst)s, 
+        %(lat)s, %(lon)s, %(bat)s, %(wspd1)s, %(gust1)s, %(wdir1)s, %(wspd2)s,
+        %(gust2)s, %(wdir2)s, %(atmp)s, %(rh)s, %(dewpt)s, %(press)s, %(sst)s,
         %(compass)s, %(arad)s, %(cspd1)s, %(cdir1)s, %(cspd2)s, %(cdir2)s,
         %(cspd3)s, %(cdir3)s, %(cspd4)s, %(cdir4)s, %(cspd5)s, %(cdir5)s,
         %(cspd6)s, %(cdir6)s, %(cspd7)s, %(cdir7)s,
@@ -223,15 +300,26 @@ def insert_data_bmo_message(conn, bmo_message_df, id_buoy):
         %(cspd11)s, %(cdir11)s, %(cspd12)s, %(cdir12)s, %(cspd13)s, %(cdir13)s,
         %(cspd14)s, %(cdir14)s, %(cspd15)s, %(cdir15)s, %(cspd16)s, %(cdir16)s,
         %(cspd17)s, %(cdir17)s, %(cspd18)s, %(cdir18)s,
-        %(swvht1)s, %(tp1)s, %(mxwvht1)s, %(wvdir1)s, %(wvspread1)s, %(swvht2)s, 
+        %(swvht1)s, %(tp1)s, %(mxwvht1)s, %(wvdir1)s, %(wvspread1)s, %(swvht2)s,
         %(tp2)s, %(wvdir2)s);"""
 
+        try:
+            cursor.execute(query_insert_data, bmo_message_data)
+            print("Row %s inserted on bmo_message table" % row_index)
+        except Exception as err:
+            print("Error on insert data on bmo_message table.")
+            print('Error: ', err)
+            print("Rollback Transaction in row %s \n" % row_index)
+            print("Transaction Cancelled.")
+            conn.rollback()
+            return 0
 
+        row_index += 1
 
-        cursor.execute(query_insert_data, bmo_message_data)
-        conn.commit()
-
-    print("%s rows inserted on bmo_message table" % i)
+    conn.commit()
+    print("Commited!")
+    print("All %s rows insereted" % row_index)
+    return 1
     #conn.commit()
 
 
@@ -240,9 +328,9 @@ def insert_data_bmo_message(conn, bmo_message_df, id_buoy):
 def raw_data_bmo(conn, id_buoy, last_date_general):
 
     import pandas as pd
-    cursor = conn.cursor()
 
-    query = "SELECT * FROM bmo_message WHERE date_time > '%s' ;" % last_date_general
+    query = f"SELECT * FROM bmo_message WHERE date_time > '{last_date_general}'" \
+            f"  AND id_buoy = {id_buoy} ;"
 
     raw_data = pd.read_sql_query(query, conn)
 
@@ -299,16 +387,16 @@ def insert_data_bmo_general(conn, bmo_general_df):
                             'wvdir2' : row['wvdir2']
                             }
 
-        query_insert_data = """INSERT INTO bmo_br (id_buoy, id, 
-        date_time, lat, lon, battery, wspd1, gust1, wdir1, wspd2, gust2, wdir2, atmp, 
-        rh, dewpt, pres, sst, compass, arad, cspd1, cdir1, cspd2, cdir2, 
+        query_insert_data = """INSERT INTO bmo_br (id_buoy, id,
+        date_time, lat, lon, battery, wspd1, gust1, wdir1, wspd2, gust2, wdir2, atmp,
+        rh, dewpt, pres, sst, compass, arad, cspd1, cdir1, cspd2, cdir2,
         cspd3, cdir3, swvht1, tp1, mxwvht1, wvdir1, wvspread1, swvht2, tp2, wvdir2)
          VALUES
-        (%(id_buoy)s, %(id)s, %(date_time)s, %(lat)s, %(lon)s, %(bat)s, %(wspd1)s, 
-        %(gust1)s, %(wdir1)s, %(wspd2)s, %(gust2)s, %(wdir2)s, %(atmp)s, 
-        %(rh)s, %(dewpt)s, %(pres)s, %(sst)s, %(compass)s, %(arad)s, 
+        (%(id_buoy)s, %(id)s, %(date_time)s, %(lat)s, %(lon)s, %(bat)s, %(wspd1)s,
+        %(gust1)s, %(wdir1)s, %(wspd2)s, %(gust2)s, %(wdir2)s, %(atmp)s,
+        %(rh)s, %(dewpt)s, %(pres)s, %(sst)s, %(compass)s, %(arad)s,
         %(cspd1)s, %(cdir1)s, %(cspd2)s, %(cdir2)s, %(cspd3)s, %(cdir3)s,
-        %(swvht1)s, %(tp1)s, %(mxwvht1)s, %(wvdir1)s, %(wvspread1)s, %(swvht2)s, 
+        %(swvht1)s, %(tp1)s, %(mxwvht1)s, %(wvdir1)s, %(wvspread1)s, %(swvht2)s,
         %(tp2)s, %(wvdir2)s);"""
 
 
@@ -389,13 +477,13 @@ def insert_data_bmo_current(conn, bmo_general_df):
                             'cdir18': row['cdir18'],
                              }
 
-        query_insert_data = """INSERT INTO bmo_br_current (id_buoy, id, 
-        date_time, lat, lon, cspd1, cdir1, cspd2, cdir2, cspd3, cdir3, cspd4, cdir4, 
-        cspd5, cdir5, cspd6, cdir6, cspd7, cdir7, cspd8, cdir8, cspd9, cdir9, cspd10, cdir10, 
+        query_insert_data = """INSERT INTO bmo_br_current (id_buoy, id,
+        date_time, lat, lon, cspd1, cdir1, cspd2, cdir2, cspd3, cdir3, cspd4, cdir4,
+        cspd5, cdir5, cspd6, cdir6, cspd7, cdir7, cspd8, cdir8, cspd9, cdir9, cspd10, cdir10,
         cspd11, cdir11, cspd12, cdir12, cspd13, cdir13, cspd14, cdir14, cspd15, cdir15,
         cspd16, cdir16, cspd17, cdir17, cspd18, cdir18)
          VALUES
-        (%(id_buoy)s, %(id)s, %(date_time)s, %(lat)s, %(lon)s, %(cspd1)s, %(cdir1)s, 
+        (%(id_buoy)s, %(id)s, %(date_time)s, %(lat)s, %(lon)s, %(cspd1)s, %(cdir1)s,
         %(cspd2)s, %(cdir2)s, %(cspd3)s, %(cdir3)s ,%(cspd4)s, %(cdir4)s, %(cspd5)s, %(cdir5)s,
         %(cspd6)s, %(cdir6)s ,%(cspd7)s, %(cdir7)s ,%(cspd8)s, %(cdir8)s ,%(cspd9)s, %(cdir9)s,
         %(cspd10)s, %(cdir10)s ,%(cspd11)s, %(cdir11)s ,%(cspd12)s, %(cdir12)s,
@@ -434,7 +522,7 @@ def get_declination(conn, id_buoy):
     return df
 
 
-def conn_qc_db():
+def conn_qc_db(server):
     """Short summary.
 
     Returns
@@ -444,20 +532,36 @@ def conn_qc_db():
         connection to REMO db
 
     """
-
     import psycopg2 as pg
 
-    try:
-        conn = pg.connect(user="postgres",
-                          password='chm@remobs11',
-                          host='localhost',
-                          port='5432',
-                          database='dw_remo')
+    if server == 'SMM':
+        try:
+            conn = pg.connect(user=USER_QC,
+                              password=PASSWORD_QC,
+                              host=HOST_QC,
+                              database=DATABASE_QC)
 
-    except Exception as err:
-        print("Error: ", err)
+        except Exception as err:
+            print("Error: ", err)
 
-    return conn
+        return conn
+
+    elif server = "PRI":
+        try:
+            conn = pg.connect(user=USER_QC,
+                              password=PASSWORD_QC,
+                              host=HOST_QC,
+                              database=DATABASE_QC)
+
+        except Exception as err:
+            print("Error: ", err)
+
+        return conn
+
+    else:
+        raise ValueError("Wrong database specification!")
+        return
+
 
 
 
@@ -533,24 +637,24 @@ def insert_bmo_qc_data(conn, bmo_qc_data_df):
                             'flag_wvdir2': int(row['flag_wvdir2'])
                             }
 
-        query_insert_data = """INSERT INTO data_buoys (id_buoy, id, 
-        date_time, lat, lon, battery, wspd, gust, wdir, atmp, 
-        rh, dewpt, pres, sst, compass, arad, cspd1, cdir1, cspd2, cdir2, 
+        query_insert_data = """INSERT INTO data_buoys (id_buoy, id,
+        date_time, lat, lon, battery, wspd, gust, wdir, atmp,
+        rh, dewpt, pres, sst, compass, arad, cspd1, cdir1, cspd2, cdir2,
         cspd3, cdir3, swvht1, tp1, mxwvht1, wvdir1, wvspread1, swvht2, tp2, wvdir2,
-        flag_wspd, flag_gust, flag_wdir, flag_atmp, flag_rh, flag_dewpt, 
-        flag_pres, flag_sst, flag_compass, flag_arad, flag_cspd1, flag_cdir1, 
-        flag_cspd2, flag_cdir2, flag_cspd3, flag_cdir3, flag_swvht1, flag_tp1, 
+        flag_wspd, flag_gust, flag_wdir, flag_atmp, flag_rh, flag_dewpt,
+        flag_pres, flag_sst, flag_compass, flag_arad, flag_cspd1, flag_cdir1,
+        flag_cspd2, flag_cdir2, flag_cspd3, flag_cdir3, flag_swvht1, flag_tp1,
         flag_mxwvht1, flag_wvdir1, flag_wvspread1, flag_swvht2, flag_tp2, flag_wvdir2)
          VALUES
-        (%(id_buoy)s, %(id)s, %(date_time)s, %(lat)s, %(lon)s, %(bat)s, %(wspd)s, 
+        (%(id_buoy)s, %(id)s, %(date_time)s, %(lat)s, %(lon)s, %(bat)s, %(wspd)s,
         %(gust)s, %(wdir)s, %(atmp)s, %(rh)s, %(dewpt)s, %(pres)s, %(sst)s,
         %(compass)s, %(arad)s, %(cspd1)s, %(cdir1)s, %(cspd2)s, %(cdir2)s,
         %(cspd3)s, %(cdir3)s, %(swvht1)s, %(tp1)s, %(mxwvht1)s, %(wvdir1)s,
-        %(wvspread1)s, %(swvht2)s, %(tp2)s, %(wvdir2)s, %(flag_wspd)s, 
+        %(wvspread1)s, %(swvht2)s, %(tp2)s, %(wvdir2)s, %(flag_wspd)s,
         %(flag_gust)s, %(flag_wdir)s, %(flag_atmp)s, %(flag_rh)s, %(flag_dewpt)s,
-        %(flag_pres)s, %(flag_sst)s, %(flag_compass)s, %(flag_arad)s, %(flag_cspd1)s, 
+        %(flag_pres)s, %(flag_sst)s, %(flag_compass)s, %(flag_arad)s, %(flag_cspd1)s,
         %(flag_cdir1)s, %(flag_cspd2)s, %(flag_cdir2)s, %(flag_cspd3)s, %(flag_cdir3)s,
-        %(flag_swvht1)s, %(flag_tp1)s, %(flag_mxwvht1)s, %(flag_wvdir1)s, 
+        %(flag_swvht1)s, %(flag_tp1)s, %(flag_mxwvht1)s, %(flag_wvdir1)s,
         %(flag_wvspread1)s, %(flag_swvht2)s, %(flag_tp2)s, %(flag_wvdir2)s);"""
 
 
@@ -571,10 +675,3 @@ def insert_bmo_qc_data(conn, bmo_qc_data_df):
     print("Commited!")
 
     return
-
-
-
-
-
-
-

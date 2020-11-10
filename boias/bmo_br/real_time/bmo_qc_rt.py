@@ -17,7 +17,7 @@ import bmo_quality_control as bqc
 
 import pandas as pd
 
-conn = connect_database_remo()
+conn = connect_database_remo('PRI')
 
 id_buoy = bmo_on(conn)
 
@@ -55,7 +55,7 @@ for id in id_buoy['id_buoy']:
     print("Connection closed.")
     ###########################################################################
     print("Connecting with Qualified Database")
-    conn_qc = conn_qc_db() # Open connection with Qualified Database
+    conn_qc = conn_qc_db('PRI') # Open connection with Qualified Database
 
     bmo_qc_data = adjust_bmo_qc(bmo_merged)
 
