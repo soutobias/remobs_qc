@@ -1,6 +1,6 @@
 import os
 import sys
-sys.path.insert(os.environ['HOME'])
+sys.path.insert(0, os.environ['HOME'])
 from user_config import *
 
 
@@ -32,7 +32,7 @@ def connect_database_remo(server):
 
         return conn
 
-    elif server = "PRI":
+    elif server == "PRI":
         try:
             conn = pg.connect(user=USER_RAW,
                               password=PASSWORD_RAW,
@@ -178,20 +178,29 @@ def check_last_date(conn, table, id_buoy):
 ###############################################################################
 
 
-def get_data_table_db(conn, id_buoy, last_date, interval_hour, table):
+def get_data_table_db(conn, id_buoy, last_date, table, interval_hour):
 
     import pandas as pd
     from datetime import timedelta
 
     # Getting data from the last x hours
-    date_period = last_date - timedelta(hours = interval_hour)
+    if interval_hour == "ALL":
 
-    query = f"SELECT * FROM {table} WHERE date_time > '{date_period}' " \
-            f" AND id_buoy = {id_buoy};"
+        query = f"SELECT * FROM {table} WHERE id_buoy = {id_buoy};"
 
-    raw_data = pd.read_sql_query(query, conn)
+        raw_data = pd.read_sql_query(query, conn)
 
-    return raw_data
+        return raw_data
+
+    else:
+        date_period = last_date - timedelta(hours = interval_hour)
+
+        query = f"SELECT * FROM {table} WHERE date_time > '{date_period}' " \
+                f" AND id_buoy = {id_buoy};"
+
+        raw_data = pd.read_sql_query(query, conn)
+
+        return raw_data
 
 
 
@@ -546,7 +555,7 @@ def conn_qc_db(server):
 
         return conn
 
-    elif server = "PRI":
+    elif server == "PRI":
         try:
             conn = pg.connect(user=USER_QC,
                               password=PASSWORD_QC,
@@ -581,8 +590,9 @@ def insert_bmo_qc_data(conn, bmo_qc_data_df):
     row_index = 0
     for index, row in bmo_qc_data_df[cols].iterrows():
 
+        id = int(row['id'])
         bmo_qc_df = {'id_buoy': int(row['id_buoy']),
-                            'id' : int(row['id']),
+                            'id' : id,
                             'date_time' : index,
                             'lat': row['lat'].round(6),
                             'lon': row['lon'].round(6),
@@ -637,6 +647,11 @@ def insert_bmo_qc_data(conn, bmo_qc_data_df):
                             'flag_wvdir2': int(row['flag_wvdir2'])
                             }
 
+        for column in bmo_qc_df:
+            value = bmo_qc_df[column]
+            if value == -9999:
+                bmo_qc_df[column] = None
+
         query_insert_data = """INSERT INTO data_buoys (id_buoy, id,
         date_time, lat, lon, battery, wspd, gust, wdir, atmp,
         rh, dewpt, pres, sst, compass, arad, cspd1, cdir1, cspd2, cdir2,
@@ -660,18 +675,42 @@ def insert_bmo_qc_data(conn, bmo_qc_data_df):
 
         try:
             cursor.execute(query_insert_data, bmo_qc_df)
-            print("Row %s inserted on data_buoys table" % row_index)
+            print(f"Row with ID {id} inserted on data_buoys table")
         except Exception as err:
             print(err)
-            print("Rollback Transaction in row %s \n" % row_index)
+            print(f"Rollback Transaction in row {row_index}"
+                  f" ID {id} \n")
             print("Transaction Cancelled.")
             conn.rollback()
             return
 
         row_index += 1
 
-    print("All %s rows insereted" % row_index)
+    print("All %s rows inserted" % row_index)
     conn.commit()
     print("Commited!")
+
+    return
+
+
+
+def delete_qc_data(conn_qc, pks):
+
+    cursor = conn_qc.cursor()
+
+    id_buoy = pks['id_buoy'].unique()[0]
+    ids_pk = pks['id'].tolist()
+
+    query = f"DELETE FROM data_buoys WHERE id_buoy =" \
+            f" {id_buoy} AND id IN {*ids_pk,}"
+
+    try:
+        cursor.execute(query)
+        print(f"Row with IDs ({*ids_pk,}) deleted from Qualified database")
+
+    except Exception as err:
+        print(err)
+        print("Rollback Transaction.")
+        print("Transaction Cancelled. No data deleted.")
 
     return

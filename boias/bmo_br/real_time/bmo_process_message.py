@@ -17,8 +17,12 @@ id_buoy = bmo_on(conn)
 
 for id in id_buoy['id_buoy']:
 
-    last_date_general = check_last_date(conn, 'bmo_message', id)
+    last_date_general = check_last_date(conn, 'bmo_br', id)
     last_date_general = last_date_general[0][0]
+
+    if last_date_general == None:
+        last_date_general = check_last_date(conn, 'buoys', id)
+        last_date_general = last_date_general[0][0]
 
     raw_data_bmo = raw_data_bmo(conn, id, last_date_general)
 

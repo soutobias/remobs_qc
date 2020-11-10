@@ -1,7 +1,7 @@
 import sys
 import os
 cwd = os.getcwd()
-sys.path.insert(os.environ['HOME'])
+sys.path.insert(0, os.environ['HOME'])
 sys.path.insert(0, cwd + '/../bd/')
 from bmo_database import *
 from bmo_message import *
@@ -11,7 +11,7 @@ from user_config import url_bmo_bs1_1
 url = url_bmo_bs1_1
 
 
-conn = connect_database_remo()
+conn = connect_database_remo('PRI')
 
 last_id_message = get_id_sat_message(conn, 'CHM1')
 id_message = last_id_message[0][0]
