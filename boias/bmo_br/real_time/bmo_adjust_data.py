@@ -189,7 +189,7 @@ def rename_flag_data(flag):
 
 def adjust_bmo_qc(bmo_qc_data):
     import pandas as pd
-
+    import numpy as np
 
     columns_data = ['id_buoy', 'id',
                        'date_time', 'lat', 'lon',

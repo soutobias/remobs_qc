@@ -17,7 +17,7 @@ import bmo_quality_control as bqc
 
 import pandas as pd
 
-conn = connect_database_remo()
+conn = connect_database_remo('PRI')
 
 id_buoy = bmo_on(conn)
 
@@ -30,11 +30,10 @@ for id in id_buoy['id_buoy']:
 
 
     time_interval = 24 # hours interval of data to be qualified
-    bmo_general = get_data_table_db(conn, id, last_date_raw, time_interval, 'bmo_br')
+    bmo_general = get_data_table_db(conn, id, last_date_raw, 'bmo_br','ALL')
     bmo_general.set_index('date_time', inplace = True)
 
 
-    bmo_general = bmo_general[~bmo_general.index.duplicated(keep = 'first')]
 
     print("Qualifying General data...")
     flag, bmo_qualified = bqc.qualitycontrol(bmo_general, id)
@@ -50,18 +49,31 @@ for id in id_buoy['id_buoy']:
     print("General Data ready.")
     print('\n'*2)
 
-    print("Closing connection with Raw Database")
+    print("Closing connection with Raw Database\n")
     conn.close() # Closing connection with raw database
-    print("Connection closed.")
+    print("Connection closed.\n")
+
+
     ###########################################################################
-    print("Connecting with Qualified Database")
-    conn_qc = conn_qc_db() # Open connection with Qualified Database
+    print("Connecting with Qualified Database...\n")
+    conn_qc = conn_qc_db('PRI') # Open connection with Qualified Database
 
     bmo_qc_data = adjust_bmo_qc(bmo_merged)
 
+    # IDs Key values to delete "old" qualified data...
+    ids_pk = bmo_qc_data[['id', 'id_buoy']]
+
+    # Deleting data to replace...
+    delete_qc_data(conn_qc, ids_pk)
+
+    # Inserting new qualified data...
     insert_bmo_qc_data(conn_qc, bmo_qc_data)
+
+    print("Closing database connection...")
     conn_qc.close()
 
+    print("Connection closed!\n")
+    print("Script finished!")
 
    # bmo_current = bmo_current[~bmo_current.index.duplicated(keep = 'first')]
 
