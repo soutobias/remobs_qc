@@ -14,7 +14,7 @@ from spotter_adjust_data import *
 #os.chdir(os.getcwd() + '/real_time')
 
 
-conn = connect_database_remo()
+conn = connect_database_remo("PRI")
 spotters_on_ids = spotter_on(conn)
 
 for id_buoy in spotters_on_ids['id_buoy']:
@@ -25,7 +25,7 @@ for id_buoy in spotters_on_ids['id_buoy']:
     last_date = check_last_date(conn, 'spotter_general', id_buoy)
     last_date = last_date[0][0]
 
-    raw_data = get_data_spotter(conn, id_buoy, last_date, 24, 'spotter_general')
+    raw_data = get_data_table_db(conn, id_buoy, last_date, 'spotter_general', 'ALL')
 
     # Treating values and index
     raw_data.set_index("date_time", inplace = True)
@@ -54,16 +54,26 @@ for id_buoy in spotters_on_ids['id_buoy']:
     conn.close()
 
     print("Connecting with Qualified Database...")
-    conn_qc = conn_qc_db()
+    conn_qc = conn_qc_db("PRI")
     print("Connected!")
 
-    min_data = min(spotter_qc_data.index)
+    # IDs Key values to delete "old" qualified data...
+    ids_pk = spotter_qc_data[['id', 'id_buoy']]
     print("Deleting data...")
-    delete_data(conn_qc, 'data_buoys', min_data, id_buoy)
+    delete_qc_data(conn_qc, ids_pk)
     print("Data deleted!\n")
 
-    insert_spotter_qc_data(conn_qc, spotter_qc_data)
-    print("New Qualified Data Inserted \n")
+    status_transaction = insert_spotter_qc_data(conn_qc, spotter_qc_data)
+
+    if status_transaction == 1:
+        print("New Qualified Data Inserted\n")
+
+
+    elif status_transaction == 0:
+        print("Error! Closing connection with Qualified Database...")
+        conn_qc.close()
+        raise Exception("No data inserted, something wrong...\n")
+
     print("Closing connection with Qualified Database...")
     conn_qc.close()
 

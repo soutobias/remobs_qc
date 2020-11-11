@@ -25,7 +25,7 @@ devices = api.device_ids
 spotter_grid = api.get_spotters()
 
 # Connecting to database
-conn = connect_database_remo()
+conn = connect_database_remo('PRI')
 
 for n_buoy in range(len(devices)):
 
