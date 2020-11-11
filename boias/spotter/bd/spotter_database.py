@@ -1,10 +1,13 @@
-
+import os
+import sys
+sys.path.insert(0, os.environ['HOME'])
+from user_config import *
 
 
 ###
 # Connecting to database
 ################################################################################
-def connect_database_remo():
+def connect_database_remo(server):
     """Short summary.
 
     Returns
@@ -14,24 +17,37 @@ def connect_database_remo():
         connection to REMO db
 
     """
-    import sys
-    from os.path import expanduser
-    home = expanduser('~')
-    sys.path.insert(0, home)
-    import user_config as USER_CONFIG
 
     import psycopg2 as pg
-    try:
-        conn = pg.connect(user=USER_CONFIG.USER,
-                          password=USER_CONFIG.PASSWORD,
-                          host=USER_CONFIG.HOST,
-                          port=USER_CONFIG.PORT,
-                          database=USER_CONFIG.DATABASE)
 
-    except Exception as err:
-        print("Error: ", err)
+    if server == 'SMM':
+        try:
+            conn = pg.connect(user=USER_RAW,
+                              password=PASSWORD_RAW,
+                              host=HOST_RAW,
+                              database=DATABASE_RAW)
 
-    return conn
+        except Exception as err:
+            print("Error: ", err)
+
+        return conn
+
+    elif server == "PRI":
+        try:
+            conn = pg.connect(user=USER_RAW,
+                              password=PASSWORD_RAW,
+                              host=HOST_RAW,
+                              database=DATABASE_RAW)
+
+        except Exception as err:
+            print("Error: ", err)
+
+        return conn
+
+    else:
+        raise ValueError("Wrong database specification!")
+        return
+
 
 
 ################################################################################
@@ -225,7 +241,7 @@ def get_declination(conn, id_buoy):
 
 
 
-def conn_qc_db():
+def conn_qc_db(server):
     """Short summary.
 
     Returns
@@ -235,37 +251,62 @@ def conn_qc_db():
         connection to REMO db
 
     """
-
     import psycopg2 as pg
 
-    try:
-        conn = pg.connect(user="postgres",
-                          password='chm@remobs11',
-                          host='localhost',
-                          port='5432',
-                          database='dw_remo')
+    if server == 'SMM':
+        try:
+            conn = pg.connect(user=USER_QC,
+                              password=PASSWORD_QC,
+                              host=HOST_QC,
+                              database=DATABASE_QC)
 
-    except Exception as err:
-        print("Error: ", err)
+        except Exception as err:
+            print("Error: ", err)
 
-    return conn
+        return conn
+
+    elif server == "PRI":
+        try:
+            conn = pg.connect(user=USER_QC,
+                              password=PASSWORD_QC,
+                              host=HOST_QC,
+                              database=DATABASE_QC)
+
+        except Exception as err:
+            print("Error: ", err)
+
+        return conn
+
+    else:
+        raise ValueError("Wrong database specification!")
+        return
 
 
-
-def get_data_spotter(conn, id_buoy, last_date, interval_hour, table):
+def get_data_table_db(conn, id_buoy, last_date, table, interval_hour):
 
     import pandas as pd
     from datetime import timedelta
 
     # Getting data from the last x hours
-    date_period = last_date - timedelta(hours = interval_hour)
+    if interval_hour == "ALL":
 
-    query = f"SELECT * FROM {table} WHERE date_time > '{date_period}' AND " \
-            f"id_buoy = {id_buoy};"
+        query = f"SELECT * FROM {table} WHERE id_buoy = {id_buoy};"
 
-    raw_data = pd.read_sql_query(query, conn)
+        raw_data = pd.read_sql_query(query, conn)
 
-    return raw_data
+        return raw_data
+
+    else:
+        date_period = last_date - timedelta(hours = interval_hour)
+
+        query = f"SELECT * FROM {table} WHERE date_time > '{date_period}' " \
+                f" AND id_buoy = {id_buoy};"
+
+        raw_data = pd.read_sql_query(query, conn)
+
+        return raw_data
+
+
 
 def delete_data(conn_qc, table, date_min, id_buoy):
 
@@ -282,6 +323,26 @@ def delete_data(conn_qc, table, date_min, id_buoy):
     return
 
 
+def delete_qc_data(conn_qc, pks_df):
+
+    cursor = conn_qc.cursor()
+
+    id_buoy = pks_df['id_buoy'].unique()[0]
+    ids_pk = pks_df['id'].tolist()
+
+    query = f"DELETE FROM data_buoys WHERE id_buoy =" \
+            f" {id_buoy} AND id IN {*ids_pk,}"
+
+    try:
+        cursor.execute(query)
+        print(f"Row with IDs ({*ids_pk,}) deleted from Qualified database")
+
+    except Exception as err:
+        print(err)
+        print("Rollback Transaction.")
+        print("Transaction Cancelled. No data deleted.")
+
+    return
 
 
 
@@ -367,14 +428,14 @@ def insert_spotter_qc_data(conn_qc, spotter_qc_df):
             print("Transaction Cancelled.")
             conn_qc.rollback()
 
-            return
+            return 0
 
         row_index += 1
 
     conn_qc.commit()
     print("Commited!")
     print("All %s rows inserted" % row_index)
-    return
+    return 1
 
 
 
