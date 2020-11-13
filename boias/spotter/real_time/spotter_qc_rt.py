@@ -3,9 +3,16 @@
 import sys
 import os
 
-cwd = os.getcwd()
-sys.path.insert(0, cwd)
-sys.path.insert(0, cwd + '/../bd/')
+
+home_path = os.environ['HOME']
+cwd_path = home_path + '/remobs_qc/boias/spotter/real_time/'
+bd_path = home_path + '/remobs_qc/boias/spotter/bd'
+
+sys.path.append(cwd_path)
+sys.path.append(bd_path)
+
+
+import pandas as pd
 
 from spotter_quality_control import *
 from spotter_database import *

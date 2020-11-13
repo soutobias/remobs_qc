@@ -7,11 +7,14 @@ from pysofar.sofar import SofarApi
 
 import sys
 import os
-cwd = os.getcwd()
-sys.path.insert(0, cwd)
-sys.path.insert(0, cwd + '/../bd/')
-sys.path.insert(0, cwd + '/../limits/')
-sys.path.insert(0, cwd + '/../qc_checks/')
+
+home_path = os.environ['HOME']
+cwd_path = home_path + '/remobs_qc/boias/spotter/real_time/'
+bd_path = home_path + '/remobs_qc/boias/spotter/bd'
+limits_path = home_path + '/remobs_qc/boias/spotter/limits'
+sys.path.append(cwd_path)
+sys.path.append(bd_path)
+sys.path.append(limits_path)
 
 
 from spotter_database import *
