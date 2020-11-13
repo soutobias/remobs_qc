@@ -1,5 +1,3 @@
-import pandas as pd
-
 
 import numpy as np
 
@@ -9,9 +7,13 @@ import numpy as np
 
 import sys
 import os
-cwd = os.getcwd()
-sys.path.insert(0, cwd + '/../limits/')
-sys.path.insert(0, cwd + '/../../../qc_checks/')
+
+home_path = os.environ['HOME']
+limits_path = home_path + '/remobs_qc/boias/spotter/limits'
+qc_path = home_path + '/remobs_qc/qc_checks'
+
+sys.path.append(limits_path)
+sys.path.append(qc_path)
 
 
 import spotter_limits as limits
