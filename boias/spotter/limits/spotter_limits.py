@@ -22,6 +22,12 @@ mis_value_limits = {
     'mean_dir': -999,
 }
 
+sigma_limits = {
+    "swvht": 6,
+    "wspd": 25,
+    "sst": 8.6,
+    }
+
 stuck_limits = 7
 
 continuity_limits = 3

@@ -36,7 +36,7 @@ for id_buoy in spotters_on_ids['id_buoy']:
 
     # Treating values and index
     raw_data.set_index("date_time", inplace = True)
-    raw_data.fillna(value = -999, inplace = True)
+    raw_data.fillna(value = -9999, inplace = True)
 
     print("Qualifying Spotter Data...")
     print("\n")
@@ -66,6 +66,15 @@ for id_buoy in spotters_on_ids['id_buoy']:
 
     # IDs Key values to delete "old" qualified data...
     ids_pk = spotter_qc_data[['id', 'id_buoy']]
+    spotter_qc_data = spotter_qc_data.replace(-9999, np.nan)
+
+    # Removing non valid values (none) from directions degrees field
+    non_valid_values = spotter_qc_data < -9000
+    spotter_qc_data[non_valid_values] = np.nan
+
+
+    spotter_qc_data = spotter_qc_data.replace({np.nan:None})
+
     print("Deleting data...")
     delete_qc_data(conn_qc, ids_pk)
     print("Data deleted!\n")

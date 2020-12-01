@@ -135,6 +135,7 @@ def insert_spotter_status(conn, status_df, id_buoy):
         return
 
 
+
 ################################################################################
 
 def insert_spotter_general(conn, spotter_df, id_buoy):
@@ -146,6 +147,7 @@ def insert_spotter_general(conn, spotter_df, id_buoy):
         date_time = row['timestamp']
         lat = row['latitude']
         lon = row['longitude']
+        sst = row['sst']
         wspd = row['wspd']
         wdir = row['wdir']
         seaId = row['seasurfaceId']
@@ -158,6 +160,7 @@ def insert_spotter_general(conn, spotter_df, id_buoy):
         wvspread = row['meanDirectionalSpread']
 
         spotter_data = {'id_buoy': id_buoy, 'date': date_time, 'lat': lat, 'lon': lon,
+                        'sst': sst,
                         'wspd': wspd, 'wdir': wdir, 'seaId': seaId,
                         'swvht': swvht, 'tp': peak_tp, 'mean_tp': mean_tp,
                         'pk_dir': peak_dir, 'wvdir': wvdir,
@@ -167,9 +170,9 @@ def insert_spotter_general(conn, spotter_df, id_buoy):
 
 
         cursor.execute("""INSERT INTO spotter_general (id_buoy, date_time, lat, lon,
-                    swvht, tp, mean_tp, pk_dir, pk_wvspread,
+                    sst, swvht, tp, mean_tp, pk_dir, pk_wvspread,
                     wvdir, wvspread, wspd, wdir, sea_surface_id) VALUES
-                    (%(id_buoy)s, %(date)s, %(lat)s, %(lon)s, %(swvht)s,
+                    (%(id_buoy)s, %(date)s, %(lat)s, %(lon)s, %(sst)s,%(swvht)s,
                     %(tp)s, %(mean_tp)s, %(pk_dir)s, %(wvdir)s, 
                     %(pk_wvspread)s, %(wvspread)s,%(wspd)s, %(wdir)s,
                      %(seaId)s);""", spotter_data)
@@ -359,6 +362,7 @@ def insert_spotter_qc_data(conn_qc, spotter_qc_df):
         date_time = index
         lat = row['lat']
         lon = row['lon']
+        sst = row['sst']
         wspd = row['wspd']
         wdir = row['wdir']
         swvht1 = row['swvht']
@@ -368,6 +372,7 @@ def insert_spotter_qc_data(conn_qc, spotter_qc_df):
         wvdir1 = row['wvdir']
         pk_wvspread = row['pk_wvspread']
         wvspread1 = row['wvspread']
+        flag_sst = row['flag_sst']
         flag_wspd = row['flag_wspd']
         flag_wdir = row['flag_wdir']
         flag_swvht1 = row['flag_swvht']
@@ -384,6 +389,7 @@ def insert_spotter_qc_data(conn_qc, spotter_qc_df):
                             'date': date_time,
                             'lat': lat,
                             'lon': lon,
+                            'sst': sst,
                             'wspd': wspd,
                             'wdir': wdir,
                             'swvht1': swvht1,
@@ -393,6 +399,7 @@ def insert_spotter_qc_data(conn_qc, spotter_qc_df):
                             'pk_dir': pk_dir,
                             'pk_wvspread': pk_wvspread,
                             'mean_tp': mean_tp,
+                            'flag_sst': flag_sst,
                             'flag_wspd': flag_wspd,
                             'flag_wdir': flag_wdir,
                             'flag_swvht1': flag_swvht1,
@@ -405,15 +412,15 @@ def insert_spotter_qc_data(conn_qc, spotter_qc_df):
                         }
 
 
-        query_insert = """INSERT INTO data_buoys (id_buoy, id, date_time, lat, lon,
+        query_insert = """INSERT INTO data_buoys (id_buoy, id, date_time, lat, lon, sst,
                     wspd, wdir, swvht1, tp1, wvdir1, wvspread1, pk_dir, pk_wvspread,
-                    mean_tp, flag_wspd, flag_wdir, flag_swvht1, flag_tp1, 
+                    mean_tp, flag_sst, flag_wspd, flag_wdir, flag_swvht1, flag_tp1, 
                     flag_wvdir1, flag_wvspread1, flag_pk_dir, flag_pk_wvspread,
                     flag_mean_tp) 
                     VALUES
-                    (%(id_buoy)s,%(id)s, %(date)s, %(lat)s, %(lon)s, %(wspd)s,
+                    (%(id_buoy)s,%(id)s, %(date)s, %(lat)s, %(lon)s, %(sst)s, %(wspd)s,
                     %(wdir)s, %(swvht1)s, %(tp1)s, %(wvdir1)s, 
-                    %(wvspread1)s, %(pk_dir)s,%(pk_wvspread)s, %(mean_tp)s,
+                    %(wvspread1)s, %(pk_dir)s,%(pk_wvspread)s, %(mean_tp)s, %(flag_sst)s,
                     %(flag_wspd)s, %(flag_wdir)s, %(flag_swvht1)s, %(flag_tp1)s,
                     %(flag_wvdir1)s, %(flag_wvspread1)s, %(flag_pk_dir)s,
                     %(flag_pk_wvspread)s, %(flag_mean_tp)s);"""

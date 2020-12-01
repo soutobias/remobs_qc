@@ -1,6 +1,7 @@
 # Script to collect spotter data from Sofar API
 
 import pandas as pd
+import numpy as np
 from datetime import datetime
 
 from pysofar.sofar import SofarApi
@@ -128,40 +129,79 @@ for n_buoy in range(len(devices)):
         )
 
         wind = pd.json_normalize(spt_data, record_path=['wind'], meta=['spotterId'])
-        waves = pd.json_normalize(spt_data, record_path=['waves'], meta=['spotterId'])
+
+
+        format_date = '%Y-%m-%dT%H:%M:%S.000Z'
 
         # wind dataframe
 
-        wind_spotter = wind[['speed', 'direction', 'seasurfaceId',
-                             'latitude', 'longitude', 'timestamp']]
+        if not wind.empty:
+            wind_spotter = wind[['speed', 'direction', 'seasurfaceId',
+                                 'latitude', 'longitude', 'timestamp']]
 
-        # getting just new data :
-        format_date = '%Y-%m-%dT%H:%M:%S.000Z'
-
-        wind_spotter.loc[:,'timestamp'] = pd.to_datetime(wind.loc[:,'timestamp'], format = format_date)
-        wind_spotter = wind_spotter.loc[wind_spotter['timestamp']>start_date]
+            # getting just new data :
 
 
+            wind_spotter.loc[:,'timestamp'] = pd.to_datetime(wind.loc[:,'timestamp'], format = format_date)
+            wind_spotter = wind_spotter.loc[wind_spotter['timestamp']>start_date]
 
-        waves_spotter = waves[['significantWaveHeight', 'peakPeriod', 'meanPeriod',
-                               'peakDirection', 'peakDirectionalSpread',
-                               'meanDirection', 'meanDirectionalSpread', 'timestamp']]
-
-        waves_spotter.loc[:,'timestamp'] = pd.to_datetime(waves_spotter.loc[:,'timestamp'], format=format_date)
-
-        waves_spotter = waves_spotter.loc[waves_spotter['timestamp'] > start_date]
+        else:
+            print("No wind data from %s to %s" % (start_date, end_date))
 
 
-        spotter_general = wind_spotter.merge(waves_spotter,
-                                             on='timestamp',
-                                             how='left')
 
-        spotter_general.rename(columns = {'speed': 'wspd',
-                                          'direction': 'wdir',
-                                          'significantWaveHeight' : 'swvht'
-                                        }, inplace = True)
+        waves = pd.json_normalize(spt_data, record_path=['waves'], meta=['spotterId'])
 
-        insert_spotter_general(conn, spotter_general, id)
+        if not waves.empty:
+
+            waves_spotter = waves[['significantWaveHeight', 'peakPeriod', 'meanPeriod',
+                                   'peakDirection', 'peakDirectionalSpread',
+                                   'meanDirection', 'meanDirectionalSpread', 'timestamp']]
+
+            waves_spotter.loc[:,'timestamp'] = pd.to_datetime(waves_spotter.loc[:,'timestamp'], format=format_date)
+
+            waves_spotter = waves_spotter.loc[waves_spotter['timestamp'] > start_date]
+
+        else:
+            print("No wave data from %s to %s" % (start_date, end_date))
+
+
+        if not waves.empty and not wind.empty:
+
+            spotter_general = wind_spotter.merge(waves_spotter,
+                                                 on='timestamp',
+                                                 how='outer')
+
+
+
+        # sst data, if exists:
+
+            if 'surfaceTemp' in spt_data.keys():
+                sst = pd.json_normalize(spt_data, record_path=['surfaceTemp'], meta=['spotterId'])
+                sst_spotter = sst[['degrees','timestamp']]
+
+                sst_spotter.loc[:,'timestamp'] = pd.to_datetime(sst_spotter.loc[:,'timestamp'], format = format_date)
+                sst_spotter = sst_spotter.loc[sst_spotter['timestamp'] > start_date]
+
+                spotter_general = spotter_general.merge(sst_spotter,
+                                                        on = 'timestamp',
+                                                        how = 'outer')
+
+
+
+
+            spotter_general.rename(columns = {'speed': 'wspd',
+                                              'direction': 'wdir',
+                                              'significantWaveHeight' : 'swvht',
+                                              'degrees':'sst'
+                                            }, inplace = True)
+
+
+            spotter_general = spotter_general.replace({np.nan:None})
+            insert_spotter_general(conn, spotter_general, id)
+
+        else:
+            print("No spotter data from %s to %s" % (start_date, end_date))
 
 
     elif last_date_general != None and last_date_general == last_date_status:
