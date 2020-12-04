@@ -29,8 +29,8 @@ sys.path.insert(0, cwd + '/../../../qc_checks/')
 from os.path import expanduser
 home = expanduser("~")
 sys.path.insert(0,home)
-import user_config1 as user_config
-os.chdir( user_config.path )
+import user_config as user_config
+#os.chdir( user_config.path )
 
 
 from axys_quality_control import *
@@ -38,23 +38,28 @@ import axys_database
 import time_codes
 from adjust_data import *
 
-buoys = axys_database.working_buoys(user_config)
+buoys = axys_database.working_buoys('PRI')
 
-for buoy in buoys:
-    print(buoy["nome"])
+for buoy in buoys.itertuples():
+    print(buoy.name_buoy)
 
-    adjusted_data = axys_database.select_adjusted_data_bd(buoy["argos_num"], user_config)
+    adjusted_data = axys_database.select_general_axys_data(buoy.id_buoy, 'PRI')
 
+    adjusted_data.set_index('date_time', inplace = True)
+    print("Qualifying General Data...")
     (flag_data, qc_data) = qualitycontrol(adjusted_data, buoy)
 
     qc_data = rotate_data(qc_data, flag_data, buoy)
 
     qc_data = rename_merge(qc_data, flag_data)
 
-    axys_database.delete_qc_old_data(str(qc_data.index[0]), buoy["estacao_id"], user_config)
+    print("Deleting old Qualified Data...")
+    axys_database.delete_qc_old_data(str(qc_data.index[0]), buoy.id_buoy, 'PRI')
 
-    qc_data["estacao_id"] = buoy["estacao_id"]
+    qc_data.reset_index().set_index(["date_time"])
+    qc_data = adjust_axys_qc(qc_data)
 
-    qc_data.reset_index().set_index(["data", "estacao_id"])
+    print("Inserting data on database...")
+    axys_database.insert_axys_qc_data(qc_data, 'PRI')
 
-    axys_database.insert_qc_data_bd(qc_data, user_config)
+    print("Script Finished!")
