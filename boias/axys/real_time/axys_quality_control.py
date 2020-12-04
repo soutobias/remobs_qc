@@ -17,10 +17,10 @@ def arredondar(num):
 
 def definition_flag_pandas(df):
 
-    flag_data = df [['wspd1', 'gust1', 'wdir1', 'wspd2', 'gust2',
-       'wdir2', 'atmp', 'rh', 'dewpt', 'pres', 'sst', 'compass', 'arad',
-       'cspd1', 'cdir1', 'cspd2', 'cdir2', 'cspd3', 'cdir3', 'swvht', 'mxwvht',
-       'tp', 'wvdir', 'wvspread']] * 0
+    flag_data = df [['wspd', 'gust', 'wdir', 'atmp', 'rh', 'dewpt', 'pres', 
+                    'sst', 'compass', 'arad', 'cspd1', 'cdir1', 'cspd2', 'cdir2',
+                    'cspd3', 'cdir3', 'swvht', 'mxwvht',
+                    'tp', 'wvdir', 'wvspread']] * 0
 
     flag_data = flag_data.replace(np.nan, 0).astype(int)
 
@@ -34,7 +34,9 @@ def qualitycontrol(df, buoy):
     #RUN THE QC CHECKS
     ##############################################
 
-    parameters = ['wdir1', 'wspd1', 'gust1', 'wdir2', 'wspd2', 'gust2', 'swvht', 'mxwvht', 'tp', 'wvdir', 'pres', 'rh', 'atmp', 'sst', 'dewpt', 'cspd1', 'cdir1', 'cspd2', 'cdir2', 'cspd3', 'cdir3']
+    parameters = ['wdir', 'wspd', 'gust', 'swvht', 'mxwvht', 'tp', 'wvdir', 
+                  'pres', 'rh', 'atmp', 'sst', 'dewpt', 'cspd1', 'cdir1', 
+                  'cspd2', 'cdir2', 'cspd3', 'cdir3']
     for parameter in parameters:
         # missing value checks
         flag_data = qc.mis_value_check(df, axys_limits.mis_value_axys_limits, flag_data, parameter)
@@ -51,8 +53,8 @@ def qualitycontrol(df, buoy):
     flag_data = qc.swvht_mxwvht_check(df, flag_data, "swvht", "mxwvht")
 
     #Wind speed vs Gust speed
-    flag_data = qc.wind_speed_gust_check(df, flag_data, "wspd1", "gust1")
-    flag_data = qc.wind_speed_gust_check(df, flag_data, "wspd2", "gust2")
+    flag_data = qc.wind_speed_gust_check(df, flag_data, "wspd", "gust")
+    #flag_data = qc.wind_speed_gust_check(df, flag_data, "wspd2", "gust2")
 
 
     #Dew point and Air temperature check
@@ -67,14 +69,14 @@ def qualitycontrol(df, buoy):
 
 
     # comparison with scaterometer data
-    parameters = ["wspd1", "wspd2", "wdir1", "wdir2", "gust1", "gust2"]
-    flag_data = qc.ascat_anemometer_comparison(df, flag_data, parameters, buoy["nome"])
+    parameters = ["wspd", "wspd", "wdir"]#, "wdir2", "gust1", "gust2"]
+   # flag_data = qc.ascat_anemometer_comparison(df, flag_data, parameters, buoy["nome"])
 
-    df = qc.convert_10_meters(df, flag_data, 4.7, "wspd1", "gust1")
+    df = qc.convert_10_meters(df, flag_data, 4.7, "wspd", "gust")
 
-    df = qc.convert_10_meters(df, flag_data, 3.4, "wspd2", "gust2")
+    #df = qc.convert_10_meters(df, flag_data, 3.4, "wspd2", "gust2")
 
-    (df, flag_data) = qc.related_meas_check(df, flag_data, parameters)
+    #(df, flag_data) = qc.related_meas_check(df, flag_data, parameters)
 
     #Time continuity check
     flag_data = qc.t_continuity_check(df, axys_limits.sigma_axys_limits, axys_limits.continuity_axys_limits, flag_data, "swvht")

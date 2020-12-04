@@ -16,17 +16,22 @@ sys.path.insert(0, cwd + '/../../../qc_checks/')
 from os.path import expanduser
 home = expanduser("~")
 sys.path.insert(0,home)
-import user_config1 as user_config
-os.chdir( user_config.path )
+import user_config as user_config
+#os.chdir( user_config.path )
 
 
 import axys_database
 import telnet_download
 
 
-buoys = axys_database.working_buoys(user_config)
+buoys = axys_database.working_buoys('PRI')
 
-for buoy in buoys:
-    print(buoy["nome"])
-    raw_data = telnet_download.download_raw_data(buoy["argos_num"], user_config)
-    axys_database.insert_raw_data_bd(raw_data, buoy["argos_num"], user_config)
+for buoy in buoys.itertuples():
+	print("Collecting data from buoy: \n")
+	print(buoy.name_buoy)
+	print("")
+	print("Downloading...")
+	raw_data = telnet_download.download_raw_data(buoy.sat_number, user_config)
+	print("Inserting on database...")
+	axys_database.insert_raw_data_bd(raw_data, buoy.id_buoy, 'PRI')
+	print("\nScript Finished!")
