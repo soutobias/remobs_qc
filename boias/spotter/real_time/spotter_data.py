@@ -40,6 +40,9 @@ for n_buoy in range(len(devices)):
 
 
     id_buoy = check_buoy_id(conn, spotter_id)
+
+    if not id_buoy:
+        continue
     id_buoy = id_buoy[0][0]
 
     ########################################
