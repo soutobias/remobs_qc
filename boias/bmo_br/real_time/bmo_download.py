@@ -27,6 +27,7 @@ elif df_xml[df_xml['type']=='remo'].empty:
     print("Script Finished...")
 
 else:
+    df_xml = df_xml.sort_values(by = 'id')
     messages = df_xml[df_xml['type']=='remo']
     messages = messages['data']
 
