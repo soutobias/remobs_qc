@@ -1,9 +1,14 @@
 
 import sys
 import os
-cwd = os.getcwd()
-sys.path.insert(0, cwd)
-sys.path.insert(0, cwd + '/../bd/')
+
+home_path = os.environ['HOME']
+cwd_path = home_path + '/remobs_qc/boias/bmo_br/real_time/'
+bd_path = home_path + '/remobs_qc/boias/bmo_br/bd'
+
+sys.path.append(cwd_path)
+sys.path.append(bd_path)
+
 from bmo_database import *
 
 from bmo_database import *
