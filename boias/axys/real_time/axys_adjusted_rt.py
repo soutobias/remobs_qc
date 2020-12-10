@@ -7,22 +7,20 @@ created on Tue may 03 10:08:32 2016
 
 import sys
 import os
-cwd = os.getcwd()
-sys.path.insert(0, cwd)
-sys.path.insert(0, cwd + '/../bd/')
-sys.path.insert(0, cwd + '/../limits/')
-sys.path.insert(0, cwd + '/../not_real_time/')
 
-sys.path.insert(0, cwd + '/../../../qc_checks/')
 
-from os.path import expanduser
-home = expanduser("~")
-sys.path.insert(0,home)
+home_path = os.environ['HOME']
+cwd_path = home_path + '/remobs_qc/boias/axys/real_time/'
+bd_path = home_path + '/remobs_qc/boias/axys/bd'
+
+sys.path.append(home_path)
+sys.path.append(cwd_path)
+sys.path.append(bd_path)
+
 import user_config as user_config
 #os.chdir( user_config.path )
 
 
-from axys_quality_control import *
 import axys_database
 import time_codes
 from adjust_data import *

@@ -18,20 +18,16 @@ def rename_merge(data, flag):
 
 import sys
 import os
-cwd = os.getcwd()
-sys.path.insert(0, cwd)
-sys.path.insert(0, cwd + '/../bd/')
-sys.path.insert(0, cwd + '/../limits/')
-sys.path.insert(0, cwd + '/../not_real_time/')
 
-sys.path.insert(0, cwd + '/../../../qc_checks/')
+home_path = os.environ['HOME']
+limits_path = home_path + '/remobs_qc/boias/axys/limits'
+qc_path = home_path + '/remobs_qc/qc_checks'
+bd_path = home_path + '/remobs_qc/boias/axys/bd'
 
-from os.path import expanduser
-home = expanduser("~")
-sys.path.insert(0,home)
-import user_config as user_config
-#os.chdir( user_config.path )
 
+sys.path.append(limits_path)
+sys.path.append(qc_path)
+sys.path.append(bd_path)
 
 from axys_quality_control import *
 import axys_database

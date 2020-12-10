@@ -7,15 +7,15 @@ Created on Tue May 03 10:08:32 2016
 
 import sys
 import os
-cwd = os.getcwd()
-sys.path.insert(0, cwd)
-sys.path.insert(0, cwd + '/../bd/')
-sys.path.insert(0, cwd + '/../limits/')
-sys.path.insert(0, cwd + '/../../../qc_checks/')
+home_path = os.environ['HOME']
+cwd_path = home_path + '/remobs_qc/boias/axys/real_time/'
+bd_path = home_path + '/remobs_qc/boias/axys/bd'
 
-from os.path import expanduser
-home = expanduser("~")
-sys.path.insert(0,home)
+sys.path.append(home_path)
+sys.path.append(cwd_path)
+sys.path.append(bd_path)
+
+
 import user_config as user_config
 #os.chdir( user_config.path )
 
