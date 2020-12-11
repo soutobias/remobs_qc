@@ -334,6 +334,49 @@ def insert_data_bmo_message(conn, bmo_message_df, id_buoy):
 
 ###############################################################################
 
+def insert_triaxys_message(conn, triaxys_message, id_buoy):
+
+
+    cursor = conn.cursor()
+    cols = triaxys_message.columns.tolist()
+    row_index = 0
+
+    for i, row in triaxys_message[cols].iterrows():
+
+         triaxys_message_data = {'id_buoy': id_buoy,
+                             'date_time' : row['date'],
+                             'message': row['data']
+                             }
+
+
+         query_insert = """INSERT INTO  bmo_triaxys_message (id_buoy, date_time,
+                            triaxys_message) VALUES 
+                            (%(id_buoy)s, %(date_time)s, %(message)s);"""
+
+
+         try:
+            cursor.execute(query_insert, triaxys_message_data)
+            print("Row %s inserted on bmo_triaxis_message table" % row_index)
+         except Exception as err:
+            print("Error on insert data on bmo_triaxys_message table.")
+            print('Error: ', err)
+            print("Rollback Transaction in row %s \n" % row_index)
+            print("Transaction Cancelled.")
+            conn.rollback()
+            return 0
+
+         row_index += 1
+
+    conn.commit()
+    print("Commited!")
+    print("All %s rows insereted" % row_index)
+    return 1
+
+
+
+
+
+
 def raw_data_bmo(conn, id_buoy, last_date_general):
 
     import pandas as pd
