@@ -34,6 +34,17 @@ elif df_xml[df_xml['type']=='remo'].empty:
 else:
     df_xml = df_xml.sort_values(by = 'id')
     messages = df_xml[df_xml['type']=='remo']
+    message_triaxys = df_xml[df_xml['type']=='tri']
+
+
+    status_transaction_triaxys = insert_data_bmo_message(conn, message_triaxys, 2)
+
+    if status_transaction_triaxys == 1:
+        print("Triaxys message inserted on database!")
+    elif status_transaction_triaxys == 0:
+        print("Triaxys message NOT inserted on database!")
+
+
     messages = messages['data']
 
     bmo_br = message_bmo(messages)
