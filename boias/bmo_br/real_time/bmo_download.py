@@ -37,7 +37,7 @@ else:
     message_triaxys = df_xml[df_xml['type']=='tri']
 
 
-    status_transaction_triaxys = insert_data_bmo_message(conn, message_triaxys, 2)
+    status_transaction_triaxys = insert_triaxys_message(conn, message_triaxys, 2)
 
     if status_transaction_triaxys == 1:
         print("Triaxys message inserted on database!")
