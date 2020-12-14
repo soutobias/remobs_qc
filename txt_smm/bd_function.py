@@ -56,7 +56,7 @@ def conn_qc_db(server):
 
 
 
-def get_data_spotter(conn, id_buoy, last_date, table, interval_hour):
+def get_data_spotter(conn, id_buoy, table, last_date, interval_hour):
 
     import pandas as pd
     from datetime import timedelta
@@ -72,7 +72,8 @@ def get_data_spotter(conn, id_buoy, last_date, table, interval_hour):
     # Getting data from the last x hours
     if interval_hour == "ALL":
 
-        query = f"SELECT {spotter_vars_str} FROM {table} WHERE id_buoy = {id_buoy};"
+        query = f"""SELECT {spotter_vars_str} FROM {table} WHERE id_buoy = {id_buoy} AND 
+        date_time > '2020-12-05 19:30:00';"""
 
         data_spotter = pd.read_sql_query(query, conn)
 
