@@ -14,8 +14,8 @@ import pandas as pd
 
 file = pd.read_csv(EMAIL_FILES[0])
 
-start_date = min(file['date_time'])
-last_date = max(file['date_time'])
+start_date = min(file['Datetime'])
+last_date = max(file['Datetime'])
 
 
 
