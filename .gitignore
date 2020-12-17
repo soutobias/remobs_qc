@@ -58,3 +58,5 @@ simcosta_estacao.csv
 
 # Files txt SMM
 smm_spotter_operantar.txt
+# Token Gmail Api
+token.pickle
