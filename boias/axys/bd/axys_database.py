@@ -95,12 +95,6 @@ def conn_qc_db(server):
         return
 
 
-
-
-
-
-
-
 def working_buoys(server):
 
     import pandas as pd
@@ -192,14 +186,14 @@ def select_raw_data_bd(buoy, user_config):
 
     db = connect_db(user_config)
 
-    
+
     time_last_month = last_month()
 
     sql = "SELECT * FROM axys_message WHERE id_buoy = %s and date_time >= '%s' \
     ORDER BY date_time" % (buoy, time_last_month)
 
     raw_data = pd.read_sql_query(sql, db)
-    
+
     db.close()
 
     return raw_data
@@ -222,13 +216,6 @@ def select_general_axys_data(buoy, user_config):
     db.close()
 
     return general_data
-
-
-
-
-
-
-
 
 
 def delete_adjusted_old_data(initial_time, buoy, user_config):
@@ -260,20 +247,10 @@ def insert_adjusted_data_bd(qc_data, user_config):
     engine = create_engine(f'postgres+psycopg2://{user}:{passw}@{host}/{db}')
 
 
-    
+
     qc_data.to_sql(con=engine, name='axys_general', if_exists='append')
 
     print('data inserted')
-
-
-
-
-
-
-
-
-
-
 
 
 
