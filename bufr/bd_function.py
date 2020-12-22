@@ -1,5 +1,4 @@
 
-
 import os
 import sys
 
@@ -56,26 +55,27 @@ def conn_qc_db(server):
 
 def working_buoys(conn):
 
-    sql = "SELECT * FROM buoys WHERE status = 1"
+    sql = "SELECT * FROM buoys WHERE status = 'Ativa'"
     buoys = pd.read_sql_query(sql, conn)
 
     return buoys
 
 def get_bufr_data(buoy, last_date, conn):
 
-    if last_date == 1
-
-        sql = "SELECT * FROM data_buoys INNER JOIN buoys WHERE \
-        data_buoys.id_buoy = buoy.id_boia AND data_buoys.id_buoy = %s \
+    if last_date == 1:
+        sql = "SELECT * FROM data_buoys INNER JOIN buoys ON \
+        data_buoys.id_buoy = buoys.id_boia WHERE data_buoys.id_buoy = %s \
         ORDER BY date_time DESC limit 1" % (buoy)
 
-    else
-        sql = "SELECT * FROM data_buoys INNER JOIN buoys WHERE \
-        data_buoys.id_buoy = buoy.id_boia AND data_buoys.id_buoy = %s \
+    else:
+        sql = "SELECT * FROM data_buoys INNER JOIN buoys ON \
+        data_buoys.id_buoy = buoys.id_boia WHERE data_buoys.id_buoy = %s \
         AND data_buoys.date_time > '%s' \
         ORDER BY date_time DESC" % (buoy, last_date)
 
     general_data = pd.read_sql_query(sql, conn)
+
+    general_data = general_data.loc[:,~general_data.columns.duplicated()]
 
     return general_data
 
