@@ -10,12 +10,16 @@ import numpy as np
 import createncdf as ncdf
 import re
 import time
+from datetime import datetime, timedelta
+from time import gmtime, strftime
 
-def generate_netcdf(df, df_status):
+def generate_netcdf(df, df_status, buoy, cf):
 
-    NC = Dataset(df['name'] + '.nc','w')
+    file_name = df_status['name_buoy'][buoy] + "_" + strftime('%Y-%m', gmtime()) + '.nc'
 
-    NC.wmo_id = df_status['wmo_number'][0]
+    NC = Dataset(file_name, 'w')
+
+    NC.wmo_id = df_status['wmo_number'][buoy]
 
     NC.institution = 'Brazilian Navy Hydrographic Center'
     NC.institution_abbreviation = 'CHM'
@@ -40,8 +44,8 @@ def generate_netcdf(df, df_status):
         "many moored weather buoys."
 
 
-    NC.station_name = df_status['name']
-    NC.sea_floor_depth_below_sea_level = df_status['depth']
+    NC.station_name = df_status['name_buoy'][buoy]
+    NC.sea_floor_depth_below_sea_level = df_status['depth'][buoy]
 
     NC.qc_manual = "https://www.marinha.mil.br/chm/sites/www.marinha.mil.br.chm/files/u1947/controle_de_qualidade_dos_dados.pdf"
     NC.keywords = "Atmospheric Pressure, Sea level Pressure, Atmospheric " \
@@ -60,45 +64,75 @@ def generate_netcdf(df, df_status):
     NC.publisher_name = "PNBOIA"
     NC.publisher_url = "https://www.marinha.mil.br/chm/dados-do-goos-brasil/pnboia"
     NC.publisher_email = "chm.pnboia@marinha.mil.br"
-    NC.nominal_latitude = df_status['lat']
-    NC.nominal_longitude = df_status['lon']
+    NC.nominal_latitude = df_status['lat'][buoy]
+    NC.nominal_longitude = df_status['lon'][buoy]
 
-    NC.time_coverage_start = df.index[0]
-    NC.time_coverage_end = df.index[-1]
-    NC.date_created = strftime("%Y-%m-%d %H:%M:%SZ", gmtime())
+
+    NC.time_coverage_start = df["date_time"].iloc[0].strftime('%Y-%m-%dT%H:%M:%SZ')
+    NC.time_coverage_end = df["date_time"].iloc[-1].strftime('%Y-%m-%dT%H:%M:%SZ')
+    NC.date_created = strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())
 
 
     ###########################
     # CREATE DIMENSIONS
     ###########################
 
-    (times,NC) = ncdf.time_dimension (df, NC)
+    (times, NC) = ncdf.time_dimension (df, NC)
 
     ###########################
     # CREATE VARIABLES
     ###########################
 
-    (lat,NC)=ncdf.latvariable(df, 'lat', NC)
+    (NC) = ncdf.create_variable(df, cf, 'lat', NC)
 
-    (lon,NC)=ncdf.latvariable(df, 'lon', NC)
+    (NC) = ncdf.create_variable(df, cf, 'lon', NC)
 
 
-    (wvht,wvht_qc,wvht_dqc,NC)=ncdf.wvhtvariable(Wvht,Wvhtflag,Wvhtflagid,NC)
+    (NC) = ncdf.create_variable(df, cf, 'sst', NC)
 
-    (dpd,dpd_qc,dpd_dqc,NC)=ncdf.dpdvariable(Dpd,Dpdflag,Dpdflagid,NC)
-    (apd,apd_qc,apd_dqc,NC)=ncdf.apdvariable(Apd,Apdflag,Apdflagid,NC)
-    (mwd,mwd_qc,mwd_dqc,NC)=ncdf.mwdvariable(Mwd,Mwdflag,Mwdflagid,NC)
-    (atmp,atmp_qc,atmp_dqc,NC)=ncdf.atmpvariable(Atmp,Atmpflag,Atmpflagid,NC)
-    (pres,pres_qc,pres_dqc,NC)=ncdf.presvariable(Pres,Presflag,Presflagid,NC)
-    (dewp,dewp_qc,dewp_dqc,NC)=ncdf.dewpvariable(Dewp,Dewpflag,Dewpflagid,NC)
-    (wtmp,wtmp_qc,wtmp_dqc,NC)=ncdf.wtmpvariable(Wtmp,Wtmpflag,Wtmpflagid,NC)
-    (wspd,wspd_qc,wspd_dqc,NC)=ncdf.wspdvariable(Wspd,Wspdflag,Wspdflagid,NC)
-    (wdir,wdir_qc,wdir_dqc,NC)=ncdf.wdirvariable(Wdir,Wdirflag,Wdirflagid,NC)
-    (gust,gust_qc,gust_dqc,NC)=ncdf.gustvariable(Gust,Gustflag,Gustflagid,NC)
+    (NC) = ncdf.create_variable(df, cf, 'swvht1', NC)
+    (NC) = ncdf.create_variable(df, cf, 'tp1', NC)
+    (NC) = ncdf.create_variable(df, cf, 'wvdir1', NC)
+
+    (NC) = ncdf.create_variable(df, cf, 'wspd', NC)
+    (NC) = ncdf.create_variable(df, cf, 'wdir', NC)
+
+
+    if df_status['model'][0] == "SPOT-0222":
+        (NC) = ncdf.create_variable(df, cf, 'pk_dir', NC)
+
+        (NC) = ncdf.create_variable(df, cf, 'pk_wvspread', NC)
+        (NC) = ncdf.create_variable(df, cf, 'mean_tp', NC)
+
+    else:
+        (NC) = ncdf.create_variable(df, cf, 'rh', NC)
+        (NC) = ncdf.create_variable(df, cf, 'pres', NC)
+        (NC) = ncdf.create_variable(df, cf, 'atmp', NC)
+        (NC) = ncdf.create_variable(df, cf, 'dewpt', NC)
+        (NC) = ncdf.create_variable(df, cf, 'wspd', NC)
+        (NC) = ncdf.create_variable(df, cf, 'wdir', NC)
+        (NC) = ncdf.create_variable(df, cf, 'gust', NC)
+        (NC) = ncdf.create_variable(df, cf, 'arad', NC)
+        (NC) = ncdf.create_variable(df, cf, 'cspd1', NC)
+        (NC) = ncdf.create_variable(df, cf, 'cdir1', NC)
+        (NC) = ncdf.create_variable(df, cf, 'cspd2', NC)
+        (NC) = ncdf.create_variable(df, cf, 'cdir2', NC)
+        (NC) = ncdf.create_variable(df, cf, 'cspd3', NC)
+        (NC) = ncdf.create_variable(df, cf, 'cdir3', NC)
+        (NC) = ncdf.create_variable(df, cf, 'mxwvht1', NC)
+        (NC) = ncdf.create_variable(df, cf, 'tp2', NC)
+        (NC) = ncdf.create_variable(df, cf, 'wvspread1', NC)
+        (NC) = ncdf.create_variable(df, cf, 'battery', NC)
+        (NC) = ncdf.create_variable(df, cf, 'compass', NC)
+
+
+        if df_status['model'][0] == "BMO-BR":
+            (NC) = ncdf.create_variable(df, cf, 'swvht2', NC)
+            (NC) = ncdf.create_variable(df, cf, 'wvdir2', NC)
 
 
     NC.close()
-    print "-- File closed successfully"
+    print ("-- File closed successfully")
 
 
 
