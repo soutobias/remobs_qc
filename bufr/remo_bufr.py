@@ -29,16 +29,25 @@ def bufrSection0(bufrMessageLength):
 
     bufrSection0List=[]
 
-    bufrSection0List.append(pack("B",66)) # letter B
-    bufrSection0List.append(pack("B",85)) # letter U
-    bufrSection0List.append(pack("B",70)) # letter F
-    bufrSection0List.append(pack("B",82)) # letter R
+    #octet 1 - Letter B
+    bufrSection0List.append(np.binary_repr(66, 8))
 
-    bufrSection0List.append((pack(">L", bufrMessageLength))[1:])  # include the length of the total GTS Message
+    #octet 2 - Letter U
+    bufrSection0List.append(np.binary_repr(85, 8))
 
-    bufrSection0List.append(pack("B", 4))     # BUFR Version Number (currently 4)
+    #octet 3 - Letter F
+    bufrSection0List.append(np.binary_repr(70, 8))
 
-    section0="".join(bufrSection0List)
+    #octet 4 - Letter R
+    bufrSection0List.append(np.binary_repr(82, 8))
+
+    #octet 5 - 7 -  include the length of the total GTS Message include section0
+    bufrSection0List.append(np.binary_repr(bufrMessageLength + 5, 8 * 3))
+
+    #octet 8 -  # BUFR Version Number (currently 4)
+    bufrSection0List.append(np.binary_repr(4, 8)) # letter R
+
+    section0 = "".join(bufrSection0List)
 
     return section0
 
@@ -51,12 +60,9 @@ def bufrSection0(bufrMessageLength):
 #
 ############################################################
 
-def bufrSection1():
-
+def bufrSection1(df):
 
     bufrSection1List = []
-    bufrSection1 = None
-
 
     # Octect 4
     # BUFR master table (zero if standard WMO FM 94 BUFR tables are used)
@@ -98,34 +104,25 @@ def bufrSection1():
     # Version number of local tables
     bufrSection1List.append(np.binary_repr(0, 8))
 
-    # Octect 13-17
     # Data and time of the measurement)
-
     # Octect 13 (Year - of the century)
-    bufrSection1List.append(np.binary_repr(Year - 2000, 8))
+    bufrSection1List.append(np.binary_repr(datetime.now().year - 2000, 8))
     # Octect 14 (Month)
-    bufrSection1List.append(np.binary_repr(Month, 8))
+    bufrSection1List.append(np.binary_repr(datetime.now().month, 8))
     # Octect 15 (Day)
-    bufrSection1List.append(np.binary_repr(Day, 8))
+    bufrSection1List.append(np.binary_repr(datetime.now().day, 8))
     # Octect 16 (Hour)
-    bufrSection1List.append(np.binary_repr(Hour, 8))
+    bufrSection1List.append(np.binary_repr(datetime.now().hour, 8))
     # Octect 17 (Minute)
-    bufrSection1List.append(np.binary_repr(Minute, 8))
+    bufrSection1List.append(np.binary_repr(datetime.now().minute, 8))
 
     # Octect 18 - shall be included and set to zero
     bufrSection1List.append(np.binary_repr(0, 8))
 
-
     #Octets 1-3
     # Length of the section 1
-    tmpString = "".join(bufrSection1List)
-    bufrSection1Length = int(len(tmpString)/8 + 3)
-
-    print('bufrSection1Length')
-    print(bufrSection1Length)
-
-    # 'L' generates a 4-byte integer, but only need 3 bytes of it
-    section1 = "%s%s" % (np.binary_repr(bufrSection1Length, 8 * 3), tmpString)
+    bufrSection1Length =  int(len(bufrSection1List / 8 + 3))
+    section1 = "%s%s" % (np.binary_repr(bufrSection1Length, 8 * 3), bufrSection1List)
 
     return section1
 
@@ -137,10 +134,9 @@ def bufrSection1():
 #
 ############################################################
 
-def bufrSection3():
+def bufrSection3(df):
 
     bufrSection3List = []
-    bufrSection3 = None
 
     # Octect 4
     # Set to zero (reserved)
@@ -176,16 +172,10 @@ def bufrSection3():
     bufrSection3List.append(np.binary_repr(6, 6))
     bufrSection3List.append(np.binary_repr(5, 8)) # 3 06 005
 
-
-
-    tmpString = "".join(bufrSection3List)
-    bufrSection3Length = int(len(tmpString)/8 + 3)
-
-    print('bufrSection3Length')
-    print(bufrSection3Length)
-
-    # 'L' generates a 4-byte integer, but only need 3 bytes of it
-    section3 = "%s%s" % (np.binary_repr(bufrSection3Length, 8 * 3), tmpString)
+    #Octets 1-3
+    # Length of the section 3
+    bufrSection3Length =  int(len(bufrSection1List / 8 + 3))
+    section3 = "%s%s" % (np.binary_repr(bufrSection3Length, 8 * 3), bufrSection3List)
 
     return section3
 
@@ -229,8 +219,9 @@ def bufrSection3():
 def bufrSection4(df):
 
     bufrSection4List = []
-    bufrSection4 = None
-    excMessage = None
+
+    # octet 4 - set to 0 (reserved)
+    bufrSection4List.append(np.binary_repr(0, 8))
 
     ############################################################
     #
@@ -241,20 +232,20 @@ def bufrSection4(df):
     ############################################################
     # 001087 - WMO Marine Observing platform extended identifier
     # Numeric 23 bits
-    bufrSection4List.append(np.binary_repr(df['wmo_number'], 23))
+    bufrSection4List.append(np.binary_repr(df['wmo_number'][0], 23))
 
     ############################################################
     # 001015 - Station or Site Name
     # 160 bits (20 bytes)
-    bufrSection4List.append(np.binary_repr(df['name_buoy'], 160))
+    bufrSection4List.append(np.binary_repr(df['name_buoy'][0], 160))
 
     ############################################################
     # 002149 - Type of data buoy
     # 6 bits - 18 = 3-metre Discus
-    if df['model'] = "3M":
+    if df['model'] == "Axys":
         bufrSection4List.append(np.binary_repr(18, 6))
-
-    # Bits filled: 1111 1000
+    elif df['model'] == "SPOT-0222"
+        bufrSection4List.append(np.binary_repr(9, 6))
 
     ############################################################
     ############################################################
@@ -266,9 +257,9 @@ def bufrSection4(df):
     # 004001  - Year (12 bits)
     # 004002  - Month (4 bits)
     # 004003  - Day   (6 bits)
-    bufrSection4List.append(np.binary_repr(df.index.year, 12))
-    bufrSection4List.append(np.binary_repr(df.index.month, 4))
-    bufrSection4List.append(np.binary_repr(df.index.day, 6))
+    bufrSection4List.append(np.binary_repr(df["date_time"][0].year, 12))
+    bufrSection4List.append(np.binary_repr(df["date_time"][0].month, 4))
+    bufrSection4List.append(np.binary_repr(df["date_time"][0].day, 6))
 
     ############################################################
     ############################################################
@@ -279,8 +270,8 @@ def bufrSection4(df):
     ############################################################
     # 004004  - Hour (5 bits)
     # 004005  - Minute (6 bits)
-    bufrSection4List.append(np.binary_repr(df.index.hour, 5))
-    bufrSection4List.append(np.binary_repr(df.index.minute, 6))
+    bufrSection4List.append(np.binary_repr(df["date_time"][0].hour, 5))
+    bufrSection4List.append(np.binary_repr(df["date_time"][0].minute, 6))
 
     # Bits filled: 1111 1100
 
@@ -294,8 +285,8 @@ def bufrSection4(df):
     # 005001  - Latitude (25 bits) (scale 5, reference value -9000000)
     # 006001  - Longitude (26 bits) (scale 5, reference value -18000000)
 
-    latScaled = (int(df['lat'] * 10 ** 5) + 9000000) # bits 26-32 are empty
-    lonScaled = (int(df['lon'] * 10 ** 5) + 18000000) # bits 27-32 are empty
+    latScaled = (int(df['lat'][0] * 10 ** 5) + 9000000) # bits 26-32 are empty
+    lonScaled = (int(df['lon'][0] * 10 ** 5) + 18000000) # bits 27-32 are empty
 
     bufrSection4List.append(np.binary_repr(latScaled, 25))
     bufrSection4List.append(np.binary_repr(lonScaled, 26))
@@ -309,48 +300,81 @@ def bufrSection4(df):
     ############################################################
     # 010004  - Pressure (14 bits) (scale -1, and units in Pa (mb * 100))
     # Null = 0
-    bufrSection4List.append(np.binary_repr(df['pres'] * 100 * 0.1, 14))
+    bufrSection4List.append(np.binary_repr(0* 100 * 0.1, 14))
+
 
     # 010051  - Pressure at sea-level (14 bits) (scale -1, and units in Pa)
-    bufrSection4List.append(np.binary_repr(df['pres'] * 100 * 0.1, 14))
+    if df["pres"][0] == nan
+        value = 0
+    else
+        value = df["pres"][0]
+
+    bufrSection4List.append(np.binary_repr(value * 100 * 0.1, 14))
 
     ############################################################
     # 007033  - Height pres Sensor Above Water (12 bits) (scale 1, m)
+    if df["h_sensor_pres"][0] == nan
+        value = 0
+    else
+        value = df["h_sensor_pres"][0]
 
-    # TODO: Value obtained from the NDBC website
-    bufrSection4List.append(np.binary_repr(df['h_pres'] * 10, 12))
+    bufrSection4List.append(np.binary_repr(value * 10, 12))
 
     ############################################################
     # 012101  - Air Temperature (16 bits) (scale 2, K)
-    bufrSection4List.append(np.binary_repr(int(df['atmp'] * 10**2)+273, 16))
+    if df["atmp"][0] == nan
+        value = 0
+    else
+        value = df["atmp"][0]
+
+    bufrSection4List.append(np.binary_repr(int(value * 10**2)+273, 16))
 
     # 012103  - Dew Point (16 bits) (scale 2, K)
-    bufrSection4List.append(np.binary_repr(int(df['dewpt'] * 10**2)+273, 16))
+    if df["dewpt"][0] == nan
+        value = 0
+    else
+        value = df["dewpt"][0]
+    bufrSection4List.append(np.binary_repr(value * 10**2)+273, 16))
 
     ############################################################
     # 013103  - Relative Humidity (7 bits) (scale 0, %)
-    bufrSection4List.append(np.binary_repr(df['rh'], 7))
+    if df["rh"][0] == nan
+        value = 0
+    else
+        value = df["rh"][0]
+
+    bufrSection4List.append(np.binary_repr(value, 7))
 
     ############################################################
     # 007033  - Height atmp Above Water (12 bits) (scale 1, m)
-    bufrSection4List.append(np.binary_repr(int(df['h_atmp'] * 10**1), 12))
+    if df["h_sensor_atmp"][0] == nan
+        value = 0
+    else
+        value = df["h_sensor_atmp"][0]
+
+    bufrSection4List.append(np.binary_repr(int(value * 10**1), 12))
 
     ############################################################
-    # 008021  - Time Significance (5 bits) (scale 1, m)
+    # 008021  - Time Significance (5 bits) (scale 1, m) - 2 (reserved)
     bufrSection4List.append(np.binary_repr(2, 5))
 
     ############################################################
     # 004025  - Time Period of Displacement (12 bits) (scale 0, minute, reference=-2048)
-    windavgScaled = (int(df['avg_atmp']) + 2048)
+    if df["atmp_avg"][0] == nan
+        value = 0
+    else
+        value = df["atmp_avg"][0]
+
+    windavgScaled = (value + 2048)
     bufrSection4List.append(np.binary_repr(windavgScaled, 12))
 
     ############################################################
     # 011001  - Wind Direction (9 bits) (scale 0, degree)
-    bufrSection4List.append(np.binary_repr(df['wdir'], 9))
+    bufrSection4List.append(np.binary_repr(df['wdir'][0], 9))
 
     ############################################################
     # 011002  - Wind Speed (12 bits) (scale 1, m/s)
-    bufrSection4List.append(np.binary_repr(df['wspd'] * 10, 12))
+    bufrSection4List.append(np.binary_repr(df['wspd'][0] * 10, 12))
 
     ############################################################
     # 008021  - Time Significance (5 bits) (scale 1, m)
@@ -359,45 +383,37 @@ def bufrSection4(df):
 
     ############################################################
     # 004025  - Time Period of Displacement (12 bits) (scale 0, minute, reference=-2048)
-    windavgScaled = (int(df['avg_wind']) + 2048)
+    windavgScaled = (int(df['wind_avg']) + 2048)
     bufrSection4List.append(np.binary_repr(windavgScaled, 12))
 
     ############################################################
     # 011041  - Maximum Gust Speed (12 bits) (scale 1, m/s)
-    bufrSection4List.append(np.binary_repr(df['gust'] * 10, 12))
+    bufrSection4List.append(np.binary_repr(df['gust'][0] * 10, 12))
 
     ############################################################
     # 004025  - Time Period of Displacement (12 bits) (scale 0, minute, reference=-2048)
     # Set to missing (=0 min)
-    bufrSection4List.append(np.binary_repr(df['avg_gust'] + 2048, 12))
+    bufrSection4List.append(np.binary_repr(df['gust_avg'][0] + 2048, 12))
 
     ############################################################
     # 007033  - Height Wind Sensor Above Water (12 bits) (scale 1, m)
     # Set to missing (=0 m) ????????? Use insted 5 meters
-
-    # TODO: I do not know to set it to missing
-    bufrSection4List.append(np.binary_repr(int(df['h_wind'] * 10**1), 12))
+    bufrSection4List.append(np.binary_repr(int(df['h_sensor_wind'][0] * 10**1), 12))
 
     ############################################################
     # 002005  - Precision of Temperature (7 bits) (scale 2, K)
 
-    # TODO: I tried to find the temperature precision, but I couldn't find it
-
-    WtmpPrecScaled = int(df['prec_sst']*10**2) # bit 8 is empty
+    WtmpPrecScaled = int(df['wtmp_prec'][0] * 10**2) # bit 8 is empty
     bufrSection4List.append(np.binary_repr(WtmpPrecScaled, 7))
 
     ############################################################
     # 007063  - Depth Below Sea/Water Surface (20 bits) (scale 2, m)
-
-    # TODO: Value obtained from the NDBC website
-
-    DepthScaled = int(df['d_sst'] * 10**2) # bits 21-32 are empty, centimeters
+    DepthScaled = int(df['d_sensor_wtmp'][0] * 10**2) # bits 21-32 are empty, centimeters
     bufrSection4List.append(np.binary_repr(DepthScaled, 20))
 
     ############################################################
     # 022049  - Sea-surface Temperature (15 bits) (scale 2, K)
-
-    WtmpScaled = int((df['sst']+273)*10**2) # bit 16 is empty
+    WtmpScaled = int((df['sst'][0]+273)*10**2) # bit 16 is empty
     bufrSection4List.append(np.binary_repr(WtmpScaled, 15))
 
 
@@ -514,42 +530,3 @@ def bufrSection4(df):
     section4 = "%s%s" % (np.binary_repr(bufrSection4Length, 8 * 3), tmpString)
 
     return section4
-
-
-########################################################
-#
-# BEGINING OF THE RUNNING CODE
-#
-########################################################
-
-(Section1)=bufrSection1()
-
-(Section3)=bufrSection3()
-
-(Section4)=bufrSection4()
-
-#Put the sections together
-bufrMessage = []
-
-bufrMessage.append(Section1)
-bufrMessage.append(Section3)
-bufrMessage.append(Section4)
-
-#Juntando a Secao 5
-bufrMessage.append('7777')
-bufrString="".join(bufrMessage)
-bufrMessageLength = len(bufrString) + 8
-
-# BUFR Section 0
-(Section0)=bufrSection0(bufrMessageLength)
-
-
-# Write message into the archive
-
-
-
-BUFR = open('gts_message', 'wb')
-
-BUFR.write(Section0)
-BUFR.write(bufrString)
-BUFR.close()
