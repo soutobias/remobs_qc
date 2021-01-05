@@ -159,7 +159,7 @@ elif last_data != None and last_data < datetime.today():
 
             print("Day %s inserted." % date_url)
 
-elif last_data.date() == datetime.today():
+elif last_data.date() == date.today():
     print("The database is up to date.")
 
 
