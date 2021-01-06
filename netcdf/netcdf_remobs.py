@@ -30,6 +30,6 @@ date_month = datetime.now().strftime("%Y-%m-01 00:00:00")
 
 for i in range(len(buoys)):
 
-    df = bd.get_netcdf_data(buoys["id_boia"][i], date_month, conn)
+    df = bd.get_netcdf_data(buoys["id"][i], date_month, conn)
 
     netcdf_new.generate_netcdf(df, buoys, i, cf)
