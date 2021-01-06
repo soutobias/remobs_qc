@@ -33,5 +33,5 @@ for buoy in buoys.itertuples():
 	print("Downloading...")
 	raw_data = telnet_download.download_raw_data(buoy.sat_number, user_config)
 	print("Inserting on database...")
-	axys_database.insert_raw_data_bd(raw_data, buoy.id_buoy, 'PRI')
+	axys_database.insert_raw_data_bd(raw_data, buoy.buoy_id, 'PRI')
 	print("\nScript Finished!")

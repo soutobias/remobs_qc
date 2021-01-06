@@ -332,7 +332,7 @@ def adjust_axys_qc(axys_qc_data):
     import pandas as pd
     import numpy as np
 
-    columns_data = ['id_buoy', 'id_serial',
+    columns_data = ['buoy_id', 'id_serial',
                        'date_time', 'lat', 'lon',
                         'battery', 'wspd', 'gust',
                        'wdir', 'atmp', 'rh', 'dewpt',
@@ -349,7 +349,7 @@ def adjust_axys_qc(axys_qc_data):
     axts_qc_data = axys_qc_data.fillna(value = np.nan)
 
 
-    axys_qc_adjusted['id_buoy'] = axys_qc_data['id_buoy'].astype(int)
+    axys_qc_adjusted['buoy_id'] = axys_qc_data['buoy_id'].astype(int)
     axys_qc_adjusted['id_serial'] = axys_qc_data['id_serial'].astype(int)
     axys_qc_adjusted['date_time'] = axys_qc_data.index
     axys_qc_adjusted['lat'] = pd.to_numeric(axys_qc_data['lat'], errors = 'coerce').round(4)
