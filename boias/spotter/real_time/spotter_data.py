@@ -39,11 +39,11 @@ for n_buoy in range(len(devices)):
 
 
 
-    id_buoy = check_buoy_id(conn, spotter_id)
+    buoy_id = check_buoy_id(conn, spotter_id)
 
-    if not id_buoy:
+    if not buoy_id:
         continue
-    id_buoy = id_buoy[0][0]
+    buoy_id = buoy_id[0][0]
 
     ########################################
     # Status Data
@@ -53,7 +53,7 @@ for n_buoy in range(len(devices)):
                       'longitude', 'battery_power', 'battery_voltage',
                       'humidity', 'solar_voltage']
 
-    id = id_buoy
+    id = buoy_id
     lon = (spot.lon + 180) % 360 - 180
     lat = spot.lat
     date = spot.timestamp

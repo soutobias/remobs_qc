@@ -22,10 +22,10 @@ import pandas as pd
 
 conn = connect_database_remo('PRI')
 
-id_buoy = bmo_on(conn)
+buoy_id = bmo_on(conn)
 
 
-for id in id_buoy['id_buoy']:
+for id in buoy_id['buoy_id']:
 
     last_date_raw = check_last_date(conn, 'bmo_br', id)
 
@@ -64,7 +64,7 @@ for id in id_buoy['id_buoy']:
     bmo_qc_data = adjust_bmo_qc(bmo_merged)
 
     # IDs Key values to delete "old" qualified data...
-    ids_pk = bmo_qc_data[['id', 'id_buoy']]
+    ids_pk = bmo_qc_data[['id', 'buoy_id']]
 
     # Deleting data to replace...
     delete_qc_data(conn_qc, ids_pk)

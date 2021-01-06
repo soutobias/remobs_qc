@@ -4,7 +4,7 @@ def adjust_bmo_general(raw_data):
     import pandas as pd
 
 
-    columns_general = ['id_buoy', 'id',
+    columns_general = ['buoy_id', 'id',
                        'date_time', 'lat', 'lon',
                         'battery', 'wspd1', 'gust1',
                        'wdir1', 'wspd2', 'gust2',
@@ -22,7 +22,7 @@ def adjust_bmo_general(raw_data):
 
     raw_data = raw_data.replace('NAN', -9999)
 
-    bmo_general_data['id_buoy'] = raw_data['id_buoy'].astype(int)
+    bmo_general_data['buoy_id'] = raw_data['buoy_id'].astype(int)
     bmo_general_data['id'] = raw_data['id'].astype(int)
     bmo_general_data['date_time'] = raw_data['date_time']
     bmo_general_data['lat'] = pd.to_numeric(raw_data['lat'], errors = 'coerce').round(4)
@@ -66,7 +66,7 @@ def adjust_bmo_current(raw_data):
     import pandas as pd
 
 
-    columns_current = ['id_buoy', 'id',
+    columns_current = ['buoy_id', 'id',
                        'date_time', 'lat', 'lon','cspd1', 'cdir1',
                         'cspd2', 'cdir2', 'cspd3','cdir3', 'cspd4', 'cdir4',
                        'cspd5', 'cdir5', 'cspd6','cdir6', 'cspd7', 'cdir7',
@@ -80,7 +80,7 @@ def adjust_bmo_current(raw_data):
 
     raw_data = raw_data.replace('NAN', -9999)
 
-    bmo_general_data['id_buoy'] = raw_data['id_buoy'].astype(int)
+    bmo_general_data['buoy_id'] = raw_data['buoy_id'].astype(int)
     bmo_general_data['id'] = raw_data['id'].astype(int)
     bmo_general_data['date_time'] = raw_data['date_time']
     bmo_general_data['lat'] = pd.to_numeric(raw_data['lat'], errors = 'coerce').round(4)
@@ -129,13 +129,13 @@ def adjust_bmo_current(raw_data):
 
 
 
-def rotate_data(conn, df, flag, id_buoy):
+def rotate_data(conn, df, flag, buoy_id):
 
 
-    def get_declination(conn, id_buoy):
+    def get_declination(conn, buoy_id):
         import pandas as pd
 
-        query = f"SELECT mag_dec, var_mag_dec FROM buoys WHERE id_buoy = {id_buoy};"
+        query = f"SELECT mag_dec, var_mag_dec FROM buoys WHERE buoy_id = {buoy_id};"
 
         df = pd.read_sql_query(query, conn)
 
@@ -145,7 +145,7 @@ def rotate_data(conn, df, flag, id_buoy):
         return dec, var_mag_dec
 
 
-    dec, var_dec = get_declination(conn, id_buoy)
+    dec, var_dec = get_declination(conn, buoy_id)
 
 
 
@@ -191,7 +191,7 @@ def adjust_bmo_qc(bmo_qc_data):
     import pandas as pd
     import numpy as np
 
-    columns_data = ['id_buoy', 'id',
+    columns_data = ['buoy_id', 'id',
                        'date_time', 'lat', 'lon',
                         'battery', 'wspd', 'gust',
                        'wdir', 'atmp', 'rh', 'dewpt',
@@ -205,7 +205,7 @@ def adjust_bmo_qc(bmo_qc_data):
     bmo_qc_adjusted = pd.DataFrame(columns = columns_data)
 
 
-    bmo_qc_adjusted['id_buoy'] = bmo_qc_data['id_buoy'].astype(int)
+    bmo_qc_adjusted['buoy_id'] = bmo_qc_data['buoy_id'].astype(int)
     bmo_qc_adjusted['id'] = bmo_qc_data['id'].astype(int)
     bmo_qc_adjusted['date_time'] = bmo_qc_data.index
     bmo_qc_adjusted['lat'] = pd.to_numeric(bmo_qc_data['lat'], errors = 'coerce').round(4)
