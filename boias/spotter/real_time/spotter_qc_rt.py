@@ -24,15 +24,15 @@ from spotter_adjust_data import *
 conn = connect_database_remo("PRI")
 spotters_on_ids = spotter_on(conn)
 
-for id_buoy in spotters_on_ids['id_buoy']:
+for buoy_id in spotters_on_ids['buoy_id']:
 
-    print(f"Starting Data Qualification for Spotter Buoy {id_buoy}")
+    print(f"Starting Data Qualification for Spotter Buoy {buoy_id}")
     print("\n"*2)
 
-    last_date = check_last_date(conn, 'spotter_general', id_buoy)
+    last_date = check_last_date(conn, 'spotter_general', buoy_id)
     last_date = last_date[0][0]
 
-    raw_data = get_data_table_db(conn, id_buoy, last_date, 'spotter_general', 'ALL')
+    raw_data = get_data_table_db(conn, buoy_id, last_date, 'spotter_general', 'ALL')
 
     # Treating values and index
     raw_data.set_index("date_time", inplace = True)
@@ -45,7 +45,7 @@ for id_buoy in spotters_on_ids['id_buoy']:
     print("\n")
 
     print("Rotating Data...")
-    spotter_qc_data = rotate_data(conn, raw_data, flag_data, id_buoy)
+    spotter_qc_data = rotate_data(conn, raw_data, flag_data, buoy_id)
     print("\n")
     print("Done!")
     print("\n")
@@ -65,7 +65,7 @@ for id_buoy in spotters_on_ids['id_buoy']:
     print("Connected!")
 
     # IDs Key values to delete "old" qualified data...
-    ids_pk = spotter_qc_data[['id', 'id_buoy']]
+    ids_pk = spotter_qc_data[['id', 'buoy_id']]
     spotter_qc_data = spotter_qc_data.replace(-9999, np.nan)
 
     # Removing non valid values (none) from directions degrees field

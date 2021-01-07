@@ -56,12 +56,12 @@ def connect_database_remo(server):
 def spotter_on(conn):
     import pandas as pd
 
-    query = "SELECT id_buoy FROM buoys WHERE model = 'Spotter' AND" \
+    query = "SELECT buoy_id FROM buoys WHERE model = 'Spotter' AND" \
             " status = 1;"
 
-    id_buoys = pd.read_sql_query(query, conn)
+    buoy_ids = pd.read_sql_query(query, conn)
 
-    return id_buoys
+    return buoy_ids
 
 
 def check_buoy_id(conn, spotter_id):
@@ -83,18 +83,18 @@ def check_buoy_id(conn, spotter_id):
 
     cursor = conn.cursor()
 
-    cursor.execute(f"SELECT id_buoy FROM buoys WHERE sat_number = '{spotter_id}'")
+    cursor.execute(f"SELECT buoy_id FROM buoys WHERE sat_number = '{spotter_id}'")
 
-    id_buoy = cursor.fetchall()
+    buoy_id = cursor.fetchall()
 
-    return id_buoy
+    return buoy_id
 
 
 ################################################################################
 
 
-def insert_spotter_status(conn, status_df, id_buoy):
-    id = id_buoy
+def insert_spotter_status(conn, status_df, buoy_id):
+    id = buoy_id
     date_time = status_df['timestamp'][0]
     lat = status_df['latitude'][0].round(6)
     lon = status_df['longitude'][0].round(6)
@@ -106,7 +106,7 @@ def insert_spotter_status(conn, status_df, id_buoy):
     cursor = conn.cursor()
 
     try:
-        cursor.execute("""INSERT INTO spotter_status (id_buoy, date_time, latitude,\
+        cursor.execute("""INSERT INTO spotter_status (buoy_id, date_time, latitude,\
                                                     longitude, battery_power,\
                                                     battery_voltage, solar_voltage,\
                                                     humidity) VALUES \
@@ -138,12 +138,12 @@ def insert_spotter_status(conn, status_df, id_buoy):
 
 ################################################################################
 
-def insert_spotter_general(conn, spotter_df, id_buoy):
+def insert_spotter_general(conn, spotter_df, buoy_id):
     cols = spotter_df.columns.tolist()
 
     cursor = conn.cursor()
     for i, row in spotter_df[cols].iterrows():
-        id_buoy = id_buoy
+        buoy_id = buoy_id
         date_time = row['timestamp']
         lat = row['latitude']
         lon = row['longitude']
@@ -159,7 +159,7 @@ def insert_spotter_general(conn, spotter_df, id_buoy):
         pk_wvspread = row['peakDirectionalSpread']
         wvspread = row['meanDirectionalSpread']
 
-        spotter_data = {'id_buoy': id_buoy, 'date': date_time, 'lat': lat, 'lon': lon,
+        spotter_data = {'buoy_id': buoy_id, 'date': date_time, 'lat': lat, 'lon': lon,
                         'sst': sst,
                         'wspd': wspd, 'wdir': wdir, 'seaId': seaId,
                         'swvht': swvht, 'tp': peak_tp, 'mean_tp': mean_tp,
@@ -169,10 +169,10 @@ def insert_spotter_general(conn, spotter_df, id_buoy):
                         }
 
 
-        cursor.execute("""INSERT INTO spotter_general (id_buoy, date_time, lat, lon,
+        cursor.execute("""INSERT INTO spotter_general (buoy_id, date_time, lat, lon,
                     sst, swvht, tp, mean_tp, pk_dir, pk_wvspread,
                     wvdir, wvspread, wspd, wdir, sea_surface_id) VALUES
-                    (%(id_buoy)s, %(date)s, %(lat)s, %(lon)s, %(sst)s,%(swvht)s,
+                    (%(buoy_id)s, %(date)s, %(lat)s, %(lon)s, %(sst)s,%(swvht)s,
                     %(tp)s, %(mean_tp)s, %(pk_dir)s, %(wvdir)s, 
                     %(pk_wvspread)s, %(wvspread)s,%(wspd)s, %(wdir)s,
                      %(seaId)s);""", spotter_data)
@@ -186,7 +186,7 @@ def insert_spotter_general(conn, spotter_df, id_buoy):
 ################################################################################
 
 
-def check_last_date(conn, table, id_buoy):
+def check_last_date(conn, table, buoy_id):
     """Short summary.
 
     Parameters
@@ -206,11 +206,11 @@ def check_last_date(conn, table, id_buoy):
     cursor = conn.cursor()
 
     if table == 'buoys':
-        cursor.execute(f"SELECT deploy_date FROM {table} WHERE id_buoy = {id_buoy}")
+        cursor.execute(f"SELECT deploy_date FROM {table} WHERE buoy_id = {buoy_id}")
         date = cursor.fetchall()
 
     else:
-        cursor.execute(f"SELECT max(date_time) FROM {table} WHERE id_buoy = {id_buoy}")
+        cursor.execute(f"SELECT max(date_time) FROM {table} WHERE buoy_id = {buoy_id}")
         date = cursor.fetchall()
 
     return date
@@ -218,7 +218,7 @@ def check_last_date(conn, table, id_buoy):
 ################################################################################
 
 
-def raw_data_spotter(id_buoy, conn, interval):
+def raw_data_spotter(buoy_id, conn, interval):
     import pandas as pd
 
     cursor = conn.cursor()
@@ -233,10 +233,10 @@ def raw_data_spotter(id_buoy, conn, interval):
 
 
 
-def get_declination(conn, id_buoy):
+def get_declination(conn, buoy_id):
     import pandas as pd
 
-    query = (f"SELECT mag_dec, var_mag_dec FROM buoys WHERE id_buoy = {id_buoy};")
+    query = (f"SELECT mag_dec, var_mag_dec FROM buoys WHERE buoy_id = {buoy_id};")
 
     df = pd.read_sql_query(query, conn)
 
@@ -285,7 +285,7 @@ def conn_qc_db(server):
         return
 
 
-def get_data_table_db(conn, id_buoy, last_date, table, interval_hour):
+def get_data_table_db(conn, buoy_id, last_date, table, interval_hour):
 
     import pandas as pd
     from datetime import timedelta
@@ -293,7 +293,7 @@ def get_data_table_db(conn, id_buoy, last_date, table, interval_hour):
     # Getting data from the last x hours
     if interval_hour == "ALL":
 
-        query = f"SELECT * FROM {table} WHERE id_buoy = {id_buoy};"
+        query = f"SELECT * FROM {table} WHERE buoy_id = {buoy_id};"
 
         raw_data = pd.read_sql_query(query, conn)
 
@@ -303,7 +303,7 @@ def get_data_table_db(conn, id_buoy, last_date, table, interval_hour):
         date_period = last_date - timedelta(hours = interval_hour)
 
         query = f"SELECT * FROM {table} WHERE date_time > '{date_period}' " \
-                f" AND id_buoy = {id_buoy};"
+                f" AND buoy_id = {buoy_id};"
 
         raw_data = pd.read_sql_query(query, conn)
 
@@ -311,17 +311,17 @@ def get_data_table_db(conn, id_buoy, last_date, table, interval_hour):
 
 
 
-def delete_data(conn_qc, table, date_min, id_buoy):
+def delete_data(conn_qc, table, date_min, buoy_id):
 
     cursor = conn_qc.cursor()
 
     cursor.execute(f"DELETE FROM {table} WHERE"
                    f" date_time >= '{date_min}' AND"
-                   f" id_buoy = {id_buoy}")
+                   f" buoy_id = {buoy_id}")
 
     conn_qc.commit()
 
-    print(f"Data from buoy {id_buoy} after {date_min} deleted from database.")
+    print(f"Data from buoy {buoy_id} after {date_min} deleted from database.")
 
     return
 
@@ -330,11 +330,11 @@ def delete_qc_data(conn_qc, pks_df):
 
     cursor = conn_qc.cursor()
 
-    id_buoy = pks_df['id_buoy'].unique()[0]
+    buoy_id = pks_df['buoy_id'].unique()[0]
     ids_pk = pks_df['id'].tolist()
 
-    query = f"DELETE FROM data_buoys WHERE id_buoy =" \
-            f" {id_buoy} AND id IN {*ids_pk,}"
+    query = f"DELETE FROM data_buoys WHERE buoy_id =" \
+            f" {buoy_id} AND id IN {*ids_pk,}"
 
     try:
         cursor.execute(query)
@@ -357,7 +357,7 @@ def insert_spotter_qc_data(conn_qc, spotter_qc_df):
     cursor = conn_qc.cursor()
     row_index = 0
     for index, row in spotter_qc_df[cols].iterrows():
-        id_buoy = row['id_buoy']
+        buoy_id = row['buoy_id']
         id = row['id']
         date_time = index
         lat = row['lat']
@@ -384,7 +384,7 @@ def insert_spotter_qc_data(conn_qc, spotter_qc_df):
         flag_wvspread1 = row['flag_wvspread']
 
 
-        spotter_qc_data = {'id_buoy': id_buoy,
+        spotter_qc_data = {'buoy_id': buoy_id,
                            'id': id,
                             'date': date_time,
                             'lat': lat,
@@ -412,13 +412,13 @@ def insert_spotter_qc_data(conn_qc, spotter_qc_df):
                         }
 
 
-        query_insert = """INSERT INTO data_buoys (id_buoy, id, date_time, lat, lon, sst,
+        query_insert = """INSERT INTO data_buoys (buoy_id, id, date_time, lat, lon, sst,
                     wspd, wdir, swvht1, tp1, wvdir1, wvspread1, pk_dir, pk_wvspread,
                     mean_tp, flag_sst, flag_wspd, flag_wdir, flag_swvht1, flag_tp1, 
                     flag_wvdir1, flag_wvspread1, flag_pk_dir, flag_pk_wvspread,
                     flag_mean_tp) 
                     VALUES
-                    (%(id_buoy)s,%(id)s, %(date)s, %(lat)s, %(lon)s, %(sst)s, %(wspd)s,
+                    (%(buoy_id)s,%(id)s, %(date)s, %(lat)s, %(lon)s, %(sst)s, %(wspd)s,
                     %(wdir)s, %(swvht1)s, %(tp1)s, %(wvdir1)s, 
                     %(wvspread1)s, %(pk_dir)s,%(pk_wvspread)s, %(mean_tp)s, %(flag_sst)s,
                     %(flag_wspd)s, %(flag_wdir)s, %(flag_swvht1)s, %(flag_tp1)s,

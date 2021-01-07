@@ -72,7 +72,7 @@ def cf_names(conn):
 
 def get_netcdf_data(buoy, last_date, conn):
 
-    sql = "SELECT * FROM data_buoys WHERE data_buoys.id_buoy = %s \
+    sql = "SELECT * FROM data_buoys WHERE data_buoys.buoy_id = %s \
         AND data_buoys.date_time > '%s' ORDER BY date_time DESC" % (buoy, last_date)
 
     general_data = pd.read_sql_query(sql, conn)

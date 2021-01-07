@@ -1,11 +1,11 @@
 
-def rotate_data(conn, df, flag, id_buoy):
+def rotate_data(conn, df, flag, buoy_id):
 
 
-    def get_declination(conn, id_buoy):
+    def get_declination(conn, buoy_id):
         import pandas as pd
 
-        query = f"SELECT mag_dec, var_mag_dec FROM buoys WHERE id_buoy = {id_buoy};"
+        query = f"SELECT mag_dec, var_mag_dec FROM buoys WHERE buoy_id = {buoy_id};"
 
         df = pd.read_sql_query(query, conn)
 
@@ -15,7 +15,7 @@ def rotate_data(conn, df, flag, id_buoy):
         return dec, var_mag_dec
 
 
-    dec, var_dec = get_declination(conn, id_buoy)
+    dec, var_dec = get_declination(conn, buoy_id)
 
 
 
