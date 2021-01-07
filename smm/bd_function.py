@@ -56,7 +56,7 @@ def conn_qc_db(server):
 
 
 
-def get_data_spotter(conn, id_buoy, table, last_date, interval_hour):
+def get_data_spotter(conn, buoy_id, table, last_date, interval_hour):
 
     import pandas as pd
     from datetime import timedelta
@@ -72,7 +72,7 @@ def get_data_spotter(conn, id_buoy, table, last_date, interval_hour):
     # Getting data from the last x hours
     if interval_hour == "ALL":
 
-        query = f"""SELECT {spotter_vars_str} FROM {table} WHERE id_buoy = {id_buoy} AND 
+        query = f"""SELECT {spotter_vars_str} FROM {table} WHERE buoy_id = {buoy_id} AND 
         date_time > '2020-12-05 19:30:00';"""
 
         data_spotter = pd.read_sql_query(query, conn)
@@ -83,7 +83,7 @@ def get_data_spotter(conn, id_buoy, table, last_date, interval_hour):
         date_period = last_date - timedelta(hours = interval_hour)
 
         query = f"SELECT {spotter_vars_str} FROM {table} WHERE date_time > '{date_period}' " \
-                f" AND id_buoy = {id_buoy};"
+                f" AND buoy_id = {buoy_id};"
 
         data_spotter = pd.read_sql_query(query, conn)
 
@@ -98,7 +98,7 @@ def get_data_spotter(conn, id_buoy, table, last_date, interval_hour):
 
 
 
-def get_data_bmo(conn, id_buoy, last_date, table, interval_hour):
+def get_data_bmo(conn, buoy_id, last_date, table, interval_hour):
 
     import pandas as pd
     from datetime import timedelta
@@ -117,7 +117,7 @@ def get_data_bmo(conn, id_buoy, last_date, table, interval_hour):
     # Getting data from the last x hours
     if interval_hour == "ALL":
 
-        query = f"SELECT {bmo_vars_str} FROM {table} WHERE id_buoy = {id_buoy};"
+        query = f"SELECT {bmo_vars_str} FROM {table} WHERE buoy_id = {buoy_id};"
 
         bmo_data = pd.read_sql_query(query, conn)
 
@@ -127,7 +127,7 @@ def get_data_bmo(conn, id_buoy, last_date, table, interval_hour):
         date_period = last_date - timedelta(hours = interval_hour)
 
         query = f"SELECT * FROM {table} WHERE date_time > '{date_period}' " \
-                f" AND id_buoy = {id_buoy};"
+                f" AND buoy_id = {buoy_id};"
 
         bmo_data = pd.read_sql_query(query, conn)
 
@@ -141,7 +141,7 @@ def get_data_bmo(conn, id_buoy, last_date, table, interval_hour):
 
 
 
-def get_data_axys(conn, id_buoy, last_date, table, interval_hour):
+def get_data_axys(conn, buoy_id, last_date, table, interval_hour):
 
     import pandas as pd
     from datetime import timedelta
@@ -160,7 +160,7 @@ def get_data_axys(conn, id_buoy, last_date, table, interval_hour):
     # Getting data from the last x hours
     if interval_hour == "ALL":
 
-        query = f"SELECT {axys_vars_str} FROM {table} WHERE id_buoy = {id_buoy};"
+        query = f"SELECT {axys_vars_str} FROM {table} WHERE buoy_id = {buoy_id};"
 
         axys_data = pd.read_sql_query(query, conn)
 
@@ -170,7 +170,7 @@ def get_data_axys(conn, id_buoy, last_date, table, interval_hour):
         date_period = last_date - timedelta(hours = interval_hour)
 
         query = f"SELECT * FROM {table} WHERE date_time > '{date_period}' " \
-                f" AND id_buoy = {id_buoy};"
+                f" AND buoy_id = {buoy_id};"
 
         axys_data = pd.read_sql_query(query, conn)
 
