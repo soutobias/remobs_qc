@@ -253,3 +253,37 @@ def adjust_bmo_qc(bmo_qc_data):
 
 
     return bmo_qc_adjusted
+
+
+def check_size_values(df):
+    """ Check size values to input in database """
+    """ Replacing very spurious data (>9999) with -9999 """
+
+
+    data_cols =  ["swvht1",
+                    "mxwvht1",
+                    "swvht2",
+                    "tp1",
+                    "tp2", 
+                    "wvdir1", 
+                    "wvdir2", 
+                    "arad",
+                    "gust", 
+                    "wspd", 
+                    "wdir",  
+                    "atmp", 
+                    "pres", 
+                    "dewpt", 
+                    "sst", 
+                    "rh", 
+                    "cspd1", 
+                    "cdir1", 
+                    "cspd2", 
+                    "cdir2",
+                    "cspd3",
+                    "cdir3"] 
+
+    for col in data_cols:
+        df[col].values[df[col] >= 9999] = -9999
+
+    return df
