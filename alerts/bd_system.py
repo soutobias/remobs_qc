@@ -48,3 +48,19 @@ class db_remo():
 
         return data
 
+
+class db_remo_qc():
+
+    def __init__(self, host=HOST_QC, db=DATABASE_QC, user=USER_QC,
+                 pwd=PASSWORD_QC):
+        self.conn = pg.connect(host=host, database=db, user=user, password=pwd)
+
+    def get_data(self, query):
+
+        try:
+            data = pd.read_sql_query(query, self.conn)
+        except Exception as Err:
+            return print(Err)
+
+        return data
+

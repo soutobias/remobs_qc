@@ -156,6 +156,8 @@ plt.savefig("tsm_ultimo_dado.jpg", dpi = 300)
 
 conn = db_remo()
 bmo_wv = conn.get_data("SELECT date_time, wvdir1, wvdir2 from bmo_br where date_time >= '2020-12-10' and date_time < '2020-12-17' order by date_time;")
+conn_qc = db_remo_qc()
+qc_data = conn_qc.get_data("SELECT date_time, wvdir1, wvdir2 from data_buoys where buoy_id = 2 and date_time >= '2020-12-10' and date_time < '2020-12-17' order by date_time;")
 
 
 norte_verdadeiro_zero_correcao = -22.61
@@ -168,6 +170,14 @@ wv_axys = bmo_wv.wvdir1
 wv_sbg = bmo_wv.wvdir2
 wv_sbg = wv_sbg.mask(wv_sbg > 400)
 wv_sbg = wv_sbg.mask(wv_sbg < -1)
+
+
+wv_axys = qc_data['wvdir1']
+wv_sbg = qc_data['wvdir2']
+
+
+
+
 # SEM CORRECAO
 plt.cla()
 #plt.plot(new_time_spotter, spotter_df['wvht'], label='Spotter Buoy - Observed', marker = 'o', linewidth=0.6, markersize=0.7, alpha = 0.5)
@@ -179,6 +189,25 @@ plt.ylabel("Dir")
 plt.legend()
 plt.title("Wave Direction")
 plt.grid(color='black', linestyle='-', linewidth=0.1)
+
+
+# Dados Qualificados
+
+
+# SEM CORRECAO
+
+
+plt.cla()
+#plt.plot(new_time_spotter, spotter_df['wvht'], label='Spotter Buoy - Observed', marker = 'o', linewidth=0.6, markersize=0.7, alpha = 0.5)
+plt.plot(qc_data.date_time, wv_axys, label='Axys Sensor', linewidth=1.2, color = 'black',marker = 'o')
+#plt.plot(time_model, model_remo['swvht'], label = 'WaveWatch | GFS + ICON - Model', marker = 'h',linewidth=0.6, markersize = 0.5, alpha=0.5)
+plt.plot(qc_data.date_time, wv_sbg, label = 'SBG Sensor',linewidth=1.2, color = 'red',marker = 'o')
+plt.xlabel("DATE TIME")
+plt.ylabel("Dir")
+plt.legend()
+plt.title("Wave Direction")
+plt.grid(color='black', linestyle='-', linewidth=0.1)
+
 
 
 # Corrigindo: (MODO IGUAL MARCELO)
