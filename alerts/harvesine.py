@@ -34,11 +34,13 @@ def safe_range_circle(lat_fundeio, lon_fundeio, radius, n_points):
 
     pi = math.pi
 
-    circle_points = [(lat + math.cos(2*pi/n_points*x)*r,lon+ math.sin(2*pi/n_points*x)*r) for x in range(0, n_points+1)]
+    circle_points = [(lat + math.cos(2*pi/x)*r,lon+ math.sin(2*pi/x)*r) for x in range(1, n_points+1)]
 
-    circle_coords = [((x[0]*180/pi), (x[1]*180/pi)) for x in circle_points]
+    # radians to degree
+    circle_lat = [(x[0]*180/pi) for x in circle_points]
+    circle_lon = [(x[1]*180/pi) for x in circle_points]
 
-    return circle_coords
+    return circle_lat, circle_lon
 
 
 

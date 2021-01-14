@@ -21,6 +21,7 @@ class db_remo():
         return pd.read_sql_query(query, self.conn)
 
     def last_positions(self, buoy_type, buoy_id, n = 5):
+        """Select the last N positions of the buoy specified"""
 
         if buoy_type == 'BMO':
             table = 'bmo_message'
@@ -37,4 +38,13 @@ class db_remo():
             return print(Err)
 
         return pd.read_sql_query(query, self.conn)
+
+    def get_data(self, query):
+
+        try:
+            data = pd.read_sql_query(query, self.conn)
+        except Exception as Err:
+            return print(Err)
+
+        return data
 
