@@ -154,7 +154,7 @@ def rotate_data(conn, df, flag, id_buoy):
 # This adjustment is from SBG System
 # Correcting for the actual position Addin 1.19 degrees
 
-# Declnation for vitoria 23.80 W
+# Declination for Vitoria 23.80 W
 # Declination for actual position 22.61 W
 
     add_diff_dec_sbg = 1.19
@@ -162,17 +162,19 @@ def rotate_data(conn, df, flag, id_buoy):
 
     df['tmp_dec'] = (df.index.year - 2020) * float(var_dec) + float(dec)
 
-    df.loc[flag['cdir1'] == 0, "cdir1"] = df['cdir1'] - df['tmp_dec']
+    df.loc[flag['cdir1'] == 0, "cdir1"] = df['cdir1'] + df['tmp_dec']
+
     df.loc[df["cdir1"] < 0, "cdir1"] = df["cdir1"] + 360
     df.loc[df["cdir1"] > 360, "cdir1"] = df["cdir1"] - 360
 
 
-    df.loc[flag['cdir2'] == 0, "cdir2"] = df['cdir2'] - df['tmp_dec']
+    df.loc[flag['cdir2'] == 0, "cdir2"] = df['cdir2'] + df['tmp_dec']
+
     df.loc[df["cdir2"] < 0, "cdir2"] = df["cdir2"] + 360
     df.loc[df["cdir2"] > 360, "cdir2"] = df["cdir2"] - 360
 
 
-    df.loc[flag['cdir3'] == 0, "cdir3"] = df['cdir3'] - df['tmp_dec']
+    df.loc[flag['cdir3'] == 0, "cdir3"] = df['cdir3'] + df['tmp_dec']
     df.loc[df["cdir3"] < 0, "cdir3"] = df["cdir3"] + 360
     df.loc[df["cdir3"] > 360, "cdir3"] = df["cdir3"] - 360
 
@@ -185,7 +187,7 @@ def rotate_data(conn, df, flag, id_buoy):
 
 
 
-    df.loc[flag['wvdir1'] == 0, "wvdir1"] = df['wvdir1'] - df['tmp_dec']
+    df.loc[flag['wvdir1'] == 0, "wvdir1"] = df['wvdir1'] + df['tmp_dec']
     df.loc[df["wvdir1"] < 0, "wvdir1"] = df["wvdir1"] + 360
     df.loc[df["wvdir1"] > 360, "wvdir1"] = df["wvdir1"] - 360
 
