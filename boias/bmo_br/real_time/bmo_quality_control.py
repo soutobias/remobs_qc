@@ -41,8 +41,8 @@ def qualitycontrol(df, buoy):
 
     parameters = ['wdir1', 'wspd1', 'gust1', 'wdir2', 'wspd2', 'gust2',
                   'swvht1', 'swvht1', 'mxwvht1', 'tp1', 'tp2', 'wvdir1',
-                  'wvdir2', 'pres', 'rh', 'atmp', 'sst', 'dewpt', 'cspd1',
-                  'cdir1', 'cspd2', 'cdir2', 'cspd3', 'cdir3']
+                  'wvdir2', 'pres', 'rh', 'atmp', 'sst','compass',
+                  'dewpt', 'cspd1','cdir1', 'cspd2', 'cdir2', 'cspd3', 'cdir3']
 
     for parameter in parameters:
         # missing value checks
@@ -52,7 +52,7 @@ def qualitycontrol(df, buoy):
         # soft range check
         flag_data = qc.range_check_climate(df, limits.climate_limits, flag_data, parameter)
         # soft range check
-        # flag_data = qc.range_check_std(df, limits.std_mean_values, flag_data, parameter)
+       # flag_data = qc.range_check_std(df, limits.std_mean_values, flag_data, parameter)
 
 
 
