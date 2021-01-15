@@ -69,6 +69,8 @@ for id in buoy_id['buoy_id']:
     # Deleting data to replace...
     delete_qc_data(conn_qc, ids_pk)
 
+    bmo_qc_data = check_size_values(bmo_qc_data)
+
     # Inserting new qualified data...
     insert_bmo_qc_data(conn_qc, bmo_qc_data)
 
