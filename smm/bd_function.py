@@ -185,11 +185,11 @@ def get_data_axys(conn, buoy_id, last_date, table, interval_hour):
 
 
 def spotter_txt(df_spotter):
-	df_spotter.to_csv(EMAIL_FILES[0], index = False)
+	df_spotter.to_csv(EMAIL_SPOTTER_FILE, index = False)
 
 
 def bmo_txt(df_bmo):
-	df_bmo.to_csv('dados_bmo_bs1.txt', index = False)
+	df_bmo.to_csv(EMAIL_BMO_FILE, index = False)
 
 
 
