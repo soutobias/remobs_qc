@@ -137,7 +137,7 @@ def range_check_std(var, limits, flag, parameter):
 
     try:
         max_value = limits[parameter][0] + 3 * limits[parameter][1]
-        min_value = limits[parameter][0] + 3 * limits[parameter][1]
+        min_value = limits[parameter][0] - 3 * limits[parameter][1]
 
         flag.loc[(var[parameter] < max_value) & (flag[parameter] == 0), parameter] = 20
         flag.loc[(var[parameter] > min_value) & (flag[parameter] == 0), parameter] = 20
