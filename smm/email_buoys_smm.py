@@ -23,8 +23,8 @@ last_date_spotter = max(file_spotter['Datetime'])
 
 file_bmo = pd.read_csv(EMAIL_BUOYS_FILES[1])
 
-start_date_bmo = min(file_bmo['date_time'])
-last_date_bmo = max(file_bmo['date_time'])
+start_date_bmo = min(file_bmo['Datetime'])
+last_date_bmo = max(file_bmo['Datetime'])
 
 
 
