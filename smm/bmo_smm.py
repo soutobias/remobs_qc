@@ -55,5 +55,8 @@ df_bmo = df_bmo_qc[
 pd.options.mode.chained_assignment = None # default='warn'
 df_bmo['tp2'].loc[df_bmo['tp2'].eq(256)]= np.nan
 
+# date_time to Datetime:
+df_bmo = df_bmo.rename({'date_time':'Datetime'}, axis = 'columns')
+df_bmo = df_bmo.rename({'battery':'Battery'}, axis = 'columns')
 
 bd.bmo_txt(df_bmo)
