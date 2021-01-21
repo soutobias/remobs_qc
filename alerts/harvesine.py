@@ -10,7 +10,7 @@ def radius_buoy(lat, lon, depth):
 
 
 def meters_to_degree(meters_distance, latitude):
-    """Considering distance of 1 degre lat/lon
+    """Considering distance of 1 degree lat/lon
     as 111.111 meters of distance...
     """
 
