@@ -320,3 +320,10 @@ def check_size_values(df):
     df[df[data_cols].eq(-9639)] = -9999
 
     return df
+
+
+def zulu_time(df):
+
+    df.index = df.index + timedelta(hours=3)
+
+    return df
