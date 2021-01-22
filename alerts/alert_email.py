@@ -1,5 +1,5 @@
 
-
+import numpy as np
 from bd_system import db_remo
 from harvesine import *
 
@@ -41,7 +41,7 @@ hav_bmo = haversine(bmo_spot, bmo_local)
 import plotly.express as px
 import plotly.graph_objects as go
 
-pts_bmo = conn.last_positions('BMO', 2, 800)
+pts_bmo = conn.last_positions('BMO', 2, 1000)
 pts_axys = conn.last_positions('AXYS', 1, 200)
 
 
@@ -64,24 +64,38 @@ pts_lon_axys = (pts_axys['lon'].values).astype(np.float)
 #pts_lon_axys = (pts_lon_axys+180)%360 - 180
 
 
-safe_range_bmo_lat, safe_range_bmo_lon = safe_range_circle(float(bmo_spot[0]), float(bmo_spot[1]), 1000)
+safe_range_bmo_lat, safe_range_bmo_lon = safe_range_circle(float(bmo_spot[0]), float(bmo_spot[1]), 1500)
 
 
+
+### BMO PLOT
 ax = plt.axes(projection=ccrs.PlateCarree())
+ax.set(facecolor = "#5ACEFF")
 ax.add_feature(cfeature.LAND)
 ax.add_feature(cfeature.COASTLINE)
-ax.set_xlim(float(pts_bmo['lon'][0])-1, float(pts_bmo['lon'][0])+1)
-ax.set_ylim(float(pts_bmo['lat'][0])-1, float(pts_bmo['lat'][0])+1)
+
+ax.set_xlim(float(pts_bmo['lon'][0])-0.03, float(pts_bmo['lon'][0])+0.03)
+ax.set_ylim(float(pts_bmo['lat'][0])-0.03, float(pts_bmo['lat'][0])+0.03)
 bmo_points = ax.plot(pts_lon_bmo,pts_lat_bmo, c='r', marker='o' ,label = 'BMO')
-axys_point = ax.plot(pts_lon_axys, pts_lat_axys, c = 'b', marker = 'o', label = 'AXYS')
+#axys_point = ax.plot(pts_lon_axys, pts_lat_axys, c = 'b', marker = 'o', label = 'AXYS')
 bmo_fund = ax.plot(bmo_spot[1], bmo_spot[0], c='k', marker = 'x', label = 'BMO_FUNDEIO')
-axys_fund = ax.plot(axys_spot[1], axys_spot[0], c='k', marker = 'x', label = 'AXYS_FUNDEIO')
+#axys_fund = ax.plot(axys_spot[1], axys_spot[0], c='k', marker = 'x', label = 'AXYS_FUNDEIO')
+bmo_now = ax.plot(bmo_local[1], bmo_local[0], c='b', marker = 'h', label = "Current Position BMO")
+bmo_distance = ax.plot([bmo_local[1],bmo_spot[1]], [bmo_local[0],bmo_spot[0]], c='g')
+bmo_text = ax.annotate(str(hav_bmo['meters']) + ' m', xy = ((bmo_local[1] + bmo_spot[1])/2, (bmo_local[0] + bmo_spot[0])/2),
+                                xytext=((bmo_local[1] + bmo_spot[1])/2, (bmo_local[0] + bmo_spot[0])/2),
+                                bbox=dict(boxstyle="round", fc=(0, 0, 0), ec="none"),c = 'w')
 
 ## Radius Safe BMO
-range_bmo = ax.plot(safe_range_bmo_lon, safe_range_bmo_lat,c='k', marker = 'x', label = 'Range_BMO')
+range_bmo = ax.plot(safe_range_bmo_lon, safe_range_bmo_lat,c='k', marker = '.', label = 'Range_BMO')
+fill_range = ax.fill(safe_range_bmo_lon, safe_range_bmo_lat, c='w', alpha=0.3)
+#Estimated center point:
+
+center_bmo = ax.plot(center_lon, center_lat,c='k', marker = '.', label = 'CENTER_BMO')
+
 ax.legend(loc = 'upper left')
 gr = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
-                  linewidth=0.5, color='gray', alpha=0.6, linestyle='--')
+                  linewidth=0.5, color='k', linestyle='--')
 
 gr.top_labels = False
 gr.right_labels = False

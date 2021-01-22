@@ -27,6 +27,9 @@ def safe_range_circle(lat_fundeio, lon_fundeio, radius):
     """Transform the Radius from lat/lon of mooring
     to a vector with 360 points locations in lat/lon,
     showing the limits of the buoy movement range."""
+
+    import numpy as np
+
     pi = math.pi
 
 
@@ -76,10 +79,10 @@ def haversine(coord1: object, coord2: object):
     nm = meters / 1852 # nautic miles
     yard = meters * 1.094
 
-    meters = round(meters, 3)
+    meters = round(meters)
     km = round(km, 3)
-    nm = round(nm, 3)
-    yard = round(yard, 3)
+    nm = round(nm, 1)
+    yard = round(yard, 1)
 
     print(f"Distance: {meters} m")
     print(f"Distance: {km} km")
@@ -108,6 +111,52 @@ def safe_position(radius_safe, distance_from_point):
         situation = ["Buoy on Limit Position", "ON LIMIT"]
 
     return situation
+
+
+
+def find_centroid(lon_points, lat_points):
+
+
+    import numpy as np
+
+    n_points = len(lat_points)
+
+    sum_lon = np.sum(lon_points)
+    sum_lat = np.sum(lat_points)
+
+    center_lon = sum_lon/n_points
+    center_lat = sum_lat/n_points
+
+    return center_lon, center_lat
+
+
+
+
+def find_outer_points(lon_points, lat_points, lat_center, lon_center):
+    '''Find the most outer point for each degree
+    within a circle.'''
+
+    import math
+    pi = math.pi
+
+
+    points = np.linspace(0, 2*pi, 360)
+
+    lat = math.radians(center_lat)
+    lon = math.radians(center_lat)
+    r_radians = math.radians(1)
+
+    circle_points = [(lat + math.sin(x)*r_radians,lon + math.cos(x)*r_radians) for x in points]
+
+    final_coords = []
+    for point in circle_points:
+        lat_point = circle_points[0]
+        lon_point = circle_points[1]
+
+        lat_diff = lat_points - lat_point
+        lon_diff = lon_points - lon_point
+
+        final_lat = max()
 
 
 
