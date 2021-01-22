@@ -320,3 +320,22 @@ def check_size_values(df):
     df[df[data_cols].eq(-9639)] = -9999
 
     return df
+
+
+def zulu_time(df):
+    from datetime import timedelta
+
+    df.index = df.index + timedelta(hours=3)
+
+    return df
+
+
+def get_synoptic_data(df):
+
+    zulu_hours = [0, 3, 6, 9, 12, 15, 18, 21]
+    idx_zulu = df.index.hour.isin(zulu_hours)
+
+    df = df[idx_zulu]
+
+    return df
+

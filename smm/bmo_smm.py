@@ -10,6 +10,20 @@ sys.path.append(bd_path)
 
 import bd_function as bd
 
+# JUST SYNIPTIC DATA WILL BE PUBLIC FOR NOW
+def get_synoptic_data(df):
+
+    zulu_hours = [0, 3, 6, 9, 12, 15, 18, 21]
+    df.set_index('Datetime', inplace=True)
+    idx_zulu = df.index.hour.isin(zulu_hours)
+
+
+
+    df = df[idx_zulu]
+
+    df.reset_index(inplace=True)
+
+    return df
 
 
 conn = bd.conn_qc_db('PRI')
@@ -58,5 +72,14 @@ df_bmo['tp2'].loc[df_bmo['tp2'].eq(256)]= np.nan
 # date_time to Datetime:
 df_bmo = df_bmo.rename({'date_time':'Datetime'}, axis = 'columns')
 df_bmo = df_bmo.rename({'battery':'Battery'}, axis = 'columns')
+
+
+
+
+
+
+df_bmo = get_synoptic_data(df_bmo)
+
+
 
 bd.bmo_txt(df_bmo)

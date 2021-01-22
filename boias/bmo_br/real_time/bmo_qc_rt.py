@@ -66,6 +66,10 @@ for id in buoy_id['buoy_id']:
     # IDs Key values to delete "old" qualified data...
     ids_pk = bmo_qc_data[['id', 'buoy_id']]
 
+    # TRANSFORMING TO ZULU TIME ( LOCAL + 3H )
+
+    bmo_qc_data = zulu_time(bmo_qc_data)
+
     # Deleting data to replace...
     delete_qc_data(conn_qc, ids_pk)
 
