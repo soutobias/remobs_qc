@@ -23,18 +23,23 @@ def meters_to_degree(meters_distance, latitude):
 
 
 
-def safe_range_circle(lat_fundeio, lon_fundeio, radius, n_points):
+def safe_range_circle(lat_fundeio, lon_fundeio, radius):
     """Transform the Radius from lat/lon of mooring
     to a vector with 360 points locations in lat/lon,
     showing the limits of the buoy movement range."""
+    pi = math.pi
+
 
     r, r_lon = meters_to_degree(radius, lat_fundeio)
     lat = math.radians(lat_fundeio)
     lon = math.radians(lon_fundeio)
+    r_radians = math.radians(r)
 
-    pi = math.pi
+    points = np.linspace(0, 2*pi, 360)
 
-    circle_points = [(lat + math.cos(2*pi/x)*r,lon+ math.sin(2*pi/x)*r) for x in range(1, n_points+1)]
+
+
+    circle_points = [(lat + math.sin(x)*r_radians,lon - math.cos(x)*r_radians) for x in points]
 
     # radians to degree
     circle_lat = [(x[0]*180/pi) for x in circle_points]

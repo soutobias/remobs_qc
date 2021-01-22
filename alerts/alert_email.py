@@ -61,17 +61,17 @@ pts_lon_bmo = (pts_bmo['lon'].values).astype(np.float)
 pts_lat_axys = (pts_axys['lat'].values).astype(np.float)
 pts_lon_axys = (pts_axys['lon'].values).astype(np.float)
 
-pts_lon_axys = (pts_lon_axys+180)%360 - 180
+#pts_lon_axys = (pts_lon_axys+180)%360 - 180
 
 
-safe_range_bmo_lat, safe_range_bmo_lon = safe_range_circle(float(bmo_spot[0]), float(bmo_spot[1]), 1000, 360)
+safe_range_bmo_lat, safe_range_bmo_lon = safe_range_circle(float(bmo_spot[0]), float(bmo_spot[1]), 1000)
 
 
 ax = plt.axes(projection=ccrs.PlateCarree())
 ax.add_feature(cfeature.LAND)
 ax.add_feature(cfeature.COASTLINE)
-ax.set_xlim(float(pts_bmo['lon'][0])-3, float(pts_bmo['lon'][0])+3)
-ax.set_ylim(float(pts_bmo['lat'][0])-3, float(pts_bmo['lat'][0])+3)
+ax.set_xlim(float(pts_bmo['lon'][0])-1, float(pts_bmo['lon'][0])+1)
+ax.set_ylim(float(pts_bmo['lat'][0])-1, float(pts_bmo['lat'][0])+1)
 bmo_points = ax.plot(pts_lon_bmo,pts_lat_bmo, c='r', marker='o' ,label = 'BMO')
 axys_point = ax.plot(pts_lon_axys, pts_lat_axys, c = 'b', marker = 'o', label = 'AXYS')
 bmo_fund = ax.plot(bmo_spot[1], bmo_spot[0], c='k', marker = 'x', label = 'BMO_FUNDEIO')
