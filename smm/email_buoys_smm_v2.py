@@ -49,7 +49,7 @@ msg['To'] = EMAIL_TO
 msg.attach(MIMEText(CONTENT))
 
 
-for file in EMAIL_BUOYS_CONTENT:
+for file in EMAIL_BUOYS_FILES:
     name_file = file.split('/')[-1]
 
     print("Attaching %s " % file)
