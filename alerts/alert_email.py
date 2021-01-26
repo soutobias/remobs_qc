@@ -26,7 +26,7 @@ axys_spot = [float(axys_spot['lat']), float(axys_spot['lon'])]
 axys_local_lon = (float(axys_local['lon'])+180)%360 - 180
 axys_local = [float(axys_local['lat']), axys_local_lon]
 
-hav_axys = haversine(axys_spot, axys_local)
+#hav_axys = haversine(axys_spot, axys_local)
 
 
 
@@ -42,7 +42,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 pts_bmo = conn.last_positions('BMO', 2, 1000)
-pts_axys = conn.last_positions('AXYS', 1, 200)
+#pts_axys = conn.last_positions('AXYS', 1, 200)
 
 
 import cartopy.crs as ccrs
@@ -57,26 +57,45 @@ import numpy as np
 pts_lat_bmo = (pts_bmo['lat'].values).astype(np.float)
 pts_lon_bmo = (pts_bmo['lon'].values).astype(np.float)
 
-# AXYS
-pts_lat_axys = (pts_axys['lat'].values).astype(np.float)
-pts_lon_axys = (pts_axys['lon'].values).astype(np.float)
+coords_bmo = [(pts_lon_bmo[p],pts_lat_bmo[p]) for p in range(len(pts_lat_bmo))]
+#
+# # AXYS
+# pts_lat_axys = (pts_axys['lat'].values).astype(np.float)
+# pts_lon_axys = (pts_axys['lon'].values).astype(np.float)
 
 #pts_lon_axys = (pts_lon_axys+180)%360 - 180
 
 
-safe_range_bmo_lat, safe_range_bmo_lon = safe_range_circle(float(bmo_spot[0]), float(bmo_spot[1]), 1500)
+safe_circle, safe_range_bmo_lat, safe_range_bmo_lon = safe_range_circle(float(bmo_spot[0]), float(bmo_spot[1]), 1000)
+
+# Find Center
+center_lon, center_lat = find_centroid(pts_lon_bmo, pts_lat_bmo)
+# Second Center
+center_lon2, center_lat2 = find_centroid(lon_farthest_point, lat_farthest_point)
+
+safe_circle2, safe_range_bmo_lat2, safe_range_bmo_lon2 = safe_range_circle(center_lon2, center_lat2, 1500)
+lon_in, lat_in = find_outer_points(pts_lon_bmo, pts_lat_bmo, bmo_spot[1],bmo_spot[0])
 
 
 
+
+
+
+
+
+##### PLOT
 ### BMO PLOT
 ax = plt.axes(projection=ccrs.PlateCarree())
 ax.set(facecolor = "#5ACEFF")
 ax.add_feature(cfeature.LAND)
 ax.add_feature(cfeature.COASTLINE)
 
-ax.set_xlim(float(pts_bmo['lon'][0])-0.03, float(pts_bmo['lon'][0])+0.03)
-ax.set_ylim(float(pts_bmo['lat'][0])-0.03, float(pts_bmo['lat'][0])+0.03)
-bmo_points = ax.plot(pts_lon_bmo,pts_lat_bmo, c='r', marker='o' ,label = 'BMO')
+ax.set_xlim(float(pts_bmo['lon'][0])-0.08, float(pts_bmo['lon'][0])+0.08)
+ax.set_ylim(float(pts_bmo['lat'][0])-0.08, float(pts_bmo['lat'][0])+0.08)
+#bmo_points = ax.plot(pts_lon_bmo,pts_lat_bmo, c='r', marker='o' ,label = 'BMO')
+#bmo_points_inside = ax.plot(lon_inside, lat_inside, c='r', marker='o' ,label = 'BMO IN')
+## BORDER POINTS
+bmo_points_border = ax.plot(lon_farthest_point, lat_farthest_point, c='r', marker='o' ,label = 'BMO BORDER')
 #axys_point = ax.plot(pts_lon_axys, pts_lat_axys, c = 'b', marker = 'o', label = 'AXYS')
 bmo_fund = ax.plot(bmo_spot[1], bmo_spot[0], c='k', marker = 'x', label = 'BMO_FUNDEIO')
 #axys_fund = ax.plot(axys_spot[1], axys_spot[0], c='k', marker = 'x', label = 'AXYS_FUNDEIO')
@@ -87,11 +106,20 @@ bmo_text = ax.annotate(str(hav_bmo['meters']) + ' m', xy = ((bmo_local[1] + bmo_
                                 bbox=dict(boxstyle="round", fc=(0, 0, 0), ec="none"),c = 'w')
 
 ## Radius Safe BMO
-range_bmo = ax.plot(safe_range_bmo_lon, safe_range_bmo_lat,c='k', marker = '.', label = 'Range_BMO')
+range_bmo = ax.plot(safe_range_bmo_lon2, safe_range_bmo_lat2,c='k', marker = '.', label = 'Range_BMO')
 fill_range = ax.fill(safe_range_bmo_lon, safe_range_bmo_lat, c='w', alpha=0.3)
 #Estimated center point:
 
+
+###
+#far_points = incremental_farthest_search(safe_circle, 2)
+
+
+
 center_bmo = ax.plot(center_lon, center_lat,c='k', marker = '.', label = 'CENTER_BMO')
+center_bmo2 = ax.plot(center_lon2, center_lat2,c='k', marker = '.', label = 'CENTER_BMO2')
+#
+test_circle = ax.plot(circle_lon, circle_lat, c='g', marker='.', label = 'CircleFunc')
 
 ax.legend(loc = 'upper left')
 gr = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,

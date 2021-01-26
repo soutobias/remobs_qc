@@ -3,8 +3,13 @@ import math
 
 
 
-def radius_buoy(lat, lon, depth):
-    return None
+def radius_buoy(lat, lon, local_depth, cable_1, cable_2, tie_1, tie_2):
+
+    total_cable_length = cable_1 + cable_2 + tie_1 + tie_2
+
+    # Pita
+    radius = math.sqrt(total_cable_length**2 - local_depth**2)
+    return radius
 
 
 
@@ -23,7 +28,7 @@ def meters_to_degree(meters_distance, latitude):
 
 
 
-def safe_range_circle(lat_fundeio, lon_fundeio, radius):
+def safe_range_circle(lon_fundeio, lat_fundeio, radius):
     """Transform the Radius from lat/lon of mooring
     to a vector with 360 points locations in lat/lon,
     showing the limits of the buoy movement range."""
@@ -45,10 +50,12 @@ def safe_range_circle(lat_fundeio, lon_fundeio, radius):
     circle_points = [(lat + math.sin(x)*r_radians,lon - math.cos(x)*r_radians) for x in points]
 
     # radians to degree
+
+    circle_coords = [((x[1]*180/pi), (x[0]*180/pi)) for x in circle_points]
     circle_lat = [(x[0]*180/pi) for x in circle_points]
     circle_lon = [(x[1]*180/pi) for x in circle_points]
 
-    return circle_lat, circle_lon
+    return circle_coords, circle_lat, circle_lon
 
 
 
@@ -132,39 +139,92 @@ def find_centroid(lon_points, lat_points):
 
 
 
-def find_outer_points(lon_points, lat_points, lat_center, lon_center):
+def find_outer_points(lon_points, lat_points, lon_center, lat_center):
     '''Find the most outer point for each degree
     within a circle.'''
 
+    from shapely.geometry import Point
+    from shapely.geometry.polygon import Polygon
+
+    import numpy as np
     import math
     pi = math.pi
 
 
     points = np.linspace(0, 2*pi, 360)
 
-    lat = math.radians(center_lat)
-    lon = math.radians(center_lat)
-    r_radians = math.radians(1)
+    lat = math.radians(lat_center)
+    lon = math.radians(lon_center)
+    r_radians = math.radians(0.02)
 
     circle_points = [(lat + math.sin(x)*r_radians,lon + math.cos(x)*r_radians) for x in points]
 
-    final_coords = []
-    for point in circle_points:
-        lat_point = circle_points[0]
-        lon_point = circle_points[1]
+    # radians to degree
+    circle_lat = [(x[0]*180/pi) for x in circle_points]
+    circle_lon = [(x[1]*180/pi) for x in circle_points]
 
-        lat_diff = lat_points - lat_point
-        lon_diff = lon_points - lon_point
+    circle_coords = [(circle_lon[p], circle_lat[p]) for p in range(len(circle_points))]
 
-        final_lat = max()
+    lat_farthest_point = []
+    lon_farthest_point = []
+
+    for point_circle in range(len(circle_coords)):
+        if point_circle == len(circle_points) - 1:
+            break
+
+        pair_points = [circle_coords[point_circle], circle_coords[point_circle + 1]]
+
+        center_point = (lon_center, lat_center)
+        polygon_slice = Polygon([center_point, pair_points[0], pair_points[1]])
+
+        lat_inside = []
+        lon_inside = []
+        distance = []
+
+
+        for lon,lat in zip(lon_points, lat_points):
+
+            POINT = Point(lon,lat)
+            if polygon_slice.contains(POINT):
+                lon_inside.append(lon)
+                lat_inside.append(lat)
+                hav = haversine(center_point , (lon,lat))
+                distance.append(hav['meters'])
+
+        if distance:
+            max_distance_point = max(distance)
+            lat_farthest_point.append(lat_inside[distance.index(max_distance_point)])
+            lon_farthest_point.append(lon_inside[distance.index(max_distance_point)])
+
+
+
+    return lon_farthest_point, lat_farthest_point
 
 
 
 
 
 
+###################
 
+##################
 
+## FUNCAO TESTE ##
 
+def incremental_farthest_search(points, k):
 
+    import random
+    remaining_points = points[:]
+    solution_set = []
+    solution_set.append(remaining_points.pop(\
+                                             random.randint(0, len(remaining_points) - 1)))
+    for _ in range(k-1):
+        distances = [distance(p, solution_set[0]) for p in remaining_points]
+        for i, p in enumerate(remaining_points):
+            for j, s in enumerate(solution_set):
+                distances[i] = min(distances[i], distance(p, s))
+        solution_set.append(remaining_points.pop(distances.index(max(distances))))
+    return solution_set
 
+def distance(A, B):
+    return abs(A - B)
