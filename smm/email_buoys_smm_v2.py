@@ -56,9 +56,9 @@ for file in EMAIL_BUOYS_FILES:
     payload = MIMEBase('application', "octet-stream")
     payload.set_payload(open(file, "rb").read())
     encoders.encode_base64(payload)
-    payload.add_header('Content-Disposition', 'attachment', filename = file)
+    payload.add_header('Content-Disposition', 'attachment', filename = name_file)
     msg.attach(payload)
-    print("%s attached." % file)
+    print("%s attached." % name_file)
 
 
     
