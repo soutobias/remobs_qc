@@ -42,7 +42,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 pts_bmo = conn.last_positions('BMO', 2, 1000)
-#pts_axys = conn.last_positions('AXYS', 1, 200)
+
 
 
 import cartopy.crs as ccrs
@@ -95,7 +95,7 @@ ax.set_ylim(float(pts_bmo['lat'][0])-0.08, float(pts_bmo['lat'][0])+0.08)
 #bmo_points = ax.plot(pts_lon_bmo,pts_lat_bmo, c='r', marker='o' ,label = 'BMO')
 #bmo_points_inside = ax.plot(lon_inside, lat_inside, c='r', marker='o' ,label = 'BMO IN')
 ## BORDER POINTS
-bmo_points_border = ax.plot(lon_farthest_point, lat_farthest_point, c='r', marker='o' ,label = 'BMO BORDER')
+bmo_points_border = ax.plot(lon_in, lat_in, c='r', marker='o' ,label = 'BMO BORDER')
 #axys_point = ax.plot(pts_lon_axys, pts_lat_axys, c = 'b', marker = 'o', label = 'AXYS')
 bmo_fund = ax.plot(bmo_spot[1], bmo_spot[0], c='k', marker = 'x', label = 'BMO_FUNDEIO')
 #axys_fund = ax.plot(axys_spot[1], axys_spot[0], c='k', marker = 'x', label = 'AXYS_FUNDEIO')
@@ -106,7 +106,7 @@ bmo_text = ax.annotate(str(hav_bmo['meters']) + ' m', xy = ((bmo_local[1] + bmo_
                                 bbox=dict(boxstyle="round", fc=(0, 0, 0), ec="none"),c = 'w')
 
 ## Radius Safe BMO
-range_bmo = ax.plot(safe_range_bmo_lon2, safe_range_bmo_lat2,c='k', marker = '.', label = 'Range_BMO')
+range_bmo = ax.plot(safe_range_bmo_lon, safe_range_bmo_lat,c='k', marker = '.', label = 'Range_BMO')
 fill_range = ax.fill(safe_range_bmo_lon, safe_range_bmo_lat, c='w', alpha=0.3)
 #Estimated center point:
 
@@ -117,9 +117,9 @@ fill_range = ax.fill(safe_range_bmo_lon, safe_range_bmo_lat, c='w', alpha=0.3)
 
 
 center_bmo = ax.plot(center_lon, center_lat,c='k', marker = '.', label = 'CENTER_BMO')
-center_bmo2 = ax.plot(center_lon2, center_lat2,c='k', marker = '.', label = 'CENTER_BMO2')
+#center_bmo2 = ax.plot(center_lon2, center_lat2,c='k', marker = '.', label = 'CENTER_BMO2')
 #
-test_circle = ax.plot(circle_lon, circle_lat, c='g', marker='.', label = 'CircleFunc')
+#test_circle = ax.plot(circle_lon, circle_lat, c='g', marker='.', label = 'CircleFunc')
 
 ax.legend(loc = 'upper left')
 gr = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
