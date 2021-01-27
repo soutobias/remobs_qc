@@ -44,7 +44,9 @@ CONTENT = EMAIL_BUOYS_CONTENT.format(start_date_spotter = start_date_spotter,
 msg = MIMEMultipart('alternative')
 msg['Subject'] = EMAIL_BUOYS_SUBJECT
 msg['From'] = EMAIL_FROM
-msg['To'] = EMAIL_TO
+
+
+msg['To'] = ", ".join(EMAIL_TO)
 
 msg.attach(MIMEText(CONTENT))
 
@@ -68,7 +70,7 @@ server.starttls()
 print("Login on Email...")
 server.login(remo_mail, remo_password)
 print("Sending email...")
-server.sendmail(remo_mail, 'ocfgaldino@gmail.com', msg.as_string())
+server.sendmail(remo_mail, EMAIL_TO, msg.as_string())
 print("Done! Email sent!")
 server.quit()
 print("Quit Server and Email.\n Script Finished!")
