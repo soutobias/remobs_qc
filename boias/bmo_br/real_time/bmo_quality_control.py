@@ -109,8 +109,6 @@ def qualitycontrol(df, buoy):
 
     # #Frontal passage exception 4 for time continuity
     #flag_data = qc.front_except_check4(df, flag, 'pres', 'wspd')
-    breakpoint()
-    stop
 
     # #Frontal passage exception 5 for time continuity
     # flag_data["pres"] = qc.front_except_check5(df["pres"], flag_data["pres"])
