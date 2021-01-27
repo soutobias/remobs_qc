@@ -3,13 +3,13 @@ import math
 
 
 
-def radius_buoy(lat, lon, local_depth, cable_1, cable_2, tie_1, tie_2):
+def radius_buoy(local_depth, cable_1, cable_2, tie_1, tie_2):
 
     total_cable_length = cable_1 + cable_2 + tie_1 + tie_2
 
     # Pita
     radius = math.sqrt(total_cable_length**2 - local_depth**2)
-    return radius
+    return round(radius)
 
 
 
