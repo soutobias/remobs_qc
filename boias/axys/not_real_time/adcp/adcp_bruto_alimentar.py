@@ -7,7 +7,7 @@ Created on Tue Oct 14 07:38:43 2014
 
 import re
 import time
-import datetime
+from datetime import *
 import numpy as np
 import operator
 from numpy import *
@@ -35,37 +35,20 @@ os.chdir( user_config.path )
 #
 ##############################################################################
 
-
-def consulta_estacao(boia):
-
-    db = MySQLdb.connect(host = user_config.host,
-                         user = user_config.username,
-                         password = user_config.password,
-                         database = user_config.database)
-
-    cur=db.cursor()
-
-    argosbruto=[]
-    cur.execute("SELECT estacao_id FROm pnboia_estacao wheRe nome='%s'" %boia)
-    for row in cur.fetchall():
-        argosbruto.append(row[:])
-
-    cur.close()
-    db.close()
-
-    return argosbruto[0][0]
-
 filenames=['riogrande','itajai','santos','cabofrio2','vitoria','portoseguro','fortaleza','niteroi']
+ids = [5, 4, 10, 13, 14, 15, 17, 9]
 
 
 dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
 
-for file in filenames:
-    print('adcp_'+file+'.xls')
-    df = pd.read_excel('adcp_'+file+'.xls')
+for i in range(len(filenames)):
 
-    df['data'] = [datetime.datetime.strptime(str(int(df.ano[i])) +  str(int(df.mes[i])).zfill(2) + str(int(df.dia[i])).zfill(2) + str(int(df.hora[i])).zfill(2),'%Y%m%d%H') for i in range(len(df))]
+    print('adcp_' + filenames[i] + '.xls')
+    df = pd.read_excel('adcp/' + filenames[i] + '.xls')
 
+    df['data'] = [datetime.strptime(str(int(df.ano[i])) +  str(int(df.mes[i])).zfill(2) + str(int(df.dia[i])).zfill(2) + str(int(df.hora[i])).zfill(2),'%Y%m%d%H') for i in range(len(df))]
+
+    df['estacao_id'] = ids[i]
 
     df=df.replace(-9999,np.NaN)
     df=df.replace(-99999,np.NaN)
@@ -77,19 +60,15 @@ for file in filenames:
     del df['dia']
     del df['hora']
 
-    estacaoid=consulta_estacao(file)
-
-    df['estacao_id'] = [estacaoid for i in range(len(df))]
-
-    df = df.set_index('data')
-
-    con = sqlalchemy.create_engine('mysql+mysqlconnector://{0}:{1}@{2}/{3}'.
-                                            format(user_config.username,
-                                                user_config.password,
-                                                user_config.host,
-                                                user_config.database))
-
-    df.to_sql(con=con, name='pnboia_adcp_bruto', if_exists='append')
+    df.columns = ['lon', 'lat', 'battery', 'wspd1', 'gust1', 'wdir1', 'wspd2', 'gust2',
+       'wdir2', 'atmp', 'rh', 'dewpt', 'pres', 'sst', 'compass', 'arad',
+       'cspd1', 'cdir1', 'cspd2', 'cdir2', 'cspd3', 'cdir3', 'swvht', 'mxwhht',
+       'tp', 'wvdir', 'wvspread', 'date_time', 'buoy_id']
 
 
+    print("Inserting on database...")
+
+    axys_database.insert_raw_old_data_bd(df)
+
+    print("\nScript Finished!")
 

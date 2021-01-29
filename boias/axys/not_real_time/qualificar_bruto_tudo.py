@@ -44,13 +44,13 @@ from pnboia_adjusted_data import *
 
 def rename_merge(data, flag):
 
-    data['swvht1'] = data['swvht1']
+    data['swvht1'] = data['swvht']
     data['mxwvht1'] = data['mxwvht']
     data['tp1'] = data['tp']
     data['wvdir1'] = data['wvdir']
     data['wvspread1'] = data['wvspread']
 
-    del data['swvht1']
+    del data['swvht']
     del data['mxwvht']
     del data['tp']
     del data['wvdir']
