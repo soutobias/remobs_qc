@@ -56,6 +56,12 @@ __pycache__/
 historico*.txt
 simcosta_estacao.csv
 
+# arquivos python
+alimentar_estacao.py
+*.xls
+*.xlsx
+
+
 # Files txt SMM
 smm_spotter_operantar.txt
 # Token Gmail Api

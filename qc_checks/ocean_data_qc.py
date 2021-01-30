@@ -646,251 +646,44 @@ def hsts_check(var, flag, swvht_name, mean_tp_name):
 #########################################################################################
 
 
-def tcontinuityadcpcheck(Epoch,var,flag,idf,flag_dir,idf_dir):
+def t_continuity_adcp_check(var, sigma, limit, flag, parameter):
+
+    flag['tmp_forward'] = 0
+    flag['tmp_backward'] = 0
+
+    for counter in range(len(var)):
+        value = var.loc[(var.index >= var.index[counter]) & (var.index <= var.index[counter] + pd.to_timedelta(limit, unit='h')) & (flag[parameter] == 0), parameter]
+        if value.size > 1:
+            forward_values = np.array(value - value[0])
+            backward_values = np.array(value - value[-1])
+            delta_times_forward = np.array(value.index - value.index[0])/(10**9)/3600
+            delta_times_backward = np.array(value.index - value.index[-1])/(10**9)/3600
+            times = np.array(value.index)
+            for i in range(len(delta_times_forward) - 1):
+                if int(delta_times_forward[i + 1]) == 1:
+                    threeshold = sigma["um"]
+                elif int(delta_times_forward[i + 1]) == 2:
+                    threeshold = sigma["dois"]
+                elif int(delta_times_forward[i + 1]) == 3:
+                    threeshold = sigma["tres"]
+                if threeshold[0] < abs(forward_values[i + 1]):
+                    flag.loc[(times[i]), "tmp_forward"] = 1
+                if threeshold[1] < abs(forward_values[i + 1]):
+                    flag.loc[(times[i]), "tmp_forward"] = 2
+                if threeshold[0] < abs(backward_values[i]):
+                    flag.loc[(times[i]), "tmp_backward"] = 1
+                if threeshold[1] < abs(backward_values[i]):
+                    flag.loc[(times[i]), "tmp_backward"] = 2
 
 
-    fwd_ep_gd,bck_ep_gd = float(Epoch[0]),float(Epoch[-1])
-    fwd_gd,bck_gd = var[0],var[-1]
-    fwd_gdf,bck_gdf = flag[0],flag[-1]
-    fwsp_qc,bksp_qc = [0]*len(Epoch),[0]*len(Epoch)
+    flag.loc[(flag["tmp_backward"] == 1) | (flag["tmp_forward"] == 1), parameter] = 10
+    flag.loc[(flag["tmp_backward"] == 2) & (flag["tmp_forward"] != 1), parameter] = 61
+    flag.loc[(flag["tmp_backward"] != 1) & (flag["tmp_forward"] == 2), parameter] = 61
 
-    for i in range(1,len(Epoch)):
-        delta_Epoch = abs(float(Epoch[i]) - fwd_ep_gd)
-        deltacurrent= abs(float(var[i]) - float(fwd_gd))
-        if delta_Epoch== 3600*3 and flag[i]!= 4 and fwd_gdf!=4:
-            if deltacurrent>249.6:
-                fwsp_qc[i] = 4
-                flag[i] = 4
-            elif deltacurrent>213.9:
-                fwsp_qc[i] = 3
-                flag[i] = 3
-            else:
-                fwsp_qc[i] = 1
-                fwd_gd = var[i]
-                fwd_ep_gd = float(Epoch[i])
-                fwd_gdf=flag[i]
-                continue
-        elif delta_Epoch== 3600*2 and flag[i]!= 4 and fwd_gdf!=4:
-            if deltacurrent>193.5:
-                fwsp_qc[i] = 4
-                flag[i] = 4
-            elif deltacurrent>165.9:
-                fwsp_qc[i] = 3
-                flag[i] = 3
-            else:
-                fwsp_qc[i] = 1
-                fwd_gd = var[i]
-                fwd_ep_gd = float(Epoch[i])
-                fwd_gdf=flag[i]
-                continue
-        elif delta_Epoch== 3600*1 and flag[i]!= 4 and fwd_gdf!=4:
-            if deltacurrent>131.4:
-                fwsp_qc[i] = 4
-                flag[i] = 4
-            elif deltacurrent>112.6:
-                fwsp_qc[i] = 3
-                flag[i] = 3
-            else:
-                fwsp_qc[i] = 1
-                fwd_gd = var[i]
-                fwd_ep_gd = float(Epoch[i])
-                fwd_gdf=flag[i]
-                continue
-        else:
-            fwd_gd = var[i]
-            fwd_ep_gd = float(Epoch[i])
-            fwd_gdf=flag[i]
-            continue
+    del flag['tmp_forward']
+    del flag['tmp_backward']
 
-    for i in range(-2,-len(Epoch),-1):
-        delta_Epoch = abs(float(Epoch[i]) - int(bck_ep_gd))
-        deltacurrent= abs(float(var[i]) - float(bck_gd))
-        if delta_Epoch == 3600*3 and flag[i] != 4 and bck_gdf!=4:
-            if deltacurrent>249.6:
-                bksp_qc[i] = 4
-            elif deltacurrent>213.9:
-                bksp_qc[i] = 3
-            else:
-                bksp_qc[i] = 1
-                bck_gd = var[i]
-                bck_ep_gd = float(Epoch[i])
-                bck_gdf=flag[i]
-        elif delta_Epoch == 3600*2 and flag[i] != 4 and bck_gdf!=4:
-            if deltacurrent>193.5:
-                bksp_qc[i] = 4
-            elif deltacurrent>165.9:
-                bksp_qc[i] = 3
-            else:
-                bksp_qc[i] = 1
-                bck_gd = var[i]
-                bck_ep_gd = float(Epoch[i])
-                bck_gdf=flag[i]
-        elif delta_Epoch == 3600*1 and flag[i] != 4 and bck_gdf!=4:
-            if deltacurrent>131.4:
-                bksp_qc[i] = 4
-            elif deltacurrent>112.6:
-                bksp_qc[i] = 3
-            else:
-                bksp_qc[i] = 1
-                bck_gd = var[i]
-                bck_ep_gd = float(Epoch[i])
-                bck_gdf=flag[i]
-        else:
-            bck_gd = var[i]
-            bck_ep_gd = float(Epoch[i])
-            bck_gdf=flag[i]
-
-    #TODO: Might consider a toggle since you want to be able to run this in realtime.
-    #OK
-    for i in range(0, len(Epoch)):
-        if fwsp_qc[i] == 4 or bksp_qc[i] == 4:
-            flag[i] = 4
-            idf[i]='10'
-            flag_dir[i]=4
-            idf_dir[i]='10'
-
-        elif fwsp_qc[i] == 3 or bksp_qc[i] == 3:
-            flag[i] = 3
-            idf[i]='61'
-            flag_dir[i]=3
-            idf_dir[i]='61'
-
-        else:
-            continue
-
-
-    return flag,idf, flag_dir, idf_dir
-
-
-
-
-########################################################################################
-# Time continuity adcp
-# Check is to verify if the data has consistency in the time
-#
-# Required input:
-# - Epoch: Data/Time in Epoch date
-# - var: variable
-# - flag: matrix of flag for the variable
-# - sigma: value for the contnuity equation (normally, is related to std deviation)
-# - idf= flag id. '8' --> letter that represents the flag
-# - rt: toggle for RTQC. If it is 0, RTQC
-#
-# Required checks: Range Check, Missing value check, Stuck Sensor check
-#
-# Return: flag,idf
-#########################################################################################
-
-
-def currentgradientcheck(Epoch,var,flag,sigma,idf,rt):
-
-
-    fwd_ep_gd,bck_ep_gd = float(Epoch[0]),float(Epoch[-1])
-    fwd_gd,bck_gd = var[0],var[-1]
-    fwd_gdf,bck_gdf = flag[0],flag[-1]
-    fwsp_qc,bksp_qc = [0]*len(Epoch),[0]*len(Epoch)
-
-    for i in range(1,len(Epoch)):
-        delta_Epoch = abs(float(Epoch[i]) - fwd_ep_gd)
-        deltacurrent= abs(float(var[i]) - float(fwd_gd))
-        if delta_Epoch== 3600*3 and flag[i]!= 4 and fwd_gdf!=4:
-            if deltacurrent>24.96:
-                fwsp_qc[i] = 4
-                flag[i] = 4
-            elif deltacurrent>21.39:
-                fwsp_qc[i] = 3
-                flag[i] = 3
-            else:
-                fwsp_qc[i] = 1
-                fwd_gd = var[i]
-                fwd_ep_gd = float(Epoch[i])
-                fwd_gdf=flag[i]
-                continue
-        elif delta_Epoch== 3600*2 and flag[i]!= 4 and fwd_gdf!=4:
-            if deltacurrent>19.35:
-                fwsp_qc[i] = 4
-                flag[i] = 4
-            elif deltacurrent>16.59:
-                fwsp_qc[i] = 3
-                flag[i] = 3
-            else:
-                fwsp_qc[i] = 1
-                fwd_gd = var[i]
-                fwd_ep_gd = float(Epoch[i])
-                fwd_gdf=flag[i]
-                continue
-        elif delta_Epoch== 3600*1 and flag[i]!= 4 and fwd_gdf!=4:
-            if deltacurrent>13.14:
-                fwsp_qc[i] = 4
-                flag[i] = 4
-            elif deltacurrent>11.26:
-                fwsp_qc[i] = 3
-                flag[i] = 3
-            else:
-                fwsp_qc[i] = 1
-                fwd_gd = var[i]
-                fwd_ep_gd = float(Epoch[i])
-                fwd_gdf=flag[i]
-                continue
-        else:
-            fwd_gd = var[i]
-            fwd_ep_gd = float(Epoch[i])
-            fwd_gdf=flag[i]
-            continue
-
-    for i in range(-2,-len(Epoch),-1):
-        delta_Epoch = abs(float(Epoch[i]) - int(bck_ep_gd))
-        deltacurrent= abs(float(var[i]) - float(bck_gd))
-        if delta_Epoch == 3600*3 and flag[i] != 4 and bck_gdf!=4:
-            if deltacurrent>24.96:
-                bksp_qc[i] = 4
-            elif deltacurrent>21.39:
-                bksp_qc[i] = 3
-            else:
-                bksp_qc[i] = 1
-                bck_gd = var[i]
-                bck_ep_gd = float(Epoch[i])
-                bck_gdf=flag[i]
-        elif delta_Epoch == 3600*2 and flag[i] != 4 and bck_gdf!=4:
-            if deltacurrent>19.35:
-                bksp_qc[i] = 4
-            elif deltacurrent>16.59:
-                bksp_qc[i] = 3
-            else:
-                bksp_qc[i] = 1
-                bck_gd = var[i]
-                bck_ep_gd = float(Epoch[i])
-                bck_gdf=flag[i]
-        elif delta_Epoch == 3600*1 and flag[i] != 4 and bck_gdf!=4:
-            if deltacurrent>13.14:
-                bksp_qc[i] = 4
-            elif deltacurrent>11.26:
-                bksp_qc[i] = 3
-            else:
-                bksp_qc[i] = 1
-                bck_gd = var[i]
-                bck_ep_gd = float(Epoch[i])
-                bck_gdf=flag[i]
-        else:
-            bck_gd = var[i]
-            bck_ep_gd = float(Epoch[i])
-            bck_gdf=flag[i]
-
-    #TODO: Might consider a toggle since you want to be able to run this in realtime.
-    #OK
-    for i in range(0, len(Epoch)):
-        if fwsp_qc[i] == 4 or bksp_qc[i] == 4:
-            flag[i] = 4
-            idf[i]='10'
-        elif fwsp_qc[i] == 3 or bksp_qc[i] == 3:
-            flag[i] = 3
-            idf[i]='61'
-        else:
-            continue
-
-
-    return flag,idf
-
+    return flag
 
 ###############################################################################
 # IN CONSTRUCTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

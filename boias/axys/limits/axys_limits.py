@@ -3,9 +3,9 @@ range_axys_limits = {
     "mxwvht": [0.1, 19.9],
     "tp": [1.7, 30],
     "wvdir": [0, 360],
-    "wspd": [0.1, 59],
-    "wdir": [0, 360],
-    "gust": [0.1, 59],
+    "wspd1": [0.1, 59],
+    "wdir1": [0, 360],
+    "gust1": [0.1, 59],
     "wspd2": [0.1, 59],
     "wdir2": [0, 360],
     "gust2": [0.1, 59],
@@ -32,6 +32,13 @@ sigma_axys_limits = {
     "sst": 8.6,
     }
 
+sigma_adcp_limits = {
+    "um": [132, 113],
+    "dois": [194, 166],
+    "tres": [250, 214]
+    }
+
+
 mis_value_axys_limits = {
     "rh": 11,
     "cspd1": 409.5,
@@ -54,8 +61,8 @@ climate_axys_limits = {
     "wwht": [0, 15],
     "mxwvht": [0, 19],
     "tp": [1.7, 20],
-    "wspd": [0, 59],
-    "gust": [0, 59],
+    "wspd1": [0, 59],
+    "gust1": [0, 59],
     "wspd2": [0, 59],
     "gust2": [0, 59],
     "atmp": [-8, 42],
@@ -75,8 +82,8 @@ std_mean_values = {
     "wwht": [0, 15],
     "mxwvht": [0, 19],
     "tp": [1.7, 20],
-    "wspd": [0, 59],
-    "gust": [0, 59],
+    "wspd1": [0, 59],
+    "gust1": [0, 59],
     "wspd2": [0, 59],
     "gust2": [0, 59],
     "atmp": [-8, 42],

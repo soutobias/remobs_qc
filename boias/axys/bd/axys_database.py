@@ -108,7 +108,9 @@ def working_buoys(server):
 
 
 
-def all_buoys(user_config):
+def all_buoys():
+
+    import psycopg2.extras
 
     db = connect_db(user_config)
 
@@ -380,4 +382,84 @@ def insert_axys_qc_data(qc_data, user_config):
     print("Commited!")
 
     return
+
+
+
+
+def insert_raw_old_data_bd(raw_data):
+
+    from sqlalchemy import create_engine
+
+    user = USER_RAW
+    passw = PASSWORD_RAW
+    host = HOST_RAW
+    db = DATABASE_RAW
+
+    engine = create_engine(f'postgres+psycopg2://{user}:{passw}@{host}/{db}')
+
+    raw_data.to_sql(con=engine, name='pnboia_general', if_exists='append')
+
+    print('data inserted')
+
+
+
+def get_old_data_db(buoy):
+
+    db = connect_db("PRI")
+
+    sql = "SELECT * FROM pnboia_general WHERE buoy_id = %s ORDER BY date_time" % (buoy)
+
+    general_data = pd.read_sql_query(sql, db)
+
+    db.close()
+
+    return general_data
+
+
+def insert_pnboia_qc_data(df):
+
+    from sqlalchemy import create_engine
+
+    user = USER_QC
+    passw = PASSWORD_QC
+    host = HOST_QC
+    db = DATABASE_QC
+
+    engine = create_engine(f'postgres+psycopg2://{user}:{passw}@{host}/{db}')
+
+    df.to_sql(con=engine, name='data_buoys', if_exists='append')
+
+    print('data inserted')
+
+
+def old_buoys():
+
+    import psycopg2.extras
+
+    db = connect_db("PRI")
+
+    cur=db.cursor(cursor_factory = psycopg2.extras.DictCursor)
+
+    sql = "SELECT * FROM buoys WHERE buoy_id >= 4 \
+        ORDER BY buoy_id"
+    cur.execute(sql)
+
+    buoys = []
+    for row in cur.fetchall():
+        buoys.append(row)
+
+    return buoys
+
+def delete_qc_pnboia_old_data(initial_time, buoy, server):
+
+    db = conn_qc_db(server)
+
+    cur=db.cursor()
+
+    cur.execute("DELETE FROM data_buoys WHERE date_time>='%s' AND buoy_id = '%s'"% (initial_time, buoy))
+    # cur.execute("SELECT wmo FROm deriva_estacao")
+    db.commit()
+    cur.close()
+
+    db.close()
 

@@ -64,36 +64,41 @@ def rename_merge(data, flag):
     return pd.merge(data, flag, left_index=True, right_index=True, how='outer')
 
 buoys = axys_database.old_buoys()
-
+id = 102012
 for buoy in buoys:
-    print(buoy["name_buoy"])
+    if buoy["name_buoy"] != "itaguai":
+        print(buoy["name_buoy"])
 
 
-    raw_data = axys_database.get_old_data_db(buoy["buoy_id"])
+        raw_data = axys_database.get_old_data_db(buoy["buoy_id"])
 
 
-    raw_data = raw_data.replace([-9999, 9999, 99.99, None, "-9999", "-99999", '', '99.99', '-9999.0', -9999.0, -9999] , np.NaN)
+        raw_data = raw_data.replace([-9999, 9999, 99.99, None, "-9999", "-99999", '', '99.99', '-9999.0', -9999.0, -9999] , np.NaN)
 
-    raw_data.set_index("date_time", inplace = True)
+        raw_data.set_index("date_time", inplace = True)
 
-    print("Qualifying General Data...")
+        print("Qualifying General Data...")
 
-    (flag_data, qc_data) = qualitycontrol(raw_data, buoy)
-    qc_data = rotate_data(qc_data, flag_data, buoy)
+        (flag_data, qc_data) = qualitycontrol(raw_data, buoy)
+        qc_data = rotate_data(qc_data, flag_data, buoy)
 
-    qc_data = rename_merge(qc_data, flag_data)
+        qc_data = rename_merge(qc_data, flag_data)
 
-    print("Deleting old Qualified Data...")
-    axys_database.delete_qc_pnboia_old_data(str(qc_data.index[0]), buoy["buoy_id"], 'PRI')
+        print("Deleting old Qualified Data... and get last ID")
+        axys_database.delete_qc_pnboia_old_data(str(qc_data.index[0]), buoy["buoy_id"], 'PRI')
 
-    qc_data.reset_index().set_index(["date_time"])
 
-    del qc_data['id']
 
-    print("Inserting data on database...")
-    axys_database.insert_pnboia_qc_data(qc_data)
+        qc_data.reset_index().set_index(["date_time"])
 
-    print("Script Finished!")
+        del qc_data['id']
+        qc_data['id'] = [*range(id,id + len(qc_data))]
+        id += len(qc_data)
+
+        print("Inserting data on database...")
+        axys_database.insert_pnboia_qc_data(qc_data)
+
+        print("Script Finished!")
 
 
 # dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d %H:%M:%S')

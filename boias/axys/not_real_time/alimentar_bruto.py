@@ -27,18 +27,6 @@ import user_config as user_config
 
 import axys_database
 
-
-
-def bancodedados():
-
-    local="pnboia-uol.mysql.uhserver.com"
-    usr="pnboia"
-    password="Ch@tasenha1"
-    data_base="pnboia_uol"
-
-    return local,usr,password,data_base
-
-
 filenames=['it','rg','ocas','itaoca','itaguai','ni','sa','cf','minuano','cf2','vi','po','re','fo']
 ids = [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
 
@@ -48,7 +36,9 @@ ids = [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
 #filenames=['re','fo']
 
 dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
+
 x=1
+
 for i in range(len(filenames)):
     print(filenames[i]+'.xls')
     df = pd.read_excel('dados/' + filenames[i] + '.xls')
