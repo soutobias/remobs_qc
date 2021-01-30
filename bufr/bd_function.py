@@ -64,12 +64,12 @@ def get_bufr_data(buoy, last_date, conn):
 
     if last_date == 1:
         sql = "SELECT * FROM data_buoys INNER JOIN buoys ON \
-        data_buoys.id_buoy = buoys.id_boia WHERE data_buoys.id_buoy = %s \
+        data_buoys.buoy_id = buoys.id WHERE data_buoys.buoy_id = %s \
         ORDER BY date_time DESC limit 1" % (buoy)
 
     else:
         sql = "SELECT * FROM data_buoys INNER JOIN buoys ON \
-        data_buoys.id_buoy = buoys.id_boia WHERE data_buoys.id_buoy = %s \
+        data_buoys.buoy_id = buoys.id WHERE data_buoys.buoy_id = %s \
         AND data_buoys.date_time > '%s' \
         ORDER BY date_time DESC" % (buoy, last_date)
 
