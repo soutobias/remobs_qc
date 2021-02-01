@@ -25,7 +25,7 @@ def rotate_data(conn, df, flag, buoy_id):
 
     df.loc[flag['wdir'] == 0, "wdir"] = df['wdir'] + df['tmp_dec']
     df.loc[df["wdir"] < 0, "wdir"] = df["wdir"] + 360
-     df.loc[df["wdir"] > 360, "wdir"] = df["wdir"] - 360
+    df.loc[df["wdir"] > 360, "wdir"] = df["wdir"] - 360
 
     df.loc[flag['pk_dir'] == 0, 'pk_dir'] = df['pk_dir'] + df['tmp_dec']
     df.loc[df['pk_dir'] < 0, 'pk_dir'] = df['pk_dir'] + 360
