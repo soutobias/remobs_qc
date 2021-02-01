@@ -8,7 +8,10 @@ import sys
 import os
 home_path = os.environ['HOME']
 cwd_path = home_path + '/remobs_qc/boias/bmo_br/real_time/'
+print(cwd_path)
 bd_path = home_path + '/remobs_qc/boias/bmo_br/bd'
+
+
 
 sys.path.append(cwd_path)
 sys.path.append(bd_path)

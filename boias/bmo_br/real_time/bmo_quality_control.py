@@ -105,7 +105,6 @@ def qualitycontrol(df, buoy):
     flag_data = qc.front_except_check3(df, flag_data, "wspd", "atmp")
 
 
-
     # stop
 
     # #Frontal passage exception 4 for time continuity

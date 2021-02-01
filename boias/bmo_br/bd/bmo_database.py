@@ -350,7 +350,7 @@ def insert_triaxys_message(conn, triaxys_message, buoy_id):
 
 
          query_insert = """INSERT INTO  bmo_triaxys_message (buoy_id, date_time,
-                            triaxys_message) VALUES 
+                            triaxys_message) VALUES
                             (%(buoy_id)s, %(date_time)s, %(message)s);"""
 
 
@@ -757,3 +757,30 @@ def delete_qc_data(conn_qc, pks):
         print("Transaction Cancelled. No data deleted.")
 
     return
+
+
+def delete_triaxys_old_data(initial_time, buoy, conn):
+
+    cur = conn.cursor()
+
+    cur.execute("DELETE FROM bmo_triaxys WHERE date_time>='%s' AND buoy_id = '%s'"% (initial_time, buoy))
+    # cur.execute("SELECT wmo FROm deriva_estacao")
+    conn.commit()
+    cur.close()
+
+def insert_triaxys_data(df):
+
+    from sqlalchemy import create_engine
+    import pandas as pd
+
+    user = USER_RAW
+    passw = PASSWORD_RAW
+    host = HOST_RAW
+    db = DATABASE_RAW
+
+    engine = create_engine(f'postgres+psycopg2://{user}:{passw}@{host}/{db}')
+
+
+    df.to_sql(con=engine, name='bmo_triaxys', if_exists='append', index=False)
+
+    print("inserted new data")
