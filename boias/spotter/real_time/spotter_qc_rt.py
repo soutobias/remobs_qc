@@ -29,6 +29,10 @@ for buoy_id in spotters_on_ids['buoy_id']:
     print(f"Starting Data Qualification for Spotter Buoy {buoy_id}")
     print("\n"*2)
 
+    if conn.closed == 1:
+        conn = connect_database_remo("PRI")
+
+
     last_date = check_last_date(conn, 'spotter_general', buoy_id)
     last_date = last_date[0][0]
 

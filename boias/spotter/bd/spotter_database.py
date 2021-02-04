@@ -338,7 +338,7 @@ def delete_qc_data(conn_qc, pks_df):
 
     try:
         cursor.execute(query)
-        print(f"Row with IDs ({*ids_pk,}) deleted from Qualified database")
+        print(f"Row with IDs ({*ids_pk,}) from buoy_id {buoy_id} deleted from Qualified database")
 
     except Exception as err:
         print(err)
