@@ -56,11 +56,14 @@ for i in range(len(buoys)):
         name_buoy = df["name_buoy"][0] + "_" + datetime.now().strftime("%Y%m%d%H0000") + '.bufr'
 
         encoder = Encoder()
-
         bufr_message_new = encoder.process(bufr_message)
-        with open(name_buoy, 'wb') as outs:
+        with open(name_buoy + ".bufr", 'wb') as outs:
             outs.write(bufr_message_new.serialized_bytes)
 
         print('BUFR file created for buoy ' + buoys['name_buoy'][i] + '!')
+
+        add_preamble = "pybufrkit decode %s.bufr | pybufrkit encode - %s_1.bufr --preamble $'IOBI02 SBBR %s\r\r\n'" % (name_buoy, name_buoy, datetime.now().strftime("%d%H00"))
+        download_status = os.system(add_preamble)
+        print('BUFR preamble added!')
     except:
         print('Can not create BUFR file for buoy ' + buoys['name_buoy'][i] + '!')
