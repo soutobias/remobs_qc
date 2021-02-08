@@ -54,11 +54,30 @@ for i in range(len(buoys)):
 
     bufrString = bufrString + ''.join(Section0)
 
+<<<<<<< refs/remotes/origin/bufr-new
     print(bufrString)
+=======
+        print(bufr_message)
+        name_buoy = df["name_buoy"][0] + "_" + datetime.now().strftime("%Y%m%d%H0000")
+>>>>>>> local
 
     name_buoy = df["name_buoy"][0] + "_" + datetime.now().strftime("%Y%m%d%H0000")
 
+<<<<<<< refs/remotes/origin/bufr-new
     bufr_message = open(name_buoy, 'w')
 
     bufr_message.write(bufrString)
     bufr_message.close()
+=======
+        bufr_message_new = encoder.process(bufr_message)
+        with open(name_buoy + ".bufr", 'wb') as outs:
+            outs.write(bufr_message_new.serialized_bytes)
+
+        print('BUFR file created for buoy ' + buoys['name_buoy'][i] + '!')
+
+        add_preamble = "pybufrkit decode %s.bufr | pybufrkit encode - %s_1.bufr --preamble $'IOBI02 SBBR %s\r\r\n'" % (name_buoy, name_buoy, datetime.now().strftime("%d%H00"))
+        download_status = os.system(add_preamble)
+        print('BUFR preamble added!')
+    except:
+        print('Can not create BUFR file for buoy ' + buoys['name_buoy'][i] + '!')
+>>>>>>> local
