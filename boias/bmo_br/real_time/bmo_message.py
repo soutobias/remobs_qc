@@ -92,7 +92,7 @@ def message_bmo(df):
     import re
 
     # Dataframe columns
-    columns_bmo = ['id_buoy', 'year', 'month', 'day', 'hour', 'minute',
+    columns_bmo = ['buoy_id', 'year', 'month', 'day', 'hour', 'minute',
                    'latitude',
                    'longitude', 'battery', 'wspd1', 'gust1', 'wdir1',
                    'wspd2', 'gust2', 'wdir2', 'atmp', 'rh', 'dewpt',

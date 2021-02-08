@@ -1,37 +1,17 @@
 """
-Spyder Editor
+Python Version tested: Python 3 or greater
 
-Python Version tested: Python 2.7.3
+Required Dependencies: Numpy, time, math, pandas
 
-Required Dependencies: Numpy, time
-
-Description: This module is designed to take Standard Meteorogical Data from
-NDBC website in form of time, Wdir, Wspd, Gst, swvht, Dpd, Apd, Mwd, Pres, Atmp,
-Wtmp, dewpt, Vis and Tide, and perform QC checks based on NDBC's "Handbook of
-Automated Data Quality Control Checks and Procedures". Each check generates a QC
-table for the archive used, following the QC Numbering.
-5 indicates that the time listed is not valid and is in the future.
-
-Required Input: EPOCH Time, swvht(m), Dpd(s), Apd(s), Mwd(degrees)
-
-Checks Performed:
-    Valid Time
-    Range Limits
-    Climatological Range Limits
-    Standard Time Continuity
-    Stuck Sensor
-    Wave Height Verses Average Wave Period
+Description: This module is designed to QC data colected by Fixed Station
+(buoys, weather station). QC is based on "Manual de Controle de Qualidade de Dados
+do PNBOIA". Each check generates a flag number. Depending the number of the flag,
+the data is considered good, suspicious or bad
 
 Flag Convention as follows:
- 0 = no QC performed
- 1 = good data
- 2 = prob. good
- 3 = prob. bad
- 4 = bad data
- 5 = invalid time
- 6 = unused
- 7 = unused
- 8 = interpolated value (unused but planned)
+ 0 = good data or no QC performed
+ 1 - 50 = hard flag data. Bad data
+ 51 - 99 = soft flag data. Suspicious data
 
 Author: Tobias Ferreira
 Organization: Brazilian Navy, BR
@@ -53,15 +33,15 @@ import pandas as pd
 # Flag the missing (MISVALUE) or None values
 #
 # Required input:
-# - Epoch: Data/Time in Epoch date
-# - var: variable that will be checked
-# - misvalue: missing value for the var
-# - flag: matrix of flag for the variable
-# - idf= flag id. '53' --> letter that represents the flag
+# - parameter: name of variable that will be checked
+# - limits: dataframe with missing values limits
+# - flag: dataframe for flag
+# - var: dataframe for variables
 #
 # Required checks: None
 #
-# Return: flag, idf
+# Return: flag
+# Represented by number "1" -> HARD FLAG
 ###############################################################################
 
 def mis_value_check(var, limits, flag, parameter):
@@ -83,15 +63,15 @@ def mis_value_check(var, limits, flag, parameter):
 # Check to ensure values are within global and equipment ranges (LIMITS)
 #
 # Required input:
-# - Epoch: Data/Time in Epoch date
-# - var: variable that will be checked
-# - limits: [lower limit,upper limit]
-# - flag: matrix of flag for the variable
-# - idf= flag id. 'L' --> letter that represents the flag
+# - parameter: name of variable that will be checked
+# - limits: dataframe with range check limits
+# - flag: dataframe for flag
+# - var: dataframe for variables
 #
 # Required checks: Missing value check
 #
-# Return: flag, idf
+# Return: flag
+# Represented by number "2" -> HARD FLAG
 ###############################################################################
 
 def range_check(var, limits, flag, parameter):
@@ -112,15 +92,15 @@ def range_check(var, limits, flag, parameter):
 # Check to ensure values are within brazil ranges (LIMITS)
 #
 # Required input:
-# - Epoch: Data/Time in Epoch date
-# - var: variable that will be checked
-# - limits: [lower limit,upper limit]
-# - flag: matrix of flag for the variable
-# - idf= flag id. 'L' --> letter that represents the flag
+# - parameter: name of variable that will be checked
+# - limits: dataframe with climate range check limits
+# - flag: dataframe for flag
+# - var: dataframe for variables
 #
-# Required checks: Missing value check
+# Required checks: Missing value check, range check
 #
-# Return: flag, idf
+# Return: flag
+# Represented by number "9" -> HARD FLAG
 ###############################################################################
 
 def range_check_climate(var, limits, flag, parameter):
@@ -133,39 +113,22 @@ def range_check_climate(var, limits, flag, parameter):
 
     return flag
 
-def range_check_std(var, limits, flag, parameter):
-
-    try:
-        max_value = limits[parameter][0] + 3 * limits[parameter][1]
-        min_value = limits[parameter][0] + 3 * limits[parameter][1]
-
-        flag.loc[(var[parameter] < max_value) & (flag[parameter] == 0), parameter] = 20
-        flag.loc[(var[parameter] > min_value) & (flag[parameter] == 0), parameter] = 20
-    except:
-        print("No std value for " + parameter)
-
-    return flag
-
-    #####################
-    #end Range Check section
-
 
 ###############################################################################
 # Wave Significant Height x Wave Max Height
 # Compares if the values of wind speed is higher than Gust.
 #
 # Required input:
-# - Epoch: Data/Time in Epoch date
-# - swvht: wave significant height
-# - mxwvht: max wave height
-# - flagv: matrix of flag for swvht
-# - idfv= flag id for swvht. '4' --> letter that represents the flag
-# - flagm: matrix of flag for mxwvht
-# - idfm= flag id for mxwvht. '4' --> letter that represents the flag
+# - swvht_name: name used in the dataframe for Wave Significance Height
+# - mxwvht_name: name used in the dataframe for Maximun Wave Height
+# - flag: dataframe for flag
+# - var: dataframe for variables
 #
-# Required checks: Range Check, Missing value check
 #
-# Return: flagv,flagm,idfv,idfm
+# Required checks: Missing value check, range check, range check climate
+#
+# Return: flag
+# Represented by number "4" -> HARD FLAG
 ###############################################################################
 
 
@@ -186,17 +149,15 @@ def swvht_mxwvht_check(var, flag, swvht_name, mxwvht_name):
 # Gust is less of 0.5
 #
 # Required input:
-# - Epoch: Data/Time in Epoch date
-# - wind: wind speed
-# - gust: gust speed
-# - flagw: matrix of flag for wind speed
-# - idfw= flag id for wind speed. '52' --> letter that represents the flag
-# - flagw: matrix of flag for wind speed
-# - idfg= flag id for gust. '52' --> letter that represents the flag
+# - wspd_name: name used in the dataframe for wind speed
+# - gust_name: name used in the dataframe for gust speed
+# - flag: dataframe for flag
+# - var: dataframe for variables
 #
-# Required checks: Range Check, Missing value check
+# Required checks: Missing value check, range check, range check climate
 #
-# Return: flagw,flagg,idfw,idfg
+# Return: flag
+# Represented by number "3" -> HARD FLAG
 ###############################################################################
 
 
@@ -219,17 +180,15 @@ def wind_speed_gust_check(var, flag, wspd_name, gust_name):
 # If so, dewpt value will be changed to atmp value and data will be soft flagged
 #
 # Required input:
-# - Epoch: Data/Time in Epoch date
-# - dewpt: dew point
-# - atmp: air temperatura
-# - flagd: matrix of flag for dew point
-# - flaga: matrix of flag for air temperature
-# - idf= flag id. 'o' --> letter that represents the flag
+# - dewpt_name: name used in the dataframe for dew point
+# - atmp_name: name used in the dataframe for air temperature
+# - flag: dataframe for flag
+# - var: dataframe for variables
 #
-# Required checks: Range Check, Missing value check
+# Required checks: Missing value check, range check, range check climate
 #
-# Return: flagd,idf
-#
+# Return: flag
+# Represented by number "51" -> SOFT FLAG
 ###############################################################################
 
 def dewpt_atmp_check(var, flag, dewpt_name, atmp_name):
@@ -247,16 +206,14 @@ def dewpt_atmp_check(var, flag, dewpt_name, atmp_name):
 # Pressure will be flagged if batterty is below of 10.5 V.
 #
 # Required input:
-# - Epoch: Data/Time in Epoch date
-# - pres: air pressure
-# - battery: battery voltage
-# - flagp: matrix of flag for air pressure
-# - idf= flag id. '5' --> letter that represents the flag
+# - pres_name: name used in the dataframe for pressure
+# - flag: dataframe for flag
+# - var: dataframe for variables
 #
-# Required checks: Range Check, Missing value check
+# Required checks: Missing value check, range check, range check climate
 #
-# Return: flagp,idf
-#
+# Return: flag
+# Represented by number "5" -> HARD FLAG
 ###############################################################################
 
 def bat_sensor_check(var, flag, battery_name, pres_name):
@@ -265,26 +222,23 @@ def bat_sensor_check(var, flag, battery_name, pres_name):
 
     return flag
 
-
     #####################
     #end battery pressure check section
 
 #######################################################################################
 # Stuck Sensor Check
-# Compare the values to the NEV next values.
-# If the value do not change, it will be flagged
+# Verify if the value of a parameter repeats until limits times
 #
 # Required input:
-# - Epoch: Data/Time in Epoch date
-# - var: variable
-# - flag: matrix of flag for the variable
-# - nev: number of variables that will be compared
-# - idf= flag id. '6' --> letter that represents the flag
+# - parameter: name of variable that will be checked
+# - limits: number of repetition used in the test
+# - flag: dataframe for flag
+# - var: dataframe for variables
 #
-# Required checks: Range Check, Missing value check
+# Required checks: Missing value check, range check, range check climate
 #
-# Return: flag,idf
-#
+# Return: flag
+# Represented by number "6" -> HARD FLAG
 ########################################################################################
 
 def stuck_sensor_check (var, limit, flag, parameter):
@@ -300,6 +254,27 @@ def stuck_sensor_check (var, limit, flag, parameter):
 
     #####################
     #end stuck sensor check
+
+
+#######################################################################################
+# Ascat Anemometer Comparison
+# CHM did comparisons between buoy and ASCAT data.
+# With this comparison, it was possible to correct wind direction data
+#
+# Required input:
+# - parameters: array of parameters names for wind speed and wind direction
+# - flag: dataframe for flag
+# - var: dataframe for variables
+# - buoy: name of the buoy
+#
+# Required checks: Missing value check, range check, range check climate,
+# stuck sensor, windspeedgust check
+#
+# Return: flag
+# Represented by number "11" -> HARD FLAG
+########################################################################################
+
+
 
 def ascat_anemometer_comparison(var, flag, parameters, buoy):
 
@@ -320,6 +295,25 @@ def ascat_anemometer_comparison(var, flag, parameters, buoy):
 
     return flag
 
+
+#######################################################################################
+# Convert wind to 10 meters
+# Using Liu equation to convert wind data to 10 meters
+#
+# Required input:
+# - wspd_name: name used in the dataframe for wind speed
+# - gust_name: name used in the dataframe for gust speed
+# - flag: dataframe for flag
+# - var: dataframe for variables
+# - height: height of anemometer sensor in the buoy
+#
+# Required checks: Missing value check, range check, range check climate,
+# stuck sensor, windspeedgust check
+#
+# Return: var
+########################################################################################
+
+
 def convert_10_meters(var, flag, height, wspd_name, gust_name):
 
     var.loc[(flag[wspd_name] == 0), wspd_name] = var[wspd_name] * (10 / height) ** 0.11
@@ -334,32 +328,14 @@ def convert_10_meters(var, flag, height, wspd_name, gust_name):
 # Compares the values of the two anemometers to find the best one.
 #
 # Required input:
-# - Epoch: Data/Time in Epoch date
-# - Wdir1: wind direction for anemometer 1
-# - Wspd1: wind speed for anemometer 1
-# - Gust1: gust speed for anemometer 1
-# - zwind1: Height of the anemometer 1
-# - Wdir2: wind direction for anemometer 2
-# - Wspd2: wind speed for anemometer 2
-# - Gust2: gust speed for anemometer 2
-# - zwind2: Height of the anemometer 2
-# - Wspd1flag: matrix of flag for wind speed from anemometer 1
-# - Wdir1flag: matrix of flag for wind direction from anemometer 1
-# - Gust1flag: matrix of flag for gust speed from anemometer 1
-# - Wspd2flag: matrix of flag for wind speed from anemometer 2
-# - Wdir2flag: matrix of flag for wind direction from anemometer 2
-# - Gust2flag: matrix of flag for gust speed from anemometer 2
-# - Wdir1flagid: flag id for Wdir1. '52' --> letter that represents the flag
-# - Wspd1flagid: flag id for Wspd1. '52' --> letter that represents the flag
-# - Gust1flagid: flag id for Gust1. '52' --> letter that represents the flag
-# - Wdir2flagid: flag id for Wdir2. '52' --> letter that represents the flag
-# - Wspd2flagid: flag id for Wspd2. '52' --> letter that represents the flag
-# - Gust2flagid: flag id for Gust2. '52' --> letter that represents the flag
+# - parameters: array of parameters names of wind data
+# - flag: dataframe for flag
+# - var: dataframe for variables
 #
+# Required checks: Missing value check, range check, range check climate,
+# stuck sensor, windspeedgust check, convert_10_meters
 #
-# Required checks: Range, Missing value, Wind Speed x Gust
-#
-# Return: Wdirflag,Wspdflag,Gustflag,Wdir,Wspd,Gust,Wdirflagid,Wspdflagid,Gustflagid
+# Return: flag, var
 ########################################################################################
 
 def related_meas_check(var, flag, parameters):
@@ -386,9 +362,6 @@ def related_meas_check(var, flag, parameters):
         del flag[parameter]
 
     return var, flag
-
-
-
     #####################
     #end of related measurement check 2
 
@@ -398,16 +371,17 @@ def related_meas_check(var, flag, parameters):
 # Check is to verify if the data has consistency in the time
 #
 # Required input:
-# - Epoch: Data/Time in Epoch date
-# - var: variable
-# - flag: matrix of flag for the variable
-# - sigma: value for the contnuity equation (normally, is related to std deviation)
-# - idf= flag id. '8' --> letter that represents the flag
-# - rt: toggle for RTQC. If it is 0, RTQC
+# - sigma: value considered in the timecontinuity check variation in time
+# - limit: number of hour considered in the time continuity test
+# - flag: dataframe for flag
+# - var: dataframe for variables
+# - parameter: name user in the dataframe to represent the parameter
 #
-# Required checks: Range Check, Missing value check, Stuck Sensor check
+# Required checks: Missing value check, range check, range check climate,
+# stuck sensor
 #
-# Return: flag,idf
+# Return: flag
+# Represented by number "8" -> HARD FLAG
 #########################################################################################
 
 
@@ -436,6 +410,223 @@ def t_continuity_check(var, sigma, limit, flag, parameter):
     del flag['tmp_backward']
 
     return flag
+
+
+########################################################################################
+########################################################################################
+# Frontal exception for time continuity checks
+# Exception for the time continuity during frontal passages
+#
+# Required checks: Missing value check, range check, range check climate,
+# stuck sensor, time continuity
+#
+########################################################################################
+########################################################################################
+
+
+
+########################################################################################
+# Frontal exception 1
+# Relation between wind direction and air temperature
+#
+# Required input:
+# - wdir_name: name used in the dataframe for wind direction
+# - atmp_name: name used in the dataframe for air temperature
+# - var: dataframe for variables
+# - flag: dataframe for flag
+#
+# Return: flag
+# Represented by number "53" -> SOFT FLAG
+########################################################################################
+
+
+def front_except_check1(var, flag, wdir_name, atmp_name):
+
+    var = var.sort_index(ascending=False)
+
+    selected_variable = var.loc[((flag[atmp_name] == 8) | (flag[atmp_name] == 0)) & (flag[wdir_name] == 0)]
+
+    flag.loc[(selected_variable.loc[(selected_variable[wdir_name].diff() > 40) &  (selected_variable[wdir_name].diff() < - 40) & (flag[atmp_name] == 8), atmp_name].index)] == 53
+
+    return flag
+
+    #end of Frontal excepion 1
+
+########################################################################################
+# Frontal exception 3
+# Relation between wind speed and air temperature 2
+#
+# Required input:
+# - wspd_name: name used in the dataframe for wind speed
+# - atmp_name: name used in the dataframe for air temperature
+# - var: dataframe for variables
+# - flag: dataframe for flag
+#
+# Return: flag
+# Represented by number "55" -> SOFT FLAG
+########################################################################################
+
+
+def front_except_check3(var, flag, wspd_name, atmp_name):
+
+    flag.loc[((flag[atmp_name] == 8) & (flag[wspd_name] == 0) & (var[wspd_name] > 7)), atmp_name ] = 55
+
+    return flag
+
+    #end of Frontal excepion 3
+
+########################################################################################
+# Frontal exception 4
+# Relation between low pressure and wind speed
+#
+# Required input:
+# - wspd_name: name used in the dataframe for wind speed
+# - pres_name: name used in the dataframe for pressure
+# - var: dataframe for variables
+# - flag: dataframe for flag
+#
+# Return: flag
+# Represented by number "56" -> SOFT FLAG
+########################################################################################
+
+def front_except_check4(var, flag, pres_name, wspd_name):
+
+    var = var.sort_index(ascending=True)
+
+    var['date_time'] = var.index
+
+    var['date_time'] = var.diff()["date_time"] / np.timedelta64(1, 's')
+
+    selected_variable = var.loc[(flag[wspd_name] == 8) & (var["date_time"] < 3700)]
+
+    selected_variable_2 = var.loc[var.index.isin(selected_variable.index + np.timedelta64(-1, "h"))]
+
+    selected_variable["pres_new"] = selected_variable_2["pres"]
+
+    selected_variable = selected_variable.loc[(selected_variable["pres_new"] <= 995)]
+
+    flag.loc[(flag.index.isin(selected_variable.index)), wspd_name] = 56
+
+    del var['date_time']
+
+    return flag
+    #end of Frontal excepion 4
+
+
+########################################################################################
+# Frontal exception 5
+# Relation between two pressures
+#
+# Required input:
+# - pres_name: name used in the dataframe for pressure
+# - var: dataframe for variables
+# - flag: dataframe for flag
+#
+# Return: flag
+# Represented by number "57" -> SOFT FLAG
+########################################################################################
+
+def front_except_check5(var, flag, pres_name):
+
+    var = var.sort_index(ascending=True)
+
+    var['date_time'] = var.index
+
+    var['date_time'] = var.diff()["date_time"] / np.timedelta64(1, 's')
+
+    selected_variable = var.loc[(flag[pres_name] == 8) & (var["date_time"] < 3700)]
+
+    selected_variable_2 = var.loc[var.index.isin(selected_variable.index + np.timedelta64(-1, "h"))]
+
+    selected_variable["pres_new"] = selected_variable_2["pres"]
+
+    selected_variable = selected_variable.loc[(selected_variable["pres_new"] < 1000)]
+
+    flag.loc[(flag.index.isin(selected_variable.index)), pres_name] = 57
+
+    del var['date_time']
+
+    return flag
+    #end of Frontal excepion 5
+
+
+
+########################################################################################
+# Frontal exception 6
+# Relation between significance wave height and wind speed
+#
+# Required input:
+# - wspd_name: name used in the dataframe for wind speed
+# - swvht_name: name used in the dataframe for significance wave height
+# - var: dataframe for variables
+# - flag: dataframe for flag
+#
+# Return: flag
+# Represented by number "58" -> SOFT FLAG
+########################################################################################
+
+def frontexcepcheck6(var, flag, wspd_name, swvht_name):
+
+    flag.loc[((flag[swvht_name] == 8) & (var[wspd_name] >= 15)), swvht_name ] = 58
+
+    return flag
+    #end of Frontal excepion 6
+
+########################################################################################
+# Comparison of Measurement Check
+# Relation between related measurement (wind speed, gust, etc)
+#
+# Required input:
+# - parameters: list of parameters names to be related
+# - var: dataframe for variables
+# - flag: dataframe for flag
+#
+# Return: flag
+# Represented by number "60" -> SOFT FLAG
+########################################################################################
+
+def comparison_related_check(var, flag, parameters):
+
+    for i in len(parameters):
+        params_test = parameters.remove(i)
+        for param in params_test:
+            flag.loc[((flag[param] < 51) & (flag[param] > 0) & (flag[parameters[i]] == 0)), parameters[i]] = 60
+
+    return flag
+
+
+#######################################################################################
+# swvht x Average Period check
+# Compare the wave significant height and Average period
+# If the value do not change, it will be flagged
+#
+# Required input:
+# - mean_tp_name: name used in the dataframe for mean period
+# - swvht_name: name used in the dataframe for significance wave height
+# - var: dataframe for variables
+# - flag: dataframe for flag
+#
+# Required checks: Range Check, Missing value check
+#
+# Return: flag
+# Represented by number "62" -> SOFT FLAG
+########################################################################################
+
+def hsts_check(var, flag, swvht_name, mean_tp_name):
+
+
+    var["hmax"] = 10000
+
+    var.loc[(var[mean_tp_name] < 5), "hmax"] = 2.55 + (var[mean_tp_name] / 4)
+
+    var.loc[(var[mean_tp_name] >= 5), "hmax"] = (1.16 * var[mean_tp_name]) - 2
+
+    flag.loc[(var[swvht_name] <= var["hmax"]) & (var[swvht_name] == 0)] = 62
+
+    return flag
+    #####################
+    #end Wave Height Versus Average Wave Period check
+
 
 ########################################################################################
 # Time continuity adcp
@@ -700,539 +891,42 @@ def currentgradientcheck(Epoch,var,flag,sigma,idf,rt):
 
     return flag,idf
 
-########################################################################################
-########################################################################################
-# Frontal exception for time continuity checks
-# Exception for the time continuity during frontal passages
-#
-# Required checks: Range Check, Missing value check, Stuck Sensor check, Time Continuity
-#
-########################################################################################
-########################################################################################
 
-
-# Frontal exception 1
-# Relation between wind direction and air temperature 2
+###############################################################################
+# IN CONSTRUCTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# IN CONSTRUCTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#
+# Range check Standard Deviation
+#
+# Check to ensure values are within 3 standard deviation from the historical data (LIMITS)
 #
 # Required input:
-# - Epoch: Data/Time in Epoch date
-# - windd: wind direction for the best anemometer
-# - flagw: wind direction flag for the best anemometer
-# - flaga: air temperature flag
-# - idfa= flag id for air temperature. '53' --> letter that represents the flag
+# - parameter: name of variable that will be checked
+# - limits: dictionary with standard deviation of buoy data
+# - flag: dataframe for flag
+# - var: dataframe for variables
 #
-# Return: flaga,idfa
+# Required checks: Missing value check, range check, range check climate
+#
+# Return: flag
+# Represented by number "20" -> HARD FLAG
+# IN CONSTRUCTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+###############################################################################
 
-def front_except_check1(var, flag, wdir_name, atmp_name):
 
-    var = var.sort_index(ascending=False)
+def range_check_std(var, limits, flag, parameter):
 
-    selected_variable = var.loc[((flag[atmp_name] == 8) | (flag[atmp_name] == 0)) & (flag[wdir_name] == 0)]
+    try:
+        max_value = limits[parameter][0] + 3 * limits[parameter][1]
+        min_value = limits[parameter][0] - 3 * limits[parameter][1]
 
-    flag.loc[(selected_variable.loc[(selected_variable[wdir_name].diff() > 40) &  (selected_variable[wdir_name].diff() < - 40) & (flag[atmp_name] == 8), atmp_name].index)] == 53
+        flag.loc[(var[parameter] < max_value) & (flag[parameter] == 0), parameter] = 20
+        flag.loc[(var[parameter] > min_value) & (flag[parameter] == 0), parameter] = 20
+    except:
+        print("No std value for " + parameter)
 
     return flag
-
-    #end of Frontal excepion 1
-
-# Frontal exception 2
-# Relation between wind direction and air temperature 2
-#
-# Required input:
-# - Epoch: Data/Time in Epoch date
-# - windd: wind direction for the best anemometer
-# - flagw: wind direction flag for the best anemometer
-# - flaga: air temperature flag
-# - idfw= flag id for wind direction. '53' --> letter that represents the flag
-#
-# Return: flagw,idfw
-
-# def frontexcepcheck2(Epoch,windd,flagw,flaga,idfw):
-#
-#
-#
-#    last_gt= Epoch[0]
-#    last_gw = windd[0]
-#    last_fa= flaga[0]
-#    last_fw=flagw[0]
-#
-#    for i in range(1,len(Epoch)):
-#        delta_Epoch = abs(Epoch[i] - last_gt)
-#        if delta_Epoch <= 3600*3:
-#            if last_fw!=4:
-#                if flagw[i]==4:
-#                    if idfw[i]=='8':
-#                        if last_fa!=4 and abs(windd[i] - last_gw)>40:
-#                            flagw[i] = 2
-#                            idfw[i]='54'
-#                            last_gt= Epoch[i]
-#                            last_gw = windd[i]
-#                            last_fa= flaga[i]
-#                            last_fw=flagw[i]
-#                    else:
-#                        continue
-#                else:
-#                    last_gt= Epoch[i]
-#                    last_gw = windd[i]
-#                    last_fa= flaga[i]
-#                    last_fw=flagw[i]
-#            else:
-#                last_gt= Epoch[i]
-#                last_gw = windd[i]
-#                last_fa= flaga[i]
-#                last_fw=flagw[i]
-#        else:
-#            last_gt= Epoch[i]
-#            last_gw = windd[i]
-#            last_fa= flaga[i]
-#            last_fw=flagw[i]
-#            continue
-#
-#        return flagw, idfw
-
-    #end of Frontal excepion 2
-
-# Frontal exception 3
-# Relation between wind direction and air temperature 2
-#
-# Required input:
-# - Epoch: Data/Time in Epoch date
-# - winds: wind speed for the best anemometer
-# - flags: wind speed flag for the best anemometer
-# - flaga: air temperature flag
-# - idfw= flag id for wind direction. '53' --> letter that represents the flag
-#
-# Return: flagw,idfw
-
-
-def front_except_check3(var, flag, wspd_name, atmp_name):
-
-    flag.loc[((flag[atmp_name] == 8) & (flag[wspd_name] == 0)) & (var[wspd_name] > 7)] = 55
-
-    return flag
-
-    #end of Frontal excepion 3
-
-# Frontal exception 4
-# Relation between low pressure and wind speed
-#
-# Required input:
-# - Epoch: Data/Time in Epoch date
-# - pres: air pressure
-# - flagp: wind speed flag for the best anemometer
-# - flagp: air pressure flag
-# - idfw= flag id for wind direction. '53' --> letter that represents the flag
-#
-# Return: flagw,idfw
-
-def front_except_check4(var, flag, pres_name, wspd_name):
-
-    var = var.sort_index(ascending=False)
-
-    selected_variable = var.loc[((flag[atmp_name] == 8) | (flag[atmp_name] == 0)) & (flag[wdir_name] == 0)]
-
-    flag.loc[(selected_variable.loc[(selected_variable[wdir_name].diff() > 40) &  (selected_variable[wdir_name].diff() < - 40) & (flag[atmp_name] == 8), atmp_name].index)] == 53
-
-
-
-    for i in range(0, len(Epoch)):
-        if pres[i]<995 and flagp[i]!=4 and idfw[i]=='8':
-            flagw[i] = 2
-            idfw[i]='56'
-        else:
-            continue
-
-    return flag
-
-    #end of Frontal excepion 4
-
-# Frontal exception 5
-# Relation between two pressures
-#
-# Required input:
-# - Epoch: Data/Time in Epoch date
-# - pres: air pressure
-# - flagp: air pressure flag
-# - idfp= flag id for air pressure. '53' --> letter that represents the flag
-#
-# Return: flagp,idfp
-
-
-def frontexcepcheck5(Epoch,pres,flagp,idfp):
-
-    last_gt= Epoch[0]
-    last_fp= flagp[0]
-    last_gp = pres[0]
-
-    for i in range(1,len(Epoch)):
-        delta_Epoch = abs(Epoch[i] - last_gt)
-        if delta_Epoch <= 3600*3:
-            if last_fp!=4:
-                if flagp[i]==4:
-                    if idfp[i]=='8':
-                        if pres[i]<=1000 and last_gp<=1000:
-                            flagp[i] = 2
-                            idfp[i]='57'
-                            last_gt= Epoch[i]
-                            last_fp= flagp[i]
-                            last_gp = pres[i]
-                        else:
-                            continue
-                    else:
-                        continue
-                else:
-                    last_gt= Epoch[i]
-                    last_fp= flagp[i]
-                    last_gp = pres[i]
-                    continue
-            else:
-                last_gt= Epoch[i]
-                last_fp= flagp[i]
-                last_gp = pres[i]
-                continue
-        else:
-            last_gt= Epoch[i]
-            last_fp= flagp[i]
-            last_gp = pres[i]
-            continue
-
-    return flagp,idfp
-
-    #end of Frontal excepion 5
-
-
-# Frontal exception 6
-# Relation between two pressures
-#
-# Required input:
-# - Epoch: Data/Time in Epoch date
-# - winds: wind speed for the best anemometer
-# - flags: wind speed flag for the best anemometer
-# - flagwh: swvht flag
-# - idfwh: flag id for swvht. '53' --> letter that represents the flag
-#
-# Return: flagwh,idfwh
-
-
-def frontexcepcheck6(Epoch,winds,flags,idfwh,flagwh):
-
-    for i in range(0, len(Epoch)):
-        if winds[i]>=15 and flags[i]!=4 and idfwh[i]=='8':
-            flagwh[i] = 2
-            idfwh[i]='58'
-        else:
-            continue
-
-
-    return flagwh,idfwh
-
-    #end of Frontal excepion 6
-
-# TODO asdasdas
-
-def related1(Epoch,winds,flags,idfwh,flagwh):
-
-    for i in range(0, len(Epoch)):
-        winds[i]>=15 and flags[i]!=4 and idfwh[i]=='8'
-
-
-    flag_data[["gust","wspd", "wdir"]] = qc.front_except_check6(flag_data[["gust","wspd", "wdir"]])
-
-
-    cspd3flagid[i]='12'
-
-
-#######################################################################################
-# swvht x Average Period check
-# Compare the wave significant height and Average period
-# If the value do not change, it will be flagged
-#
-# Required input:
-# - Epoch: Data/Time in Epoch date
-# - Apd: Average wave period
-# - swvht: Significant wave height
-# - flagt: matrix of flag for Apd
-# - flagh: matrix of flag for swvht
-# - idf= flag id for swvht. '7' --> letter that represents the flag
-#
-# Required checks: Range Check, Missing value check
-#
-# Return: flag,idf
-#
-########################################################################################
-
-def hstscheck(Epoch, Apd, swvht, flagt,flagh,idf):
-
-    htresh=[0]*len(Epoch)
-    for i in range(len(Epoch)):
-        if Apd[i] <= 5 and Apd[i]!=None:
-           htresh[i] = (2.55 + (Apd[i]/4))
-
-        elif Apd[i] > 5:
-           htresh[i] = ((1.16*Apd[i])-2)
-
-        else:
-           continue
-
-    for i in range(len(Epoch)):
-        if flagt[i]!=4 and flagh[i]!=4:
-            if swvht[i] > htresh[i]:
-               flagh[i] = 4
-               idf[i]='7'
-
-            else:
-               continue
-
-
-
-    return flagh, idf
-
-
-
-
 
     #####################
-    #end Wave Height Versus Average Wave Period check
-
-
-
-
-#############################################################
-#############################################################
-#END OF CHECKS
-#############################################################
-#############################################################
-
-
-
-###############################################################################
-#
-#OTHERS CHECKS THAT ARE NOT OK YET
-#
-#
-###############################################################################
-
-
-def ncepmodelcheck(Epoch,Pres,Atmp,Wdir,Wspd,Presflag,Atmpflag,Wdirflag,Wspdflag):
-
-
-    lines = open('C:\\ndbc\\data\\NCPE_data.txt', 'rb')
-
-#read in the first 2 lines
-    ASCIIs = lines.readline()
-    Units = lines.readline()
-
-#declare lists for each column in the file.
-    Year,Month,Day,Hour,Minute = [],[],[],[],[]
-    ModelWdir,ModelAtmp,ModelPres,ModelWspd = [],[],[],[]
-
-
-    for line in lines:
-        dataline = line.strip()
-        columns = dataline.split()
-
-        Year.append(int(columns[0]))
-        Month.append(int(columns[1]))
-        Day.append(int(columns[2]))
-        Hour.append(int(columns[3]))
-        Minute.append(int(columns[4]))
-        ModelWdir.append(int(columns[0]))
-        ModelAtmp.append(int(columns[1]))
-        ModelWspd.append(int(columns[2]))
-        ModelPres.append(int(columns[3]))
-
-    for i in range(len(Epoch)):
-            if abs(ModelPres[i]-Pres[i])>2.5:
-                Presflag[i] = 3
-            elif abs(ModelAtmp[i]-Atmp[i])>3:
-                Atmpflag[i] = 3
-            elif Wspd[i]>10 and abs(Wdir[i]-Wdir[i-1])>30:
-                Wdirflag[i]=3
-            elif Wspd[i]>=5 and Wspd<=10:
-                if((Wspd-15.6)/-188)<abs(Wdir[i]-Wdir[i-1]):
-                    Wdirflag[i]=3
-            elif Wspd[i]>=6 and Wspd[i]<=12 and abs(Wspd[i]-Wspd[i-1])>((Wspd[i]-16.1)/1.67):
-                Wspdflag[i]=3
-            elif Wspd[i]>12 and abs(Wspd[i]-Wspd[i-1])>2.25:
-                Wspdflag[i]=3
-            else:
-                continue
-
-    return Presflag,Atmpflag,Wdirflag,Wspdflag
-########################################################
-#end Wave Height Verses Average Wave Period check
-
-#######################################################################################
-# Climatological Range Check
-# Check to ensure values are within climatological ranges.
-#
-# Required checks: Range
-#
-########################################################################################
-def climarangecheck(Epoch, swvht, Dpd, Apd,Wspd,Gust,Pres,dewpt,Atmp,Wtmp,swvhtflag, Dpdflag, Apdflag,Wspdflag, Gustflag, Presflag, dewptflag, Atmpflag, Wtmpflag):
-
-# Definition of the ranges. For example: msdswvht=[0,5]. It means that the
-# climatological mean is 0 and the standard deviation is 20
-
-    msdswvht=[0,20]
-    msdDpd=[1.95,26]
-    msdApd=[0,26]
-    msdWspd=[0,60]
-    msdGust=[0,60]
-    msdAtmp=[-40,60]
-    msdPres=[500,1100]
-    msddewpt=[-30,40]
-    msdWtmp=[-4,30]
-
-    for i in range(len(Epoch)):
-
-        if swvht[i] > (msdswvht[0]+(3*msdswvht[1])) or swvht[i] < (msdswvht[0]-(3*msdswvht[1])):
-           swvhtflag[i] = 4
-
-        else:
-           swvhtflag[i] = 1
-
-    for i in range(len(Epoch)):
-
-        if Dpd[i] >= (msdDpd[0]+(3*msdDpd[1])) or Dpd[i] <= (msdDpd[0]+(3*msdDpd[1])):
-           Dpdflag[i] = 4
-
-        else:
-           Dpdflag[i] = 1
-
-    for i in range(len(Epoch)):
-
-        if Apd[i] >= (msdApd[0]+(3*msdApd[1])) or Apd[i] <= (msdApd[0]+(3*msdApd[1])):
-           Apdflag[i] = 4
-
-        else:
-           Apdflag[i] = 1
-
-    for i in range(len(Epoch)):
-
-        if Wspd[i] > (msdWspd[0]+(3*msdWspd[1])) or Wspd[i] < (msdWspd[0]+(3*msdWspd[1])):
-           Wspdflag[i] = 4
-
-        else:
-           Wspdflag[i] = 1
-
-    for i in range(len(Epoch)):
-
-        if Gust[i] > (msdGust[0]+(3*msdGust[1])) or Gust[i] < (msdGust[0]+(3*msdGust[1])):
-           Gustflag[i] = 4
-
-        else:
-           Gustflag[i] = 1
-
-    for i in range(len(Epoch)):
-
-        if Atmp[i] > (msdAtmp[0]+(3*msdAtmp[1])) or Atmp[i] < (msdAtmp[0]+(3*msdAtmp[1])):
-           Atmpflag[i] = 4
-
-        else:
-           Atmpflag[i] = 1
-
-    for i in range(len(Epoch)):
-
-        if Pres[i] > (msdPres[0]+(3*msdPres[1])) or Pres[i] < (msdPres[0]+(3*msdPres[1])):
-           Presflag[i] = 4
-
-        else:
-           Presflag[i] = 1
-
-    for i in range(len(Epoch)):
-
-        if dewpt[i] > (msddewpt[0]+(3*msddewpt[1])) or dewpt[i] < (msddewpt[0]+(3*msddewpt[1])):
-           dewptflag[i] = 4
-
-        else:
-           dewptflag[i] = 1
-
-    for i in range(len(Epoch)):
-
-        if Wtmp[i] > (msdWtmp[0]+(3*msdWtmp[1])) or Wtmp[i] < (msdWtmp[0]+(3*msdWtmp[1])):
-           Wtmpflag[i] = 4
-
-        else:
-           Wtmpflag[i] = 1
-
-
-    return swvhtflag, Dpdflag, Apdflag, Wspdflag, Gustflag, Presflag, dewptflag, Atmpflag, Wtmpflag
-    #end Range Check section
-
-#####################################################
-
-
-def gustratiocheck(gustfactor,winds,gust,flaggf):
-
-
-     for i in range(len(gust)):
-         xx=math.exp(-0.18*gust[i])
-         gzero = 1.98 - ( 1.887*xx)
-         ratiomax = 1.5 + (1.0/gzero)
-         if winds[i]<0.3:
-             ratiomax=ratiomax+5
-         elif winds[i]<1.0 and winds[i]>=0.3:
-             ratiomax=ratiomax+3
-         elif winds[i]<3.0 and winds[i]>=1.0:
-             ratiomax=ratiomax+0.7
-         elif winds[i]<6.0 and winds[i]>=3.0:
-             ratiomax=ratiomax+0.35
-         else:
-             ratiomax=ratiomax+0.2
-             continue
-
-         if gustfactor[i]>ratiomax:
-             flaggf[i]=4
-         elif gustfactor[i]<=0.9:
-             flaggf[i]=4
-         else:
-             continue
-
-     return flaggf
-
-
-
-
-########################################################################################
-# Swell direction check
-# Check to determine if the direction of the swell is coming from shore
-#
-# Required checks: None
-#
-#########################################################################################
-
-def dircoastcheck(Epoch, Mwd, coastflag):
-
-
-    meancoast = 150 #direction of the coast
-
-    for i in range(len(Epoch)):
-
-        if Mwd[i] < (meancoast-45) and Mwd[i] > (meancoast+45-180):
-           coastflag[i] = 4
-
-
-        else:
-           coastflag[i] = 1
-
-    return coastflag, meancoast
-
-#end Swell direction check
-
-########################################################
-
-
-########################################################################################
-#Wave Height Verses Average Wave Period
-#
-# Check is to verify if the wave height is consistent with the average wave period
-#
-# Required checks: None
-#
-#########################################################################################
-
-
-
-
+    #end Range Check STD section
 

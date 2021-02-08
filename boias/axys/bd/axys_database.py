@@ -132,7 +132,7 @@ def insert_raw_data_bd(raw_data, buoy, user_config):
     cur = db.cursor()
 
     bd_data = []
-    cur.execute("SELECT date_time FROM axys_message WHERE id_buoy = %s\
+    cur.execute("SELECT date_time FROM axys_message WHERE buoy_id = %s\
     ORDER BY date_time DESC limit 5" % buoy)
     for row in cur.fetchall():
         bd_data.append(row)
@@ -143,7 +143,7 @@ def insert_raw_data_bd(raw_data, buoy, user_config):
         if bd_data != []:
             print(raw_data)
             if data[3] > bd_data[0]:
-                sql = "INSERT INTO axys_message (id_buoy,sat_number,lat, lon, date_time, sensor00, sensor01, \
+                sql = "INSERT INTO axys_message (buoy_id,sat_number,lat, lon, date_time, sensor00, sensor01, \
                 sensor02, sensor03, sensor04, sensor05, sensor06, sensor07, sensor08, sensor09, \
                 sensor10, sensor11, sensor12, sensor13, sensor14, sensor15, sensor16, sensor17, \
                 sensor18, sensor19, sensor20, sensor21, sensor22, sensor23, sensor24, sensor25)\
@@ -162,7 +162,7 @@ def insert_raw_data_bd(raw_data, buoy, user_config):
                 db.commit()
         else:
             print(raw_data)
-            sql = "INSERT INTO axys_message (id_buoy,sat_number, lat, lon, date_time, sensor00, sensor01, \
+            sql = "INSERT INTO axys_message (buoy_id,sat_number, lat, lon, date_time, sensor00, sensor01, \
             sensor02, sensor03, sensor04, sensor05, sensor06, sensor07, sensor08, sensor09, \
             sensor10, sensor11, sensor12, sensor13, sensor14, sensor15, sensor16, sensor17, \
             sensor18, sensor19, sensor20, sensor21, sensor22, sensor23, sensor24, sensor25)\
@@ -189,7 +189,7 @@ def select_raw_data_bd(buoy, user_config):
 
     time_last_month = last_month()
 
-    sql = "SELECT * FROM axys_message WHERE id_buoy = %s and date_time >= '%s' \
+    sql = "SELECT * FROM axys_message WHERE buoy_id = %s and date_time >= '%s' \
     ORDER BY date_time" % (buoy, time_last_month)
 
     raw_data = pd.read_sql_query(sql, db)
@@ -208,7 +208,7 @@ def select_general_axys_data(buoy, user_config):
 
     time_last_month = last_month()
 
-    sql = "SELECT * FROM axys_general WHERE id_buoy = %s and date_time >= '%s' \
+    sql = "SELECT * FROM axys_general WHERE buoy_id = %s and date_time >= '%s' \
     ORDER BY date_time" % (buoy, time_last_month)
 
     general_data = pd.read_sql_query(sql, db)
@@ -226,7 +226,7 @@ def delete_adjusted_old_data(initial_time, buoy, user_config):
     cur=db.cursor()
 
     print("Deleting Raw Data from axys_general table...")
-    cur.execute("DELETE FROM axys_general WHERE date_time>='%s' AND id_buoy = '%s'"% (initial_time, buoy))
+    cur.execute("DELETE FROM axys_general WHERE date_time>='%s' AND buoy_id = '%s'"% (initial_time, buoy))
     # cur.execute("SELECT wmo FROm deriva_estacao")
     db.commit()
     cur.close()
@@ -261,7 +261,7 @@ def delete_qc_old_data(initial_time, buoy, user_config):
 
     cur=db.cursor()
 
-    cur.execute("DELETE FROM data_buoys WHERE date_time>='%s' AND id_buoy = '%s'"% (initial_time, buoy))
+    cur.execute("DELETE FROM data_buoys WHERE date_time>='%s' AND buoy_id = '%s'"% (initial_time, buoy))
     # cur.execute("SELECT wmo FROm deriva_estacao")
     db.commit()
     cur.close()
@@ -286,7 +286,7 @@ def insert_axys_qc_data(qc_data, user_config):
     for index, row in qc_data[cols].iterrows():
 
         id = int(row['id_serial'])
-        axys_qc_df = {'id_buoy': int(row['id_buoy']),
+        axys_qc_df = {'buoy_id': int(row['buoy_id']),
                             'id' : id,
                             'date_time' : index,
                             'lat': row['lat'].round(6),
@@ -341,7 +341,7 @@ def insert_axys_qc_data(qc_data, user_config):
             if value == -9999 or pd.isnull(value):
                 axys_qc_df[column] = None
 
-        query_insert_data = """INSERT INTO data_buoys (id_buoy, id,
+        query_insert_data = """INSERT INTO data_buoys (buoy_id, id,
         date_time, lat, lon, battery, wspd, gust, wdir, atmp,
         rh, dewpt, pres, sst, compass, arad, cspd1, cdir1, cspd2, cdir2,
         cspd3, cdir3, swvht1, tp1, mxwvht1, wvdir1, wvspread1,
@@ -350,7 +350,7 @@ def insert_axys_qc_data(qc_data, user_config):
         flag_cspd2, flag_cdir2, flag_cspd3, flag_cdir3, flag_swvht1, flag_tp1,
         flag_mxwvht1, flag_wvdir1, flag_wvspread1)
          VALUES
-        (%(id_buoy)s, %(id)s, %(date_time)s, %(lat)s, %(lon)s, %(bat)s, %(wspd)s,
+        (%(buoy_id)s, %(id)s, %(date_time)s, %(lat)s, %(lon)s, %(bat)s, %(wspd)s,
         %(gust)s, %(wdir)s, %(atmp)s, %(rh)s, %(dewpt)s, %(pres)s, %(sst)s,
         %(compass)s, %(arad)s, %(cspd1)s, %(cdir1)s, %(cspd2)s, %(cdir2)s,
         %(cspd3)s, %(cdir3)s, %(swvht1)s, %(tp1)s, %(mxwvht1)s, %(wvdir1)s,

@@ -17,10 +17,10 @@ from bmo_adjust_data import *
 
 conn = connect_database_remo('PRI')
 
-id_buoy = bmo_on(conn)
+buoy_id = bmo_on(conn)
 
 
-for id in id_buoy['id_buoy']:
+for id in buoy_id['buoy_id']:
 
     last_date_general = check_last_date(conn, 'bmo_br', id)
     last_date_general = last_date_general[0][0]

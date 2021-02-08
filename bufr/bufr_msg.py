@@ -20,55 +20,42 @@ import pandas as pd
 
 import remo_bufr as bufr
 
+from pybufrkit.encoder import Encoder
+import json
+
 conn = bd.conn_qc_db('PRI')
 
 buoys = bd.working_buoys(conn)
 
-print(buoys)
-
 for i in range(len(buoys)):
 
-    df = bd.get_bufr_data(buoys["id_boia"][i], 1, conn)
+    print(buoys['name_buoy'][i])
 
-    Section1 = bufr.bufrSection1(df)
+    try:
+        df = bd.get_bufr_data(buoys["id"][i], 1, conn)
 
-    Section3 = bufr.bufrSection3(df)
+        section0 = bufr.bufr_section0()
 
-    Section4 = bufr.bufrSection4(df)
+        section1 = bufr.bufr_section1()
 
-    Section5 = bufr.bufrSection5()
+        section3 = bufr.bufr_section3()
 
-    bufrMessage = []
+        section4 = bufr.bufr_section4(df)
 
-    bufrMessage.append(Section1)
-    bufrMessage.append(Section3)
-    bufrMessage.append(Section4)
-    bufrMessage.append(Section5)
+        section5 = bufr.bufr_section5()
 
-    bufrString="".join(bufrMessage)
+        bufr_message = []
 
-    bufrMessageLength = len(bufrString) / 8
+        bufr_message.append(section0)
+        bufr_message.append(section1)
+        bufr_message.append(section3)
+        bufr_message.append(section4)
+        bufr_message.append(section5)
 
-    # BUFR Section 0
-    Section0 = bufr.bufrSection0(bufrMessageLength)
-
-    bufrString = bufrString + ''.join(Section0)
-
-<<<<<<< refs/remotes/origin/bufr-new
-    print(bufrString)
-=======
         print(bufr_message)
-        name_buoy = df["name_buoy"][0] + "_" + datetime.now().strftime("%Y%m%d%H0000")
->>>>>>> local
+        name_buoy = df["name_buoy"][0] + "_" + datetime.now().strftime("%Y%m%d%H0000") + '.bufr'
 
-    name_buoy = df["name_buoy"][0] + "_" + datetime.now().strftime("%Y%m%d%H0000")
-
-<<<<<<< refs/remotes/origin/bufr-new
-    bufr_message = open(name_buoy, 'w')
-
-    bufr_message.write(bufrString)
-    bufr_message.close()
-=======
+        encoder = Encoder()
         bufr_message_new = encoder.process(bufr_message)
         with open(name_buoy + ".bufr", 'wb') as outs:
             outs.write(bufr_message_new.serialized_bytes)
@@ -80,4 +67,3 @@ for i in range(len(buoys)):
         print('BUFR preamble added!')
     except:
         print('Can not create BUFR file for buoy ' + buoys['name_buoy'][i] + '!')
->>>>>>> local

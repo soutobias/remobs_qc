@@ -5,22 +5,34 @@ sys.path.append(os.environ['HOME'])
 
 import requests
 import pandas as pd
-from datetime import datetime
-from datetime import date
-from datetime import timedelta
+from datetime import datetime, date, timedelta
 import io
 
-
 import remo_model_db
-from user_config import URL_MODEL_SPOTTER_GFS_ICON, URL_MODEL_SPOTTER_GFS, URL_MODEL_SPOTTER_ICON
 
-models = {'ICON':URL_MODEL_SPOTTER_GFS,
-          'GFS':URL_MODEL_SPOTTER_ICON,
-          'GFS+ICON':URL_MODEL_SPOTTER_GFS_ICON}
+from user_config import URL_MODEL_BMO_GFS, URL_MODEL_BMO_ICON, \
+    URL_MODEL_BMO_COSMO
+
+'''
+
+##################################################################
+
+######################## GFS MODEL ##############################
+
+##################################################################
+'''
+
+
+# Link Constructor:
+# GFS MODEL
+
+models = {'GFS':URL_MODEL_BMO_GFS,
+          'ICON':URL_MODEL_BMO_ICON,
+          'COSMO':URL_MODEL_BMO_COSMO}
 
 for model in models:
 
-    last_data = remo_model_db.check_last_time_remo('PRI', model, 3)
+    last_data = remo_model_db.check_last_time_remo('PRI', model, 2)
     last_data = last_data[0][0]
 
     if last_data == None:
@@ -29,13 +41,7 @@ for model in models:
 
         first_date_datetime = datetime.strptime(first_data, '%Y%m%d').date()
 
-        if model == "GFS+ICON":
-            last_date = '20210107'
-            last_date_time = datetime.strptime(last_date, '%Y%m%d').date()
-            days_until_today = (last_date_time - first_date_datetime).days
-
-        else:
-            days_until_today = (date.today() - first_date_datetime).days
+        days_until_today = (date.today() - first_date_datetime).days
 
         for day in range(days_until_today):
 
@@ -95,7 +101,7 @@ for model in models:
                 df_remo['lat'] = lat
                 df_remo['lon'] = lon
 
-                remo_model_db.insert_remo_model_db(df_remo, "PRI", 3, model)
+                remo_model_db.insert_remo_model_db(df_remo, "PRI", 2, model)
 
                 print("Day %s for %s model inserted on database." % (date_url, model))
 
@@ -163,7 +169,7 @@ for model in models:
                 df_remo['lat'] = lat
                 df_remo['lon'] = lon
 
-                remo_model_db.insert_remo_model_db(df_remo, "PRI", 3, model)
+                remo_model_db.insert_remo_model_db(df_remo, "PRI", 2, model)
 
                 print("Day %s for %s model inserted on database." % (date_url, model))
 

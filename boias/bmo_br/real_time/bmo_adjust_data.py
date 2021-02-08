@@ -4,7 +4,7 @@ def adjust_bmo_general(raw_data):
     import pandas as pd
 
 
-    columns_general = ['id_buoy', 'id',
+    columns_general = ['buoy_id', 'id',
                        'date_time', 'lat', 'lon',
                         'battery', 'wspd1', 'gust1',
                        'wdir1', 'wspd2', 'gust2',
@@ -22,7 +22,7 @@ def adjust_bmo_general(raw_data):
 
     raw_data = raw_data.replace('NAN', -9999)
 
-    bmo_general_data['id_buoy'] = raw_data['id_buoy'].astype(int)
+    bmo_general_data['buoy_id'] = raw_data['buoy_id'].astype(int)
     bmo_general_data['id'] = raw_data['id'].astype(int)
     bmo_general_data['date_time'] = raw_data['date_time']
     bmo_general_data['lat'] = pd.to_numeric(raw_data['lat'], errors = 'coerce').round(4)
@@ -66,7 +66,7 @@ def adjust_bmo_current(raw_data):
     import pandas as pd
 
 
-    columns_current = ['id_buoy', 'id',
+    columns_current = ['buoy_id', 'id',
                        'date_time', 'lat', 'lon','cspd1', 'cdir1',
                         'cspd2', 'cdir2', 'cspd3','cdir3', 'cspd4', 'cdir4',
                        'cspd5', 'cdir5', 'cspd6','cdir6', 'cspd7', 'cdir7',
@@ -80,7 +80,7 @@ def adjust_bmo_current(raw_data):
 
     raw_data = raw_data.replace('NAN', -9999)
 
-    bmo_general_data['id_buoy'] = raw_data['id_buoy'].astype(int)
+    bmo_general_data['buoy_id'] = raw_data['buoy_id'].astype(int)
     bmo_general_data['id'] = raw_data['id'].astype(int)
     bmo_general_data['date_time'] = raw_data['date_time']
     bmo_general_data['lat'] = pd.to_numeric(raw_data['lat'], errors = 'coerce').round(4)
@@ -129,13 +129,13 @@ def adjust_bmo_current(raw_data):
 
 
 
-def rotate_data(conn, df, flag, id_buoy):
+def rotate_data(conn, df, flag, buoy_id):
 
 
-    def get_declination(conn, id_buoy):
+    def get_declination(conn, buoy_id):
         import pandas as pd
 
-        query = f"SELECT mag_dec, var_mag_dec FROM buoys WHERE id_buoy = {id_buoy};"
+        query = f"SELECT mag_dec, var_mag_dec FROM buoys WHERE buoy_id = {buoy_id};"
 
         df = pd.read_sql_query(query, conn)
 
@@ -145,29 +145,60 @@ def rotate_data(conn, df, flag, id_buoy):
         return dec, var_mag_dec
 
 
-    dec, var_dec = get_declination(conn, id_buoy)
+    dec, var_dec = get_declination(conn, buoy_id)
 
+
+# Adjusting different for Wvdir2 and Wdir.
+# Data from these sensors already adjusted for Vitoria - ES.
+
+# This adjustment is from SBG System
+# Correcting for the actual position Addin 1.19 degrees
+
+# Declination for Vitoria 23.80 W
+# Declination for actual position 22.61 W
+
+    add_diff_dec_sbg = 1.19
 
 
     df['tmp_dec'] = (df.index.year - 2020) * float(var_dec) + float(dec)
 
-    df.loc[flag['cdir1'] == 0, "cdir1"] = df['cdir1'] - df['tmp_dec']
+    df.loc[flag['cdir1'] == 0, "cdir1"] = df['cdir1'] + df['tmp_dec']
+
     df.loc[df["cdir1"] < 0, "cdir1"] = df["cdir1"] + 360
+    df.loc[df["cdir1"] > 360, "cdir1"] = df["cdir1"] - 360
 
-    df.loc[flag['cdir2'] == 0, "cdir2"] = df['cdir2'] - df['tmp_dec']
+
+    df.loc[flag['cdir2'] == 0, "cdir2"] = df['cdir2'] + df['tmp_dec']
+
     df.loc[df["cdir2"] < 0, "cdir2"] = df["cdir2"] + 360
+    df.loc[df["cdir2"] > 360, "cdir2"] = df["cdir2"] - 360
 
-    df.loc[flag['cdir3'] == 0, "cdir3"] = df['cdir3'] - df['tmp_dec']
+
+    df.loc[flag['cdir3'] == 0, "cdir3"] = df['cdir3'] + df['tmp_dec']
     df.loc[df["cdir3"] < 0, "cdir3"] = df["cdir3"] + 360
+    df.loc[df["cdir3"] > 360, "cdir3"] = df["cdir3"] - 360
 
-    df.loc[flag['wdir'] == 0, "wdir"] = df['wdir'] - df['tmp_dec']
+
+
+    df.loc[flag['wdir'] == 0, "wdir"] = df['wdir'] + add_diff_dec_sbg
     df.loc[df["wdir"] < 0, "wdir"] = df["wdir"] + 360
+    df.loc[df["wdir"] > 360, "wdir"] = df["wdir"] - 360
 
-    df.loc[flag['wvdir1'] == 0, "wvdir1"] = df['wvdir1'] - df['tmp_dec']
+
+
+
+    df.loc[flag['wvdir1'] == 0, "wvdir1"] = df['wvdir1'] + df['tmp_dec']
     df.loc[df["wvdir1"] < 0, "wvdir1"] = df["wvdir1"] + 360
+    df.loc[df["wvdir1"] > 360, "wvdir1"] = df["wvdir1"] - 360
 
-    df.loc[flag['wvdir2'] == 0, "wvdir2"] = df['wvdir2'] - df['tmp_dec']
+
+
+
+    df.loc[flag['wvdir2'] == 0, "wvdir2"] = df['wvdir2'] + add_diff_dec_sbg
     df.loc[df["wvdir2"] < 0, "wvdir2"] = df["wvdir2"] + 360
+    df.loc[df["wvdir2"] > 360, "wvdir2"] = df["wvdir2"] - 360
+
+
 
     del df['tmp_dec']
 
@@ -191,7 +222,7 @@ def adjust_bmo_qc(bmo_qc_data):
     import pandas as pd
     import numpy as np
 
-    columns_data = ['id_buoy', 'id',
+    columns_data = ['buoy_id', 'id',
                        'date_time', 'lat', 'lon',
                         'battery', 'wspd', 'gust',
                        'wdir', 'atmp', 'rh', 'dewpt',
@@ -205,7 +236,7 @@ def adjust_bmo_qc(bmo_qc_data):
     bmo_qc_adjusted = pd.DataFrame(columns = columns_data)
 
 
-    bmo_qc_adjusted['id_buoy'] = bmo_qc_data['id_buoy'].astype(int)
+    bmo_qc_adjusted['buoy_id'] = bmo_qc_data['buoy_id'].astype(int)
     bmo_qc_adjusted['id'] = bmo_qc_data['id'].astype(int)
     bmo_qc_adjusted['date_time'] = bmo_qc_data.index
     bmo_qc_adjusted['lat'] = pd.to_numeric(bmo_qc_data['lat'], errors = 'coerce').round(4)
@@ -253,3 +284,58 @@ def adjust_bmo_qc(bmo_qc_data):
 
 
     return bmo_qc_adjusted
+
+
+def check_size_values(df):
+    """ Check size values to input in database """
+    """ Replacing very spurious data (>9999) with -9999 """
+
+
+    data_cols =  ["swvht1",
+                    "mxwvht1",
+                    "swvht2",
+                    "tp1",
+                    "tp2",
+                    "wvdir1",
+                    "wvdir2",
+                    "arad",
+                    "gust",
+                    "wspd",
+                    "wdir",
+                    "atmp",
+                    "pres",
+                    "dewpt",
+                    "sst",
+                    "rh",
+                    "cspd1",
+                    "cdir1",
+                    "cspd2",
+                    "cdir2",
+                    "cspd3",
+                    "cdir3"]
+
+    # Replace values:
+
+    df[df[data_cols].ge(9999)] = -9999
+    df[df[data_cols].eq(-9639)] = -9999
+
+    return df
+
+
+def zulu_time(df):
+    from datetime import timedelta
+
+    df.index = df.index + timedelta(hours=3)
+
+    return df
+
+
+def get_synoptic_data(df):
+
+    zulu_hours = [0, 3, 6, 9, 12, 15, 18, 21]
+    idx_zulu = df.index.hour.isin(zulu_hours)
+
+    df = df[idx_zulu]
+
+    return df
+

@@ -53,12 +53,12 @@ def connect_database_remo(server):
 def bmo_on(conn):
     import pandas as pd
 
-    query = "SELECT id_buoy FROM buoys WHERE model = 'BMO-BR' AND" \
+    query = "SELECT buoy_id FROM buoys WHERE model = 'BMO-BR' AND" \
             " status = 1;"
 
-    id_buoys = pd.read_sql_query(query, conn)
+    buoy_ids = pd.read_sql_query(query, conn)
 
-    return id_buoys
+    return buoy_ids
 
 
 def check_buoy_id(conn, bmo_name):
@@ -80,11 +80,11 @@ def check_buoy_id(conn, bmo_name):
 
     cursor = conn.cursor()
 
-    cursor.execute(f"SELECT id_buoy FROM buoys WHERE name_buoy = '{bmo_name}'")
+    cursor.execute(f"SELECT buoy_id FROM buoys WHERE name_buoy = '{bmo_name}'")
 
-    id_buoy = cursor.fetchall()
+    buoy_id = cursor.fetchall()
     cursor.close()
-    return id_buoy
+    return buoy_id
 
 
 ###############################################################################
@@ -94,7 +94,7 @@ def get_id_sat_message(conn, sat_number):
     cursor = conn.cursor()
 
     cursor.execute(f"SELECT max(id) as id FROM satellite_message"
-                   f" WHERE id_buoy = (SELECT id_buoy FROM buoys WHERE"
+                   f" WHERE buoy_id = (SELECT buoy_id FROM buoys WHERE"
 				    f" sat_number = '{sat_number}')")
 
     last_id = cursor.fetchall()
@@ -103,7 +103,7 @@ def get_id_sat_message(conn, sat_number):
     return last_id
 
 
-def insert_sat_message_xml(conn, id_buoy, df_xml):
+def insert_sat_message_xml(conn, buoy_id, df_xml):
 
 
     cursor = conn.cursor()
@@ -112,14 +112,14 @@ def insert_sat_message_xml(conn, id_buoy, df_xml):
     for i, row in df_xml[cols].iterrows():
         id_message = row['id']
         bmo_message_xml = { 'id': id_message,
-                            'id_buoy': id_buoy,
+                            'buoy_id': buoy_id,
                             'date_time': row['date'],
                             'type': row['type'],
                     }
 
         query_insert_data = """INSERT INTO satellite_message (id, type,
-                                date_time, id_buoy) VALUES
-                                (%(id)s, %(type)s, %(date_time)s, %(id_buoy)s);"""
+                                date_time, buoy_id) VALUES
+                                (%(id)s, %(type)s, %(date_time)s, %(buoy_id)s);"""
 
         try:
             cursor.execute(query_insert_data, bmo_message_xml)
@@ -145,7 +145,7 @@ def insert_sat_message_xml(conn, id_buoy, df_xml):
 
 
 
-def check_last_date(conn, table, id_buoy):
+def check_last_date(conn, table, buoy_id):
     """Short summary.
 
     Parameters
@@ -165,11 +165,11 @@ def check_last_date(conn, table, id_buoy):
     cursor = conn.cursor()
 
     if table == 'buoys':
-        cursor.execute(f"SELECT deploy_date FROM {table} WHERE id_buoy = {id_buoy}")
+        cursor.execute(f"SELECT deploy_date FROM {table} WHERE buoy_id = {buoy_id}")
         date = cursor.fetchall()
 
     else:
-        cursor.execute(f"SELECT max(date_time) FROM {table} WHERE id_buoy = {id_buoy}")
+        cursor.execute(f"SELECT max(date_time) FROM {table} WHERE buoy_id = {buoy_id}")
         date = cursor.fetchall()
 
     return date
@@ -178,7 +178,7 @@ def check_last_date(conn, table, id_buoy):
 ###############################################################################
 
 
-def get_data_table_db(conn, id_buoy, last_date, table, interval_hour):
+def get_data_table_db(conn, buoy_id, last_date, table, interval_hour):
 
     import pandas as pd
     from datetime import timedelta
@@ -186,7 +186,7 @@ def get_data_table_db(conn, id_buoy, last_date, table, interval_hour):
     # Getting data from the last x hours
     if interval_hour == "ALL":
 
-        query = f"SELECT * FROM {table} WHERE id_buoy = {id_buoy};"
+        query = f"SELECT * FROM {table} WHERE buoy_id = {buoy_id};"
 
         raw_data = pd.read_sql_query(query, conn)
 
@@ -196,7 +196,7 @@ def get_data_table_db(conn, id_buoy, last_date, table, interval_hour):
         date_period = last_date - timedelta(hours = interval_hour)
 
         query = f"SELECT * FROM {table} WHERE date_time > '{date_period}' " \
-                f" AND id_buoy = {id_buoy};"
+                f" AND buoy_id = {buoy_id};"
 
         raw_data = pd.read_sql_query(query, conn)
 
@@ -209,7 +209,7 @@ def get_data_table_db(conn, id_buoy, last_date, table, interval_hour):
 ###############################################################################
 ###############################################################################
 
-def insert_data_bmo_message(conn, bmo_message_df, id_buoy):
+def insert_data_bmo_message(conn, bmo_message_df, buoy_id):
     """
 
     @param conn: connector of Remo Database
@@ -222,7 +222,7 @@ def insert_data_bmo_message(conn, bmo_message_df, id_buoy):
     row_index = 0
     for i, row in bmo_message_df[cols].iterrows():
 
-        bmo_message_data = {'id_buoy': id_buoy,
+        bmo_message_data = {'buoy_id': buoy_id,
                             'date_time' : row['date_time'],
                             'year': row['year'],
                             'month': row['month'],
@@ -291,7 +291,7 @@ def insert_data_bmo_message(conn, bmo_message_df, id_buoy):
                             'wvdir2' : row['wvdir2']
                             }
 
-        query_insert_data = """INSERT INTO bmo_message (id_buoy, date_time,
+        query_insert_data = """INSERT INTO bmo_message (buoy_id, date_time,
         year, month, day, hour, minute, lat, lon, battery, wspd1, gust1, wdir1,
         wspd2, gust2, wdir2, atmp, rh, dewpt, pres, sst, compass, arad,
         cspd1, cdir1, cspd2, cdir2, cspd3, cdir3, cspd4, cdir4, cspd5, cdir5,
@@ -299,7 +299,7 @@ def insert_data_bmo_message(conn, bmo_message_df, id_buoy):
         cspd11, cdir11, cspd12, cdir12, cspd13, cdir13, cspd14, cdir14, cspd15,
         cdir15, cspd16, cdir16, cspd17, cdir17, cspd18, cdir18, swvht1, tp1,
         mxwvht1, wvdir1, wvspread1, swvht2, tp2, wvdir2) VALUES
-        (%(id_buoy)s, %(date_time)s, %(year)s, %(month)s, %(day)s, %(hour)s, %(minute)s,
+        (%(buoy_id)s, %(date_time)s, %(year)s, %(month)s, %(day)s, %(hour)s, %(minute)s,
         %(lat)s, %(lon)s, %(bat)s, %(wspd1)s, %(gust1)s, %(wdir1)s, %(wspd2)s,
         %(gust2)s, %(wdir2)s, %(atmp)s, %(rh)s, %(dewpt)s, %(press)s, %(sst)s,
         %(compass)s, %(arad)s, %(cspd1)s, %(cdir1)s, %(cspd2)s, %(cdir2)s,
@@ -334,7 +334,7 @@ def insert_data_bmo_message(conn, bmo_message_df, id_buoy):
 
 ###############################################################################
 
-def insert_triaxys_message(conn, triaxys_message, id_buoy):
+def insert_triaxys_message(conn, triaxys_message, buoy_id):
 
 
     cursor = conn.cursor()
@@ -343,15 +343,15 @@ def insert_triaxys_message(conn, triaxys_message, id_buoy):
 
     for i, row in triaxys_message[cols].iterrows():
 
-         triaxys_message_data = {'id_buoy': id_buoy,
+         triaxys_message_data = {'buoy_id': buoy_id,
                              'date_time' : row['date'],
                              'message': row['data']
                              }
 
 
-         query_insert = """INSERT INTO  bmo_triaxys_message (id_buoy, date_time,
-                            triaxys_message) VALUES 
-                            (%(id_buoy)s, %(date_time)s, %(message)s);"""
+         query_insert = """INSERT INTO  bmo_triaxys_message (buoy_id, date_time,
+                            triaxys_message) VALUES
+                            (%(buoy_id)s, %(date_time)s, %(message)s);"""
 
 
          try:
@@ -377,12 +377,12 @@ def insert_triaxys_message(conn, triaxys_message, id_buoy):
 
 
 
-def raw_data_bmo(conn, id_buoy, last_date_general):
+def raw_data_bmo(conn, buoy_id, last_date_general):
 
     import pandas as pd
 
     query = f"SELECT * FROM bmo_message WHERE date_time > '{last_date_general}'" \
-            f"  AND id_buoy = {id_buoy} ;"
+            f"  AND buoy_id = {buoy_id} ;"
 
     raw_data = pd.read_sql_query(query, conn)
 
@@ -404,7 +404,7 @@ def insert_data_bmo_general(conn, bmo_general_df):
     row_index = 0
     for index, row in bmo_general_df[cols].iterrows():
 
-        bmo_general_df = {'id_buoy': row['id_buoy'],
+        bmo_general_df = {'buoy_id': row['buoy_id'],
                             'id' : row['id'],
                             'date_time' : index,
                             'lat': row['lat'],
@@ -439,12 +439,12 @@ def insert_data_bmo_general(conn, bmo_general_df):
                             'wvdir2' : row['wvdir2']
                             }
 
-        query_insert_data = """INSERT INTO bmo_br (id_buoy, id,
+        query_insert_data = """INSERT INTO bmo_br (buoy_id, id,
         date_time, lat, lon, battery, wspd1, gust1, wdir1, wspd2, gust2, wdir2, atmp,
         rh, dewpt, pres, sst, compass, arad, cspd1, cdir1, cspd2, cdir2,
         cspd3, cdir3, swvht1, tp1, mxwvht1, wvdir1, wvspread1, swvht2, tp2, wvdir2)
          VALUES
-        (%(id_buoy)s, %(id)s, %(date_time)s, %(lat)s, %(lon)s, %(bat)s, %(wspd1)s,
+        (%(buoy_id)s, %(id)s, %(date_time)s, %(lat)s, %(lon)s, %(bat)s, %(wspd1)s,
         %(gust1)s, %(wdir1)s, %(wspd2)s, %(gust2)s, %(wdir2)s, %(atmp)s,
         %(rh)s, %(dewpt)s, %(pres)s, %(sst)s, %(compass)s, %(arad)s,
         %(cspd1)s, %(cdir1)s, %(cspd2)s, %(cdir2)s, %(cspd3)s, %(cdir3)s,
@@ -486,7 +486,7 @@ def insert_data_bmo_current(conn, bmo_general_df):
     row_index = 0
     for index, row in bmo_general_df[cols].iterrows():
 
-        bmo_general_df = {'id_buoy': row['id_buoy'],
+        bmo_general_df = {'buoy_id': row['buoy_id'],
                             'id' : row['id'],
                             'date_time' : index,
                             'lat': row['lat'],
@@ -529,13 +529,13 @@ def insert_data_bmo_current(conn, bmo_general_df):
                             'cdir18': row['cdir18'],
                              }
 
-        query_insert_data = """INSERT INTO bmo_br_current (id_buoy, id,
+        query_insert_data = """INSERT INTO bmo_br_current (buoy_id, id,
         date_time, lat, lon, cspd1, cdir1, cspd2, cdir2, cspd3, cdir3, cspd4, cdir4,
         cspd5, cdir5, cspd6, cdir6, cspd7, cdir7, cspd8, cdir8, cspd9, cdir9, cspd10, cdir10,
         cspd11, cdir11, cspd12, cdir12, cspd13, cdir13, cspd14, cdir14, cspd15, cdir15,
         cspd16, cdir16, cspd17, cdir17, cspd18, cdir18)
          VALUES
-        (%(id_buoy)s, %(id)s, %(date_time)s, %(lat)s, %(lon)s, %(cspd1)s, %(cdir1)s,
+        (%(buoy_id)s, %(id)s, %(date_time)s, %(lat)s, %(lon)s, %(cspd1)s, %(cdir1)s,
         %(cspd2)s, %(cdir2)s, %(cspd3)s, %(cdir3)s ,%(cspd4)s, %(cdir4)s, %(cspd5)s, %(cdir5)s,
         %(cspd6)s, %(cdir6)s ,%(cspd7)s, %(cdir7)s ,%(cspd8)s, %(cdir8)s ,%(cspd9)s, %(cdir9)s,
         %(cspd10)s, %(cdir10)s ,%(cspd11)s, %(cdir11)s ,%(cspd12)s, %(cdir12)s,
@@ -564,10 +564,10 @@ def insert_data_bmo_current(conn, bmo_general_df):
 
 
 
-def get_declination(conn, id_buoy):
+def get_declination(conn, buoy_id):
     import pandas as pd
 
-    query = (f"SELECT mag_dec, var_mag_dec FROM buoys WHERE id_buoy = {id_buoy};")
+    query = (f"SELECT mag_dec, var_mag_dec FROM buoys WHERE buoy_id = {buoy_id};")
 
     df = pd.read_sql_query(query, conn)
 
@@ -634,7 +634,7 @@ def insert_bmo_qc_data(conn, bmo_qc_data_df):
     for index, row in bmo_qc_data_df[cols].iterrows():
 
         id = int(row['id'])
-        bmo_qc_df = {'id_buoy': int(row['id_buoy']),
+        bmo_qc_df = {'buoy_id': int(row['buoy_id']),
                             'id' : id,
                             'date_time' : index,
                             'lat': row['lat'].round(6),
@@ -695,7 +695,7 @@ def insert_bmo_qc_data(conn, bmo_qc_data_df):
             if value == -9999:
                 bmo_qc_df[column] = None
 
-        query_insert_data = """INSERT INTO data_buoys (id_buoy, id,
+        query_insert_data = """INSERT INTO data_buoys (buoy_id, id,
         date_time, lat, lon, battery, wspd, gust, wdir, atmp,
         rh, dewpt, pres, sst, compass, arad, cspd1, cdir1, cspd2, cdir2,
         cspd3, cdir3, swvht1, tp1, mxwvht1, wvdir1, wvspread1, swvht2, tp2, wvdir2,
@@ -704,7 +704,7 @@ def insert_bmo_qc_data(conn, bmo_qc_data_df):
         flag_cspd2, flag_cdir2, flag_cspd3, flag_cdir3, flag_swvht1, flag_tp1,
         flag_mxwvht1, flag_wvdir1, flag_wvspread1, flag_swvht2, flag_tp2, flag_wvdir2)
          VALUES
-        (%(id_buoy)s, %(id)s, %(date_time)s, %(lat)s, %(lon)s, %(bat)s, %(wspd)s,
+        (%(buoy_id)s, %(id)s, %(date_time)s, %(lat)s, %(lon)s, %(bat)s, %(wspd)s,
         %(gust)s, %(wdir)s, %(atmp)s, %(rh)s, %(dewpt)s, %(pres)s, %(sst)s,
         %(compass)s, %(arad)s, %(cspd1)s, %(cdir1)s, %(cspd2)s, %(cdir2)s,
         %(cspd3)s, %(cdir3)s, %(swvht1)s, %(tp1)s, %(mxwvht1)s, %(wvdir1)s,
@@ -741,11 +741,11 @@ def delete_qc_data(conn_qc, pks):
 
     cursor = conn_qc.cursor()
 
-    id_buoy = pks['id_buoy'].unique()[0]
+    buoy_id = pks['buoy_id'].unique()[0]
     ids_pk = pks['id'].tolist()
 
-    query = f"DELETE FROM data_buoys WHERE id_buoy =" \
-            f" {id_buoy} AND id IN {*ids_pk,}"
+    query = f"DELETE FROM data_buoys WHERE buoy_id =" \
+            f" {buoy_id} AND id IN {*ids_pk,}"
 
     try:
         cursor.execute(query)
@@ -757,3 +757,30 @@ def delete_qc_data(conn_qc, pks):
         print("Transaction Cancelled. No data deleted.")
 
     return
+
+
+def delete_triaxys_old_data(initial_time, buoy, conn):
+
+    cur = conn.cursor()
+
+    cur.execute("DELETE FROM bmo_triaxys WHERE date_time>='%s' AND buoy_id = '%s'"% (initial_time, buoy))
+    # cur.execute("SELECT wmo FROm deriva_estacao")
+    conn.commit()
+    cur.close()
+
+def insert_triaxys_data(df):
+
+    from sqlalchemy import create_engine
+    import pandas as pd
+
+    user = USER_RAW
+    passw = PASSWORD_RAW
+    host = HOST_RAW
+    db = DATABASE_RAW
+
+    engine = create_engine(f'postgres+psycopg2://{user}:{passw}@{host}/{db}')
+
+
+    df.to_sql(con=engine, name='bmo_triaxys', if_exists='append', index=False)
+
+    print("inserted new data")

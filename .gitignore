@@ -55,6 +55,7 @@ __pycache__/
 *.tex
 historico*.txt
 simcosta_estacao.csv
+*.bufr
 
 # Files txt SMM
 smm_spotter_operantar.txt
