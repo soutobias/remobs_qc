@@ -39,6 +39,13 @@ dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
 
 x=1
 
+
+df = pd.read_csv('dados1.csv')
+
+axys_database.insert_raw_old_data_bd(df)
+
+stop
+
 for i in range(len(filenames)):
     print(filenames[i]+'.xls')
     df = pd.read_excel('dados/' + filenames[i] + '.xls')

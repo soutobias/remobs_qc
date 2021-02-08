@@ -385,6 +385,20 @@ def insert_axys_qc_data(qc_data, user_config):
 
 
 
+def insert_raw_old_adcp_bd(raw_data):
+
+    from sqlalchemy import create_engine
+
+    user = USER_RAW
+    passw = PASSWORD_RAW
+    host = HOST_RAW
+    db = DATABASE_RAW
+
+    engine = create_engine(f'postgres+psycopg2://{user}:{passw}@{host}/{db}')
+
+    raw_data.to_sql(con=engine, name='pnboia_current', if_exists='append')
+
+    print('data inserted')
 
 def insert_raw_old_data_bd(raw_data):
 
@@ -397,7 +411,7 @@ def insert_raw_old_data_bd(raw_data):
 
     engine = create_engine(f'postgres+psycopg2://{user}:{passw}@{host}/{db}')
 
-    raw_data.to_sql(con=engine, name='pnboia_general', if_exists='append')
+    raw_data.to_sql(con=engine, name='pnboia_general', if_exists='append', index=False)
 
     print('data inserted')
 
