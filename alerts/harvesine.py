@@ -91,10 +91,10 @@ def haversine(coord1: object, coord2: object):
     nm = round(nm, 1)
     yard = round(yard, 1)
 
-    print(f"Distance: {meters} m")
-    print(f"Distance: {km} km")
-    print(f"Distance: {nm} nautic miles")
-    print(f"Distance: {yard} yards")
+    # print(f"Distance: {meters} m")
+    # print(f"Distance: {km} km")
+    # print(f"Distance: {nm} nautic miles")
+    # print(f"Distance: {yard} yards")
 
     return {'km':km, 'meters':meters, 'nm':nm, 'yards':yard}
 
@@ -102,19 +102,21 @@ def haversine(coord1: object, coord2: object):
 
 
 
-def safe_position(radius_safe, distance_from_point):
+def safe_position(radius_safe, distance_from_point, window):
     """Check if distance of currently position is greater than safe distance
        radius and distance in METERS"""
 
+    window_meters = radius_safe * window
+    radius_plus_window = radius_safe + window_meters
+    radius_minus_window = radius_safe - window_meters
 
-    if distance_from_point < radius_safe:
+    if distance_from_point <= radius_minus_window:
         situation = ["Buoy in Position", "OK"]
 
-    elif distance_from_point > radius_safe:
+    elif distance_from_point >= radius_plus_window:
         situation = ["Buoy Out Position!", "ALERT"]
 
-    elif distance_from_point == radius_safe:
-        # Probably we will never see this case in real
+    elif distance_from_point < radius_plus_window and distance_from_point > radius_minus_window:
         situation = ["Buoy on Limit Position", "ON LIMIT"]
 
     return situation
