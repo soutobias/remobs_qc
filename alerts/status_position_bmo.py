@@ -31,7 +31,7 @@ lon_in, lat_in = find_outer_points(pts_lon_bmo, pts_lat_bmo, center_lon, center_
 
 center_lon2, center_lat2 = find_centroid(lon_in, lat_in)
 
-safe_circle, safe_range_bmo_lat, safe_range_bmo_lon = safe_range_circle(center_lon, center_lat, 1250)
+safe_circle, safe_range_bmo_lat, safe_range_bmo_lon = safe_range_circle(center_lon, center_lat, 1500)
 
 
 
