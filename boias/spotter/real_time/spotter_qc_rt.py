@@ -47,16 +47,12 @@ for buoy_id in spotters_on_ids['buoy_id']:
     flag_data = qualitycontrol(raw_data)
     print("Spotter Data Qualified!")
     print("\n")
-
-    print("Rotating Data...")
-    spotter_qc_data = rotate_data(conn, raw_data, flag_data, buoy_id)
-    print("\n")
     print("Done!")
     print("\n")
 
     flag_data = rename_flag_data(flag_data)
 
-    spotter_qc_data = pd.merge(spotter_qc_data, flag_data, how = 'outer',
+    spotter_qc_data = pd.merge(raw_data, flag_data, how = 'outer',
                                on = 'date_time', validate = 'one_to_one' )
 
 
