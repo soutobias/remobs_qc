@@ -62,7 +62,7 @@ for i in range(len(buoys)):
 
         print('BUFR file created for buoy ' + buoys['name_buoy'][i] + '!')
 
-        add_preamble = "pybufrkit decode %s.bufr | pybufrkit encode - %s_1.bufr --preamble 'IOBI01 SBBR %s\r\r\n'" % (name_buoy, name_buoy, datetime.now().strftime("%d%H00"))
+        add_preamble = "pybufrkit decode %s.bufr | pybufrkit encode - %s.bufr --preamble 'IOBI01 SBBR %s\r\r\n'" % (name_buoy, name_buoy, datetime.now().strftime("%d%H00"))
         download_status = os.system(add_preamble)
         print('BUFR preamble added!')
     except:
