@@ -263,7 +263,7 @@ def bufrSection3(df):
     bufrSection3List.append(np.binary_repr(126, 8)) # 3 01 126
 
     # Octect 10-11
-    if df['model'][0] == "SPOT-0222":
+    if df['model'][0] == "Spotter":
         bufrSection3List.append(np.binary_repr(3, 2))
         bufrSection3List.append(np.binary_repr(2, 6))
         bufrSection3List.append(np.binary_repr(42, 8)) # 3 02 042
@@ -273,7 +273,7 @@ def bufrSection3(df):
         bufrSection3List.append(np.binary_repr(38, 8)) # 3 06 038
 
     # Octect 12-13
-    if df['model'][0] == "SPOT-0222":
+    if df['model'][0] == "Spotter":
         bufrSection3List.append(np.binary_repr(3, 2))
         bufrSection3List.append(np.binary_repr(2, 6))
         bufrSection3List.append(np.binary_repr(21, 8)) # 3 02 021
@@ -283,7 +283,7 @@ def bufrSection3(df):
         bufrSection3List.append(np.binary_repr(39, 8)) # 3 06 039
 
     # Octect 14-15
-    if df['model'][0] == "SPOT-0222":
+    if df['model'][0] == "Spotter":
         bufrSection3List.append(np.binary_repr(3, 2))
         bufrSection3List.append(np.binary_repr(2, 6))
         bufrSection3List.append(np.binary_repr(56, 8)) # 3 02 056
@@ -353,7 +353,7 @@ def bufr_section4(df):
     # 6 bits - 18 = 3-metre Discus
     if df['model'][0] == "BMO-BR":
         section4_subset1.append(18)
-    elif df['model'][0] == "SPOT-0222":
+    elif df['model'][0] == "Spotter":
         section4_subset1.append(9)
 
     ############################################################
@@ -602,7 +602,7 @@ def bufrSection4(df):
     # 6 bits - 18 = 3-metre Discus
     if df['model'][0] == "BMO-BR":
         bufrSection4List.append(np.binary_repr(18, 6))
-    elif df['model'][0] == "SPOT-0222":
+    elif df['model'][0] == "Spotter":
         bufrSection4List.append(np.binary_repr(9, 6))
 
     ############################################################
@@ -650,7 +650,7 @@ def bufrSection4(df):
     bufrSection4List.append(np.binary_repr(lonScaled, 26))
 
 
-    if df['model'][0] != "SPOT-0222":
+    if df['model'][0] != "Spotter":
         ############################################################
         ############################################################
         # 306038  - STDMET for Moored Buoys {includes subsets}
@@ -833,7 +833,7 @@ def bufrSection4(df):
         bufrSection4List.append(np.binary_repr(0 * 10, 12))
 
 
-    if df['model'][0] != "SPOT-0222":
+    if df['model'][0] != "Spotter":
         ############################################################
         ############################################################
         # Wave Measurements
@@ -902,7 +902,7 @@ def bufrSection4(df):
         bufrSection4List.append(np.binary_repr(WvhtScaled, 10))
 
 
-    if df['model'][0] != "SPOT-0222":
+    if df['model'][0] != "Spotter":
         ############################################################
         ###Currents measurements
         ############################################################
