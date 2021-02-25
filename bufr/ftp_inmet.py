@@ -24,6 +24,6 @@ for bufr_file in bufr_files:
     send_file = ftp.storbinary('STOR %s' % bufr_file, ftp_file, 1024)
     ftp_file.close()
     if send_file == "226 Transfer complete.":
-        print("f{bufr_file} sent to INMET FTP.")
+        print(f"{bufr_file} sent to INMET FTP.")
         os.remove(bufr_file)
         print(f"{bufr_file} removed!")
