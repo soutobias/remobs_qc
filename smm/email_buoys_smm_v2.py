@@ -19,24 +19,22 @@ from user_config import EMAIL_FROM, EMAIL_TO, EMAIL_BUOYS_SUBJECT, EMAIL_BUOYS_C
 ###################################################
 #### SPOTTER
 
-file_spotter = pd.read_csv(EMAIL_BUOYS_FILES[0])
+#file_spotter = pd.read_csv(EMAIL_BUOYS_FILES[0])
 
-start_date_spotter = min(file_spotter['Datetime'])
-last_date_spotter = max(file_spotter['Datetime'])
+#start_date_spotter = min(file_spotter['Datetime'])
+#last_date_spotter = max(file_spotter['Datetime'])
 
 ###################################################
 #### BMO BR
 
-file_bmo = pd.read_csv(EMAIL_BUOYS_FILES[1])
+file_bmo = pd.read_csv(EMAIL_BUOYS_FILES[0])
 
 start_date_bmo = min(file_bmo['Datetime'])
 last_date_bmo = max(file_bmo['Datetime'])
 
 
-CONTENT = EMAIL_BUOYS_CONTENT.format(start_date_spotter = start_date_spotter,
-                                       end_date_spotter = last_date_spotter,
-                                       start_date_bmo = start_date_bmo,
-                                       end_date_bmo = last_date_bmo)
+CONTENT = EMAIL_BUOYS_CONTENT.format(start_date_bmo = start_date_bmo,
+                                      end_date_bmo = last_date_bmo)
 
 
 
