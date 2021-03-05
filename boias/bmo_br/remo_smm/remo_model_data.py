@@ -11,7 +11,7 @@ import io
 import remo_model_db
 
 from user_config import URL_MODEL_BMO_GFS, URL_MODEL_BMO_ICON, \
-    URL_MODEL_BMO_COSMO
+    URL_MODEL_BMO_COSMO, SMM_LOGIN, SMM_PSW
 
 '''
 
@@ -51,7 +51,7 @@ for model in models:
 
             url = models[model] + date_url + '.txt'
 
-            response = requests.get(url, verify=False)
+            response = requests.get(url, auth=(SMM_LOGIN,SMM_PSW), verify=False)
 
             if response.ok:
 
@@ -119,7 +119,7 @@ for model in models:
 
             url = models[model] + date_url + '.txt'
 
-            response = requests.get(url, verify=False)
+            response = requests.get(url, auth=(SMM_LOGIN,SMM_PSW), verify=False)
 
             if response.ok:
 
