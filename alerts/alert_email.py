@@ -93,7 +93,7 @@ ax.add_feature(cfeature.COASTLINE)
 ax.set_xlim(float(pts_bmo['lon'][0])-0.08, float(pts_bmo['lon'][0])+0.08)
 ax.set_ylim(float(pts_bmo['lat'][0])-0.08, float(pts_bmo['lat'][0])+0.08)
 bmo_points = ax.plot(pts_lon_bmo,pts_lat_bmo, c='r', marker='o' ,label = 'BMO')
-bmo_points_inside = ax.plot(lon_inside, lat_inside, c='r', marker='o' ,label = 'BMO IN')
+#bmo_points_inside = ax.plot(lon_inside, lat_inside, c='r', marker='o' ,label = 'BMO IN')
 ## BORDER POINTS
 bmo_points_border = ax.plot(lon_in, lat_in, c='r', marker='o' ,label = 'BMO BORDER')
 #axys_point = ax.plot(pts_lon_axys, pts_lat_axys, c = 'b', marker = 'o', label = 'AXYS')

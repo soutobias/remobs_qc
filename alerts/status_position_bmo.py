@@ -1,3 +1,12 @@
+import os
+import sys
+
+home_path = os.environ['HOME']
+cwd_path = home_path + '/remobs_qc/alerts/'
+
+sys.path.append(cwd_path)
+sys.path.append(home_path)
+
 
 import numpy as np
 from bd_system import db_remo
@@ -23,7 +32,7 @@ bmo_now = [float(bmo_now['lon']), float(bmo_now['lat'])]
 
 
 
-pts_bmo = conn.last_positions('BMO', 2, 1300)
+pts_bmo = conn.last_positions('BMO', 2, 1600)
 pts_lat_bmo = (pts_bmo['lat'].values).astype(np.float)
 pts_lon_bmo = (pts_bmo['lon'].values).astype(np.float)
 
@@ -33,7 +42,7 @@ coords_bmo = [[pts_lon_bmo[p],pts_lat_bmo[p]] for p in range(len(pts_lat_bmo))]
 safe_radius = radius_buoy(2164, 2100,300,27.5,15)
 center_lon, center_lat = find_centroid(pts_lon_bmo, pts_lat_bmo)
 
-#new_center_lon , new_center_lat = find_centroid(outer_points_lon, outer_points_lat)
+new_center_lon , new_center_lat = find_centroid(outer_points_lon, outer_points_lat)
 
 #lon_in, lat_in = find_outer_points(pts_lon_bmo, pts_lat_bmo, center_lon, center_lat)
 
@@ -43,7 +52,7 @@ hav_bmo = haversine(bmo_spot, bmo_now)
 
 safe_circle, safe_range_bmo_lat, safe_range_bmo_lon = safe_range_circle(center_lon, center_lat, 1500)
 
-new_safe_circle, new_safe_range_bmo_lat, new_safe_range_bmo_lon = safe_range_circle(new_center_lon, new_center_lat, 1300)
+#new_safe_circle, new_safe_range_bmo_lat, new_safe_range_bmo_lon = safe_range_circle(new_center_lon, new_center_lat, 1300)
 
 
 # PLOT
@@ -65,7 +74,7 @@ ax.add_feature(cfeature.COASTLINE)
 
 ax.set_xlim(float(center_lon)-0.03, float(center_lon)+0.03)
 ax.set_ylim(float(center_lat)-0.03, float(center_lat)+0.03)
-#bmo_points = ax.plot(pts_lon_bmo,pts_lat_bmo, c='r', marker='o' ,label = 'BMO', alpha=0.2)
+bmo_points = ax.plot(pts_lon_bmo,pts_lat_bmo, c='r', marker='o' ,label = 'BMO', alpha=0.2)
 
 ## BORDER POINTS
 #axys_point = ax.plot(pts_lon_axys, pts_lat_axys, c = 'b', marker = 'o', label = 'AXYS')
@@ -76,10 +85,10 @@ bmo_distance = ax.plot([bmo_now[0],center_lon], [bmo_now[1],center_lat], c='g')
 bmo_text = ax.annotate(str(hav_bmo['meters']) + ' m', xy = ((bmo_now[0] + bmo_spot[0])/2, (bmo_now[1] + bmo_spot[1])/2),
                                 xytext=((bmo_now[0] + bmo_spot[0])/2, (bmo_now[1] + bmo_spot[1])/2),
                                 bbox=dict(boxstyle="round", fc=(0, 0, 0), ec="none"),c = 'w')
-hull_plot = ax.plot(points[hull.vertices, 0], points[hull.vertices, 1], 'g.', lw=1)
+#hull_plot = ax.plot(points[hull.vertices, 0], points[hull.vertices, 1], 'g.', lw=1)
 ## Radius Safe BMO
 range_bmo = ax.plot(safe_range_bmo_lon, safe_range_bmo_lat,c='k', marker = '.', label = 'Safe Circle')
-new_range_bmo = ax.plot(new_safe_range_bmo_lon, new_safe_range_bmo_lat,c='w', marker = '.', label = 'NEW_Safe Circle')
+#new_range_bmo = ax.plot(new_safe_range_bmo_lon, new_safe_range_bmo_lat,c='w', marker = '.', label = 'NEW_Safe Circle')
 fill_range = ax.fill(safe_range_bmo_lon, safe_range_bmo_lat, c='w', alpha=0.3)
 #Estimated center point:
 
@@ -92,7 +101,7 @@ point_text = ax.annotate(str(abs(bmo_now[1])) + ' °S \n' + str(abs(bmo_now[0]))
 
 
 center_bmo = ax.plot(center_lon, center_lat,c='k', marker = '.', label = 'CENTER_BMO')
-new_center_bmo = ax.plot(new_center_lon, new_center_lat,c='b', marker = '.', label = 'NEW_CENTER_BMO')
+#new_center_bmo = ax.plot(new_center_lon, new_center_lat,c='b', marker = '.', label = 'NEW_CENTER_BMO')
 
 
 
