@@ -13,14 +13,6 @@ from bd_tag_wl import db_tag
 from user_config import WL_URL, WL_ACCESS_KEY, WL_SECRET_KEY, WL_PPTS
 
 
-
-# adapt float to int in pg2
-import numpy
-from psycopg2.extensions import register_adapter, AsIs
-def addapt_numpy_float64(numpy_float64):
-    return AsIs(numpy_float64)
-    
-register_adapter(numpy.float64, addapt_numpy_float64)
 # prepare request
 
 
@@ -34,7 +26,7 @@ headers = {'X-Access':WL_ACCESS_KEY,
 for tag_ppt in WL_PPTS:
 
 
-    tag_buoy_id = db_tag().get_buoy_tag(tag_ppt)['buoy_id'][0]
+    tag_buoy_id = int(db_tag().get_buoy_tag(tag_ppt)['buoy_id'][0])
 
     print(f"Getting data from: \n \
     tag number: {tag_ppt} \n \
