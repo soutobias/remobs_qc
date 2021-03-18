@@ -13,6 +13,14 @@ from bd_tag_wl import db_tag
 from user_config import WL_URL, WL_ACCESS_KEY, WL_SECRET_KEY, WL_PPTS
 
 
+
+# adapt float to int in pg2
+import numpy
+from psycopg2.extensions import register_adapter, AsIs
+def addapt_numpy_float64(numpy_float64):
+    return AsIs(numpy_float64)
+    
+register_adapter(numpy.float64, addapt_numpy_float64)
 # prepare request
 
 
