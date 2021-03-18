@@ -52,7 +52,7 @@ for tag_ppt in WL_PPTS:
         if response.status_code == 200:
             # Get your data...
             print("Connected to WilfLife.")
-            xml = BeautifulSoup(response.content)
+            xml = BeautifulSoup(response.content, features='lxml')
 
             last_time = int(xml.find('location_date').text)
             latitude = float(xml.find('latitude').text)
