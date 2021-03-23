@@ -67,7 +67,7 @@ for tag_ppt in WL_PPTS:
 
             if last_date_time.iloc[0][0] == None or last_date_time.iloc[0][0] < date_time:
 
-                data_dict = dict({'tag_id':WL_PPTS,
+                data_dict = dict({'tag_id':tag_ppt,
                                   'latitude': latitude,
                                   'longitude': longitude,
                                   'date_time': date_time})
