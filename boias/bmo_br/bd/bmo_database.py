@@ -657,7 +657,7 @@ def insert_bmo_qc_data(conn, bmo_qc_data_df):
                             'cspd3': row['cspd3'].round(2),
                             'cdir3': int(row['cdir3']),
                             'swvht1' : row['swvht1'].round(2),
-                            'tp1' : row['tp1'].round(),
+                            'tp1' : row['tp1'].round(1),
                             'mxwvht1' : row['mxwvht1'].round(2),
                             'wvdir1' : int(row['wvdir1']),
                             'wvspread1' : int(row['wvspread1']),
