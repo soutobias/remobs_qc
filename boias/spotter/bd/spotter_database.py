@@ -170,8 +170,8 @@ def insert_spotter_general(conn, spotter_df, buoy_id):
 
 
         cursor.execute("""INSERT INTO spotter_general (buoy_id, date_time, lat, lon,
-                    sst, swvht, tp, mean_tp, pk_dir, pk_wvspread,
-                    wvdir, wvspread, wspd, wdir, sea_surface_id) VALUES
+                    sst, swvht, tp, mean_tp, pk_dir, wvdir, pk_wvspread,
+                    wvspread, wspd, wdir, sea_surface_id) VALUES
                     (%(buoy_id)s, %(date)s, %(lat)s, %(lon)s, %(sst)s,%(swvht)s,
                     %(tp)s, %(mean_tp)s, %(pk_dir)s, %(wvdir)s, 
                     %(pk_wvspread)s, %(wvspread)s,%(wspd)s, %(wdir)s,
