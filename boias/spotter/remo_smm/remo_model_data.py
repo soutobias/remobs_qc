@@ -14,8 +14,8 @@ import io
 import remo_model_db
 from user_config import URL_MODEL_SPOTTER_GFS_ICON, URL_MODEL_SPOTTER_GFS, URL_MODEL_SPOTTER_ICON
 
-models = {'ICON':URL_MODEL_SPOTTER_GFS,
-          'GFS':URL_MODEL_SPOTTER_ICON,
+models = {'ICON':URL_MODEL_SPOTTER_ICON,
+          'GFS':URL_MODEL_SPOTTER_GFS,
           'GFS+ICON':URL_MODEL_SPOTTER_GFS_ICON}
 
 for model in models:
