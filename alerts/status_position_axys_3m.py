@@ -67,17 +67,17 @@ import matplotlib.pyplot as plt
 import cartopy.feature as cfeature
 
 
-
-
 ##### PLOT
+
+
 ### BMO PLOT
 ax = plt.axes(projection=ccrs.PlateCarree())
 ax.set(facecolor = "#5ACEFF")
 ax.add_feature(cfeature.LAND)
 ax.add_feature(cfeature.COASTLINE)
 
-ax.set_xlim(float(center_lon)-1, float(center_lon)+1)
-ax.set_ylim(float(center_lat)-1, float(center_lat)+1)
+ax.set_xlim(float(center_lon)-0.4, float(center_lon)+0.4)
+ax.set_ylim(float(center_lat)-0.4, float(center_lat)+0.4)
 axys3m_points = ax.plot(pts_lon_axys3m,pts_lat_axys3m, c='r', marker='o' ,label = 'AXYS-3M', alpha=0.2)
 
 ## BORDER POINTS
@@ -96,8 +96,8 @@ range_axys3m = ax.plot(safe_range_axys3m_lon, safe_range_axys3m_lat,c='k', marke
 fill_range = ax.fill(safe_range_axys3m_lon, safe_range_axys3m_lat, c='w', alpha=0.3)
 #Estimated center point:
 
-point_text = ax.annotate(str(abs(axys3m_now[1])) + ' °S \n' + str(abs(axys3m_now[0])) + ' °W \n' + str(last_time), xy = (axys3m_now[0]+0.0002, axys3m_now[1]),
-                                xytext=(axys3m_now[0]+0.001, axys3m_now[1]),
+point_text = ax.annotate(str(abs(axys3m_now[1])) + ' °S \n' + str(abs(axys3m_now[0])) + ' °W \n' + str(last_time), xy = (axys3m_now[0]+0.0004, axys3m_now[1]),
+                                xytext=(axys3m_now[0]+0.005, axys3m_now[1]),
                                 bbox=dict(boxstyle="round", fc=(0, 0, 0), ec="none"),c = 'w')
 ###
 #far_points = incremental_farthest_search(safe_circle, 2)
