@@ -34,7 +34,9 @@ axys3m_now = [float(axys3m_now['lon']), float(axys3m_now['lat'])]
 
 
 
-pts_axys3m = conn.last_positions_by_tag(1,60)
+pts_axys3m = conn.last_positions_by_tag(1,70)
+
+
 pts_lat_axys3m = (pts_axys3m['lat'].values).astype(np.float)
 pts_lon_axys3m = (pts_axys3m['lon'].values).astype(np.float)
 
@@ -44,6 +46,7 @@ coords_axys = [[pts_lon_axys3m[p],pts_lat_axys3m[p]] for p in range(len(pts_lat_
 
 
 # Safe_Radius
+
 safe_radius = radius_buoy(2164, 2100,300,27.5,15)
 center_lon, center_lat = find_centroid(pts_lon_axys3m, pts_lat_axys3m)
 
@@ -51,9 +54,17 @@ center_lon, center_lat = find_centroid(pts_lon_axys3m, pts_lat_axys3m)
 
 #lon_in, lat_in = find_outer_points(pts_lon_bmo, pts_lat_bmo, center_lon, center_lat)
 
-#axys3m_spot = [center_lon, center_lat]
+
+
+center_lon = -43.22003064516129
+center_lat = -25.85692258064516
+
+axys3m_spot = [center_lon, center_lat]
+
 
 hav_axys3m = haversine(axys3m_spot, axys3m_now)
+
+
 
 safe_circle, safe_range_axys3m_lat, safe_range_axys3m_lon = safe_range_circle(center_lon, center_lat, 3000)
 
