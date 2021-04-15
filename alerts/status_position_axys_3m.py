@@ -87,8 +87,8 @@ ax.set(facecolor = "#5ACEFF")
 ax.add_feature(cfeature.LAND)
 ax.add_feature(cfeature.COASTLINE)
 
-ax.set_xlim(float(center_lon)-0.4, float(center_lon)+0.4)
-ax.set_ylim(float(center_lat)-0.4, float(center_lat)+0.4)
+ax.set_xlim(float(center_lon)-0.4, float(center_lon)+0.6)
+ax.set_ylim(float(center_lat)-0.4, float(center_lat)+0.6)
 axys3m_points = ax.plot(pts_lon_axys3m,pts_lat_axys3m, c='r', marker='o' ,label = 'AXYS-3M', alpha=0.2)
 
 ## BORDER POINTS
@@ -115,7 +115,7 @@ point_text = ax.annotate(str(abs(axys3m_now[1])) + ' °S \n' + str(abs(axys3m_no
 
 
 
-center_axys3m = ax.plot(center_lon, center_lat,c='k', marker = '.', label = 'CENTER_AXYS')
+center_axys3m = ax.plot(center_lon, center_lat,c='orange', marker = '.', label = 'CENTER_AXYS')
 #new_center_bmo = ax.plot(new_center_lon, new_center_lat,c='b', marker = '.', label = 'NEW_CENTER_BMO')
 
 
