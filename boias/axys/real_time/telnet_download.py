@@ -137,3 +137,45 @@ def download_raw_data(argos_id, user_config):
         raw_data[i][3] = datetime.datetime.strptime(raw_data[i][3] + " " + raw_data[i][4], '%Y-%m-%d %H:%M:%S')
 
     return raw_data
+
+def download_raw_tag(argos_id, user_config):
+    program = "05655"
+    out = []
+    command = "PRV,5655,DS,,"
+    usern = user_config.pnboia_user
+    passw = user_config.pnboia_psw
+
+    try:
+        tn = Telnet(user_config.pnboia_telnet)
+    except :
+        pass
+
+    #---Login
+
+    try:
+        tn.read_until(b"Username: ")
+        tn.write(usern.encode('ascii') + b"\n")
+
+        tn.read_until(b"Password: ")
+        tn.write(passw.encode('ascii') + b"\n")
+
+        print ("Successful connect to the server...")# ,tn.read_until('SERVER', 5)
+        print ("Collecting data from argos_id " + str(argos_id) + "...")
+
+    except:
+        pass
+
+    #---command para coleta de telnet_data
+    #print command
+    print(str(command) + str(argos_id) + "\n\r")
+    tn.write(passw.encode('ascii') + b"\n")
+    command = command + str(argos_id)
+    tn.write(command.encode('ascii') + b"\n")
+
+    telnet_data = tn.read_until(b'SERVER', 5)
+    print ("Receive data: \n\r")
+    tn.close()
+    telnet_data = telnet_data.decode("utf-8")
+    regex = '\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} -\d{2}.\d{3}. \d{3}.\d{3}'
+    values = re.findall(regex, raw_data)
+    return values
