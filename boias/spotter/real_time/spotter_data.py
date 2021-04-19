@@ -180,18 +180,31 @@ for n_buoy in range(len(devices)):
         # sst data, if exists:
 
             if 'surfaceTemp' in spt_data.keys():
+
                 sst = pd.json_normalize(spt_data, record_path=['surfaceTemp'], meta=['spotterId'])
-                sst_spotter = sst[['degrees','timestamp']]
 
-                sst_spotter.loc[:,'timestamp'] = pd.to_datetime(sst_spotter.loc[:,'timestamp'], format = format_date)
-                sst_spotter = sst_spotter.loc[sst_spotter['timestamp'] > start_date]
+                if not sst.empty:
+                
+                    sst_spotter = sst[['degrees','timestamp']]
 
-                spotter_general = spotter_general.merge(sst_spotter,
-                                                        on = 'timestamp',
-                                                        how = 'outer')
+                    sst_spotter.loc[:,'timestamp'] = pd.to_datetime(sst_spotter.loc[:,'timestamp'], format = format_date)
+                    sst_spotter = sst_spotter.loc[sst_spotter['timestamp'] > start_date]
 
+                    spotter_general = spotter_general.merge(sst_spotter,
+                                                            on = 'timestamp',
+                                                            how = 'outer')
 
+                else:
 
+                    sst_spotter = pd.DataFrame({'timestamp':waves['timestamp'],
+                                                'degrees':[np.nan]*len(waves['timestamp'])})
+
+                    sst_spotter.loc[:,'timestamp'] = pd.to_datetime(sst_spotter.loc[:,'timestamp'], format= format_date)
+
+            spotter_general = spotter_general.merge(sst_spotter,
+                                                    on='timestamp',
+                                                    how='outer')
+                
 
             spotter_general.rename(columns = {'speed': 'wspd',
                                               'direction': 'wdir',
