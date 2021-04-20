@@ -200,10 +200,9 @@ for n_buoy in range(len(devices)):
                                                 'degrees':[np.nan]*len(waves['timestamp'])})
 
                     sst_spotter.loc[:,'timestamp'] = pd.to_datetime(sst_spotter.loc[:,'timestamp'], format= format_date)
-
-            spotter_general = spotter_general.merge(sst_spotter,
-                                                    on='timestamp',
-                                                    how='outer')
+                    spotter_general = spotter_general.merge(sst_spotter,
+                                                            on='timestamp',
+                                                            how='outer')
                 
 
             spotter_general.rename(columns = {'speed': 'wspd',
