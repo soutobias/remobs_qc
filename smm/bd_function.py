@@ -73,7 +73,7 @@ def get_data_spotter(conn, buoy_id, table, last_date, interval_hour):
     if interval_hour == "ALL":
 
         query = f"""SELECT {spotter_vars_str} FROM {table} WHERE buoy_id = {buoy_id} AND 
-        date_time > '2020-12-05 19:30:00';"""
+        date_time > '2021-04-18';"""
 
         data_spotter = pd.read_sql_query(query, conn)
 
