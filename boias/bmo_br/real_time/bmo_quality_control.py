@@ -7,9 +7,13 @@ import sys
 import os
 
 home_path = os.environ['HOME']
-abs_dir = os.path.dirname(os.getcwd())
-limits_path = os.path.join(abs_dir, 'boias', 'bmo_br', 'limits')
-qc_path = os.path.join(abs_dir, 'qc_checks')
+limits_path = home_path + '/remobs_qc/boias/bmo_br/limits'
+qc_path = home_path + '/remobs_qc/qc_checks'
+
+
+#abs_dir = os.path.dirname(os.getcwd())
+#limits_path = os.path.join(abs_dir, 'boias', 'bmo_br', 'limits')
+#qc_path = os.path.join(abs_dir, 'qc_checks')
 
 sys.path.append(limits_path)
 sys.path.append(qc_path)
