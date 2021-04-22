@@ -7,7 +7,7 @@ import sys
 import os
 
 home_path = os.environ['HOME']
-abs_dir = os.path.dirname(os.getcwd())
+abs_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 limits_path = os.path.join(abs_dir, 'boias', 'bmo_br', 'limits')
 qc_path = os.path.join(abs_dir, 'qc_checks')
 
@@ -107,7 +107,6 @@ def qualitycontrol(df, buoy):
 
 
 
-
    #Frontal passage exception 1 for time continuity
     flag_data = qc.front_except_check1(df, flag_data, "wdir", "atmp")
     # (Wdirflag,Wdirflagid)=qc.frontexcepcheck2(Epoch,Wdir,Wdirflag,Atmpflag,Atmpflagid)
@@ -142,6 +141,9 @@ def qualitycontrol_adcp(df, buoy):
 
     flag_data = definition_flag_pandas_adcp(df)
 
+    df = df[~df.index.duplicated(keep='first')]
+    flag_data = flag_data[~flag_data.index.duplicated(keep='first')]
+
     ##############################################
     #RUN THE QC CHECKS
     ##############################################
@@ -149,55 +151,38 @@ def qualitycontrol_adcp(df, buoy):
 
     for parameter in parameters:
         # missing value checks
-        if parameter[0:4] == cspd:
-            df[parameter] = df[parameter] * 1000
-        flag_data = qc.mis_value_check(df, limits.mis_value_limits, flag_data, parameter)
+        if parameter[0:4] == 'cspd':
+            df.loc[df[parameter] != -9999, parameter] =  df.loc[df[parameter] != -9999, parameter] * 1000
+        flag_data = qc.mis_value_check(df.copy(), limits.mis_value_limits, flag_data, parameter)
         # coarse range check
-        flag_data = qc.range_check(df, limits.range_limits, flag_data, parameter)
+        flag_data = qc.range_check(df.copy(), limits.range_limits, flag_data, parameter)
         # soft range check
-        flag_data = qc.range_check_climate(df, limits.climate_limits, flag_data, parameter)
-        # soft range check
-       # flag_data = qc.range_check_std(df, limits.std_mean_values, flag_data, parameter)
-
-    #Stucksensorcheck
-    for parameter in parameters:
+        flag_data = qc.range_check_climate(df.copy(), limits.climate_limits, flag_data, parameter)
         flag_data = qc.stuck_sensor_check(df, limits.stuck_limits, flag_data, parameter)
 
-    #Time continuity check
-    flag_data = qc.t_continuity_check(df, limits.sigma_limits, limits.continuity_limits, flag_data, "swvht1")
-    flag_data = qc.t_continuity_check(df, limits.sigma_limits, limits.continuity_limits, flag_data, "swvht2")
-    flag_data = qc.t_continuity_check(df, limits.sigma_limits, limits.continuity_limits, flag_data, "rh")
-    flag_data = qc.t_continuity_check(df, limits.sigma_limits, limits.continuity_limits, flag_data, "pres")
-    flag_data = qc.t_continuity_check(df, limits.sigma_limits, limits.continuity_limits, flag_data, "atmp")
-    flag_data = qc.t_continuity_check(df, limits.sigma_limits, limits.continuity_limits, flag_data, "wspd")
-    flag_data = qc.t_continuity_check(df, limits.sigma_limits, limits.continuity_limits, flag_data, "sst")
+    for i in range(20):
+        value = str(i +1)
+        try:
+            (df['uu'],df['vv'])=intdir2uv(df['cspd' + value], df['cdir' + value])
+            flag_data = qc.tcontinuityadcpcheck(df.copy(), limits.adcp_limits, 3, flag_data, ['uu', "cspd" + value])
+            flag_data = qc.tcontinuityadcpcheck(df.copy(), limits.adcp_limits, 3, flag_data, ['vv', "cspd" + value])
+        except:
+            print('no data for cspd' + value)
 
-   #Frontal passage exception 1 for time continuity
-    flag_data = qc.front_except_check1(df, flag_data, "wdir", "atmp")
-    # (Wdirflag,Wdirflagid)=qc.frontexcepcheck2(Epoch,Wdir,Wdirflag,Atmpflag,Atmpflagid)
+    print("BMO ADCP Data Qualified!")
 
-    #Frontal passage exception 3 for time continuity
-    flag_data = qc.front_except_check3(df, flag_data, "wspd", "atmp")
-
-
-    # stop
-
-    # #Frontal passage exception 4 for time continuity
-    #flag_data = qc.front_except_check4(df, flag, 'pres', 'wspd')
-
-    # #Frontal passage exception 5 for time continuity
-    # flag_data["pres"] = qc.front_except_check5(df["pres"], flag_data["pres"])
-
-    # #Frontal passage exception 6 for time continuity
-    # flag_data["swvht"] = qc.front_except_check6(df["wspd"], flag_data[["wspd", "swvht"]])
-
-
-    # #related measurement check
-    # flag_data[["cspd1","cdir1"]] = qc.front_except_check6(flag_data[["cspd1", "cdir1"]])
-    # flag_data[["cspd2","cdir2"]] = qc.front_except_check6(flag_data[["cspd2", "cdir2"]])
-    # flag_data[["cspd3","cdir3"]] = qc.front_except_check6(flag_data[["cspd3", "cdir3"]])
-    # flag_data[["gust","wspd", "wdir"]] = qc.front_except_check6(flag_data[["gust","wspd", "wdir"]])
-
-    print("BMO Data Qualified!")
+    df = df.replace(-9999, np.nan)
 
     return flag_data, df
+
+def intdir2uv(intensidade, direcao):
+
+    import numpy as np
+
+    direcao = np.mod(direcao,360)
+    direcao = direcao*np.pi/180
+
+    u=intensidade*np.sin(direcao)
+    v=intensidade*np.cos(direcao)
+
+    return u, v

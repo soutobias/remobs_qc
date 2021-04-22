@@ -196,3 +196,9 @@ std_mean_values = {
 stuck_limits = 7
 
 continuity_limits = 3
+
+adcp_limits = {
+    '1': {'hard': 132, 'soft': 113},
+    '2': {'hard': 194, 'soft': 166},
+    '3': {'hard': 250, 'soft': 214},
+    }

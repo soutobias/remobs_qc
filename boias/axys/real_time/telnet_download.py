@@ -138,6 +138,7 @@ def download_raw_data(argos_id, user_config):
 
     return raw_data
 
+
 def download_raw_tag(argos_id, user_config):
     program = "05655"
     out = []
@@ -177,5 +178,5 @@ def download_raw_tag(argos_id, user_config):
     tn.close()
     telnet_data = telnet_data.decode("utf-8")
     regex = '\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} -\d{2}.\d{3}. \d{3}.\d{3}'
-    values = re.findall(regex, raw_data)
+    values = re.findall(regex, telnet_data)
     return values

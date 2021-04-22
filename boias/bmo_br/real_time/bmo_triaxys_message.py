@@ -7,10 +7,9 @@
 import sys
 import os
 home_path = os.environ['HOME']
-cwd_path = home_path + '/remobs_qc/boias/bmo_br/real_time/'
-print(cwd_path)
-bd_path = home_path + '/remobs_qc/boias/bmo_br/bd'
-
+abs_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+cwd_path = os.path.join(abs_dir, 'boias', 'bmo_br', 'real_time')
+bd_path = os.path.join(abs_dir, 'boias', 'bmo_br', 'bd')
 
 
 sys.path.append(cwd_path)
@@ -33,7 +32,7 @@ for id in buoy_id['buoy_id']:
 
     last_date_raw = last_date_raw[0][0]
 
-    time_interval = 24 # hours interval of data to be qualified
+    time_interval = 24*10000 # hours interval of data to be qualified
     bmo_general = get_data_table_db(conn, id, last_date_raw, 'bmo_triaxys_message', time_interval)
     bmo_general[['begin', 'date', 'time', 'serial', 'buoyid', 'lat', 'lon', 'number_of_bands', 'initial_frequency',\
      'frequency_spacing', 'mean_average_direction', 'spread_direction', 'values']] = bmo_general.triaxys_message.str.split(',',12, expand=True)
@@ -52,6 +51,7 @@ for id in buoy_id['buoy_id']:
     del bmo_general['time']
     del bmo_general['triaxys_message']
 
+    bmo_general = bmo_general.dropna()
     # Deleting data to replace...
     delete_triaxys_old_data(min(bmo_general.date_time), id, conn)
 

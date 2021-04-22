@@ -45,11 +45,12 @@ for id in buoy_id['buoy_id']:
     flag, bmo_qualified = bqc.qualitycontrol(bmo_general, id)
 
     print("Rotating....")
-    bmo_qualified = rotate_data(conn, bmo_qualified, flag, id)
+    ṕarameters = ['cdir1', 'cdir2', 'cdir3', 'wdir', 'wvdir1', 'wvdir2']
+    bmo_qualified = rotate_data(conn, bmo_qualified, flag, id, parameters)
 
     flag = rename_flag_data(flag)
 
-    bmo_merged = pd.merge(bmo_qualified, flag, how = 'outer', on = 'date_time',
+    bmo_merged = pd.merge(bmo_qc_data, flag, how = 'outer', on = 'date_time',
                           validate = 'one_to_one')
 
     print("General Data ready.")
@@ -66,12 +67,12 @@ for id in buoy_id['buoy_id']:
 
     bmo_qc_data = adjust_bmo_qc(bmo_merged)
 
-    # IDs Key values to delete "old" qualified data...
-    ids_pk = bmo_qc_data[['id', 'buoy_id']]
 
     # TRANSFORMING TO ZULU TIME ( LOCAL + 3H )
-
     bmo_qc_data = zulu_time(bmo_qc_data)
+
+    # IDs Key values to delete "old" qualified data...
+    ids_pk = bmo_qc_data[['id', 'buoy_id']]
 
     # Deleting data to replace...
     delete_qc_data(conn_qc, ids_pk)

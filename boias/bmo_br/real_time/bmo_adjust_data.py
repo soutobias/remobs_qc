@@ -64,6 +64,7 @@ def adjust_bmo_general(raw_data):
 
 def adjust_bmo_current(raw_data):
     import pandas as pd
+    import numpy as np
 
 
     columns_current = ['buoy_id', 'id',
@@ -78,11 +79,14 @@ def adjust_bmo_current(raw_data):
 
     bmo_general_data = pd.DataFrame(columns = columns_current)
 
-    raw_data = raw_data.replace('NAN', -9999)
+    raw_data = raw_data.replace(np.nan, -9999)
 
     bmo_general_data['buoy_id'] = raw_data['buoy_id'].astype(int)
     bmo_general_data['id'] = raw_data['id'].astype(int)
-    bmo_general_data['date_time'] = raw_data['date_time']
+    try:
+        bmo_general_data['date_time'] = raw_data['date_time']
+    except:
+        bmo_general_data['date_time'] = raw_data.index
     bmo_general_data['lat'] = pd.to_numeric(raw_data['lat'], errors = 'coerce').round(4)
     bmo_general_data['lon'] = pd.to_numeric(raw_data['lon'], errors = 'coerce').round(4)
     bmo_general_data['cspd1'] = pd.to_numeric(raw_data['cspd1'],errors = 'coerce').round(1)
@@ -124,12 +128,12 @@ def adjust_bmo_current(raw_data):
 
     bmo_general_data.set_index('date_time', inplace = True)
 
+    bmo_general_data = bmo_general_data.replace(-9999, np.nan)
 
     return bmo_general_data
 
 
-
-def rotate_data(conn, df, flag, buoy_id):
+def rotate_data(conn, df, flag, buoy_id, parameters):
 
 
     def get_declination(conn, buoy_id):
@@ -162,43 +166,16 @@ def rotate_data(conn, df, flag, buoy_id):
 
     df['tmp_dec'] = (df.index.year - 2020) * float(var_dec) + float(dec)
 
-    df.loc[flag['cdir1'] == 0, "cdir1"] = df['cdir1'] + df['tmp_dec']
-
-    df.loc[df["cdir1"] < 0, "cdir1"] = df["cdir1"] + 360
-    df.loc[df["cdir1"] > 360, "cdir1"] = df["cdir1"] - 360
-
-
-    df.loc[flag['cdir2'] == 0, "cdir2"] = df['cdir2'] + df['tmp_dec']
-
-    df.loc[df["cdir2"] < 0, "cdir2"] = df["cdir2"] + 360
-    df.loc[df["cdir2"] > 360, "cdir2"] = df["cdir2"] - 360
-
-
-    df.loc[flag['cdir3'] == 0, "cdir3"] = df['cdir3'] + df['tmp_dec']
-    df.loc[df["cdir3"] < 0, "cdir3"] = df["cdir3"] + 360
-    df.loc[df["cdir3"] > 360, "cdir3"] = df["cdir3"] - 360
-
-
-
-    df.loc[flag['wdir'] == 0, "wdir"] = df['wdir'] + add_diff_dec_sbg
-    df.loc[df["wdir"] < 0, "wdir"] = df["wdir"] + 360
-    df.loc[df["wdir"] > 360, "wdir"] = df["wdir"] - 360
-
-
-
-
-    df.loc[flag['wvdir1'] == 0, "wvdir1"] = df['wvdir1'] + df['tmp_dec']
-    df.loc[df["wvdir1"] < 0, "wvdir1"] = df["wvdir1"] + 360
-    df.loc[df["wvdir1"] > 360, "wvdir1"] = df["wvdir1"] - 360
-
-
-
-
-    df.loc[flag['wvdir2'] == 0, "wvdir2"] = df['wvdir2'] + add_diff_dec_sbg
-    df.loc[df["wvdir2"] < 0, "wvdir2"] = df["wvdir2"] + 360
-    df.loc[df["wvdir2"] > 360, "wvdir2"] = df["wvdir2"] - 360
-
-
+    for parameter in parameters:
+        try:
+            if parameter in ['wdir', 'wvdir2']:
+                df.loc[flag[parameter] == 0, parameter] = df[parameter] + add_diff_dec_sbg
+            else:
+                df.loc[flag[parameter] == 0, parameter] = df[parameter] + df['tmp_dec']
+            df.loc[df[parameter] < 0, parameter] = df[parameter] + 360
+            df.loc[df[parameter] > 360, parameter] = df[parameter] - 360
+        except:
+            print(f"No variable with the name {parameter}")
 
     del df['tmp_dec']
 

@@ -735,6 +735,26 @@ def insert_bmo_qc_data(conn, bmo_qc_data_df):
 
     return
 
+def insert_bmo_adcp_qc_data(bmo_qc_data_df):
+    """
+
+       @param conn: connector of Remo Qualified Database
+       @param message_df: BMO message Dataframe
+       @param buoy_id: Id of buoy
+       @return: None
+       """
+
+    from sqlalchemy import create_engine
+
+    user = USER_QC
+    passw = PASSWORD_QC
+    host = HOST_QC
+    db = DATABASE_QC
+
+    engine = create_engine(f'postgresql+psycopg2://{user}:{passw}@{host}/{db}')
+    bmo_qc_data_df.to_sql(con=engine, name='data_buoys_adcp', if_exists='append', index=False)
+
+    return
 
 
 def delete_qc_data(conn_qc, pks):
@@ -745,6 +765,28 @@ def delete_qc_data(conn_qc, pks):
     ids_pk = pks['id'].tolist()
 
     query = f"DELETE FROM data_buoys WHERE buoy_id =" \
+            f" {buoy_id} AND id IN {*ids_pk,}"
+
+    try:
+        cursor.execute(query)
+        print(f"Row with IDs ({*ids_pk,}) deleted from Qualified database")
+
+    except Exception as err:
+        print(err)
+        print("Rollback Transaction.")
+        print("Transaction Cancelled. No data deleted.")
+
+    return
+
+
+def delete_adcp_qc_data(conn_qc, pks):
+
+    cursor = conn_qc.cursor()
+
+    buoy_id = pks['buoy_id'].unique()[0]
+    ids_pk = pks['id'].tolist()
+
+    query = f"DELETE FROM data_adcp_buoys WHERE buoy_id =" \
             f" {buoy_id} AND id IN {*ids_pk,}"
 
     try:
@@ -778,7 +820,7 @@ def insert_triaxys_data(df):
     host = HOST_RAW
     db = DATABASE_RAW
 
-    engine = create_engine(f'postgres+psycopg2://{user}:{passw}@{host}/{db}')
+    engine = create_engine(f'postgresql+psycopg2://{user}:{passw}@{host}/{db}')
 
 
     df.to_sql(con=engine, name='bmo_triaxys', if_exists='append', index=False)
