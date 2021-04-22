@@ -15,7 +15,7 @@ import pandas as pd
 conn = bd.conn_qc_db('PRI')
 
 
-df_spotter_qc = bd.get_data_spotter(conn, 3, 'data_buoys', '', 'ALL')
+df_spotter_qc = bd.get_data_spotter(conn, 19, 'data_buoys', '', 'ALL')
 df_spotter_qc.sort_values(by = 'date_time', inplace = True)
 
 
