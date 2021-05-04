@@ -809,6 +809,7 @@ def delete_triaxys_old_data(initial_time, buoy, conn):
     # cur.execute("SELECT wmo FROm deriva_estacao")
     conn.commit()
     cur.close()
+    print(f"deleted old data after {initial_time}")
 
 def insert_triaxys_data(df):
 
