@@ -7,28 +7,25 @@ cwd_path = home_path + '/remobs_qc/alerts/'
 sys.path.append(cwd_path)
 sys.path.append(home_path)
 
-
+from datetime import timedelta
 import numpy as np
 from bd_system import db_remo
 from systems_buoys import *
 
 
 conn = db_remo()
-buoys = conn.active_buoys()
+
 
 # BMO POINTS
-bmo_spot = buoys[['lat','lon']][buoys['buoy_id']==2]
+# bmo_spot = buoys[['lat','lon']][buoys['buoy_id']==2]
 
 bmo_now = conn.last_positions('BMO',2,1)
+date_time_now = bmo_now['date_time'][0]
 
-bmo_spot = [float(bmo_spot['lon']), float(bmo_spot['lat'])]
+# ZULU TIME...
+date_time_now = date_time_now + timedelta(hours=3)
+
 bmo_now = [float(bmo_now['lon']), float(bmo_now['lat'])]
-
-
-# TESTE OUT POSITION
-
-#bmo_now = [-42.7335,-25.5323]
-
 
 
 
@@ -39,83 +36,108 @@ pts_lon_bmo = (pts_bmo['lon'].values).astype(np.float)
 coords_bmo = [[pts_lon_bmo[p],pts_lat_bmo[p]] for p in range(len(pts_lat_bmo))]
 
 # Safe_Radius
-safe_radius = radius_buoy(2164, 2100,300,27.5,15)
-center_lon, center_lat = find_centroid(pts_lon_bmo, pts_lat_bmo)
+# safe_radius = radius_buoy(2164, 2100,300,27.5,15)
 
-#new_center_lon , new_center_lat = find_centroid(outer_points_lon, outer_points_lat)
+#### to do: change the calculus of centroid, not in 100% in center...
+# center_lon, center_lat = find_centroid(pts_lon_bmo, pts_lat_bmo)
 
-#lon_in, lat_in = find_outer_points(pts_lon_bmo, pts_lat_bmo, center_lon, center_lat)
+
+
+# very close points to center...
+center_lon = -42.73667
+center_lat = -25.51108
 
 bmo_spot = [center_lon, center_lat]
 
 hav_bmo = haversine(bmo_spot, bmo_now)
 
-safe_circle, safe_range_bmo_lat, safe_range_bmo_lon = safe_range_circle(center_lon, center_lat, 1500)
-
-#new_safe_circle, new_safe_range_bmo_lat, new_safe_range_bmo_lon = safe_range_circle(new_center_lon, new_center_lat, 1300)
-
-
-# PLOT
-import cartopy.crs as ccrs
-import matplotlib
-matplotlib.use('TkAgg')
-import matplotlib.pyplot as plt
-import cartopy.feature as cfeature
 
 
 
+watch_circle_radius = 1500
 
-##### PLOT
-### BMO PLOT
-ax = plt.axes(projection=ccrs.PlateCarree())
-ax.set(facecolor = "#5ACEFF")
-ax.add_feature(cfeature.LAND)
-ax.add_feature(cfeature.COASTLINE)
+if hav_bmo['meters'] > watch_circle_radius:
 
-ax.set_xlim(float(center_lon)-0.15, float(center_lon)+0.15)
-ax.set_ylim(float(center_lat)-0.15, float(center_lat)+0.15)
-bmo_points = ax.plot(pts_lon_bmo,pts_lat_bmo, c='r', marker='o' ,label = 'BMO', alpha=0.2)
+    print("Boia fora de posição!")
 
-## BORDER POINTS
-#axys_point = ax.plot(pts_lon_axys, pts_lat_axys, c = 'b', marker = 'o', label = 'AXYS')
-#bmo_fund = ax.plot(bmo_spot[0], bmo_spot[1], c='k', marker = 'x', label = 'BMO_FUNDEIO')
-#axys_fund = ax.plot(axys_spot[1], axys_spot[0], c='k', marker = 'x', label = 'AXYS_FUNDEIO')
-bmo_now_pt = ax.plot(bmo_now[0], bmo_now[1], c='b', marker = 'h', label = "Current Position BMO")
-bmo_distance = ax.plot([bmo_now[0],center_lon], [bmo_now[1],center_lat], c='g')
-bmo_text = ax.annotate(str(hav_bmo['meters']) + ' m', xy = ((bmo_now[0] + bmo_spot[0])/2, (bmo_now[1] + bmo_spot[1])/2),
-                                xytext=((bmo_now[0] + bmo_spot[0])/2, (bmo_now[1] + bmo_spot[1])/2),
-                                bbox=dict(boxstyle="round", fc=(0, 0, 0), ec="none"),c = 'w')
-#hull_plot = ax.plot(points[hull.vertices, 0], points[hull.vertices, 1], 'g.', lw=1)
-## Radius Safe BMO
-range_bmo = ax.plot(safe_range_bmo_lon, safe_range_bmo_lat,c='k', marker = '.', label = 'Safe Circle')
-#new_range_bmo = ax.plot(new_safe_range_bmo_lon, new_safe_range_bmo_lat,c='w', marker = '.', label = 'NEW_Safe Circle')
-fill_range = ax.fill(safe_range_bmo_lon, safe_range_bmo_lat, c='w', alpha=0.3)
-#Estimated center point:
+    safe_circle, safe_range_bmo_lat, safe_range_bmo_lon = safe_range_circle(center_lon, center_lat, watch_circle_radius)
 
-point_text = ax.annotate(str(abs(bmo_now[1])) + ' °S \n' + str(abs(bmo_now[0])) + ' °W', xy = (bmo_now[0]+0.0002, bmo_now[1]),
-                                xytext=(bmo_now[0]+0.001, bmo_now[1]),
-                                bbox=dict(boxstyle="round", fc=(0, 0, 0), ec="none"),c = 'w')
-###
-#far_points = incremental_farthest_search(safe_circle, 2)
+
+    # PLOT
+    import cartopy.crs as ccrs
+    import matplotlib.pyplot as plt
+    import cartopy.feature as cfeature
+    from matplotlib.offsetbox import AnchoredText
 
 
 
-center_bmo = ax.plot(center_lon, center_lat,c='k', marker = '.', label = 'CENTER_BMO')
-#new_center_bmo = ax.plot(new_center_lon, new_center_lat,c='b', marker = '.', label = 'NEW_CENTER_BMO')
+
+
+    ##### PLOT
+    ### BMO PLOT
+    plt.figure(figsize=(10, 10))
+    ax = plt.axes(projection=ccrs.PlateCarree())
+    ax.set(facecolor = "#5ACEFF")
+    ax.add_feature(cfeature.LAND)
+    ax.add_feature(cfeature.COASTLINE)
+
+    ax.set_xlim(float(center_lon)-0.18, float(center_lon)+0.18)
+    ax.set_ylim(float(center_lat)-0.18, float(center_lat)+0.18)
+    bmo_points = ax.plot(pts_lon_bmo,pts_lat_bmo, c='r', marker='o' ,label = 'BMO', alpha=0.2)
+
+    ## BORDER POINTS
+
+    bmo_now_pt = ax.plot(bmo_now[0], bmo_now[1], c='b', marker = 'h', label = "Current Position BMO")
+    bmo_distance = ax.plot([bmo_now[0],center_lon], [bmo_now[1],center_lat], c='g')
+    bmo_text = ax.annotate(str(hav_bmo['meters']) + ' m', xy = ((bmo_now[0] + bmo_spot[0])/2, (bmo_now[1] + bmo_spot[1])/2),
+                                    xytext=((bmo_now[0] + bmo_spot[0])/2, (bmo_now[1] + bmo_spot[1])/2),
+                                    bbox=dict(boxstyle="round", fc=(0, 0, 0), ec="none"),c = 'w')
+
+    ## Radius Safe BMO
+    range_bmo = ax.plot(safe_range_bmo_lon, safe_range_bmo_lat,c='k', marker = '.', label = 'Watch Circle')
+
+    fill_range = ax.fill(safe_range_bmo_lon, safe_range_bmo_lat, c='w', alpha=0.3)
+    #Estimated center point:
+
+    point_text = ax.annotate(str(abs(bmo_now[1])) + ' °S \n' + str(abs(bmo_now[0])) + ' °W', xy = (bmo_now[0]+0.0002, bmo_now[1]),
+                                    xytext=(bmo_now[0]+0.001, bmo_now[1]),
+                                    bbox=dict(boxstyle="round", fc=(0, 0, 0), ec="none"),c = 'w')
 
 
 
-ax.legend(loc = 'upper left')
-gr = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
-                  linewidth=0.5, color='k', linestyle='--')
 
-gr.top_labels = False
-gr.right_labels = False
-gr.xlabel_style = {'size': 10}
-gr.ylabel_style = {'size': 10}
-plt.show()
+    center_bmo = ax.plot(center_lon, center_lat,c='k', marker = '.', label = 'center circle')
 
 
+    at = AnchoredText("LAST DATA: \n"
+                      "LAT: " + str(abs(bmo_now[1])) + " °S \n"
+                      "LON: " + str(abs(bmo_now[0])) + " °W \n"
+                      "DATETIME(Z): " + str(date_time_now) + " \n"
+                      "DISTANCE: " + str(hav_bmo['meters']) + "meters",
+                      prop=dict(size=11), frameon=True,
+                      loc='upper right',
+                      )
+    at.patch.set_boxstyle("round,pad=0.,rounding_size=0.2")
+    ax.add_artist(at)
+
+    ax.legend(loc = 'upper left')
+    gr = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
+                      linewidth=0.5, color='k', linestyle='--')
+
+    gr.top_labels = False
+    gr.right_labels = False
+    gr.xlabel_style = {'size': 10}
+    gr.ylabel_style = {'size': 10}
+
+    plt.savefig(home_path + '/bmo_last_position.png', dpi = 100)
+
+
+# send email:
+    from alert_email_bmo import send_alert_mail
+
+    file_plot = home_path + '/bmo_last_position.png'
+
+    send_alert_mail(bmo_now[1], bmo_now[0], date_time_now, hav_bmo['meters'], file_plot)
 
 
 
