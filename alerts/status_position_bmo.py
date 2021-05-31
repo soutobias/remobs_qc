@@ -140,5 +140,5 @@ if hav_bmo['meters'] > watch_circle_radius:
     send_alert_mail(bmo_now[1], bmo_now[0], date_time_now, hav_bmo['meters'], file_plot)
 
 else:
-    print("BMO em posição: " + str(hav_bmo['meters'] + " do ponto de fundeio, OK!")
+    print("BMO em posição: " + str(hav_bmo['meters'] + " do ponto de fundeio, OK!"))
 
