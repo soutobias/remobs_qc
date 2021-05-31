@@ -48,6 +48,22 @@ class db_remo():
 
         return data
 
+    def last_positions_by_tag(self, buoy_id, n=5):
+        """Select the last N positions of the buoy specified"""
+
+        try:
+            query = f"""SELECT date_time, lat, lon FROM tag_location WHERE buoy_id = {buoy_id} 
+            ORDER BY date_time DESC LIMIT {n};"""
+
+        except Exception as Err:
+            return print(Err)
+
+        return pd.read_sql_query(query, self.conn)
+
+
+
+
+
 
 class db_remo_qc():
 
