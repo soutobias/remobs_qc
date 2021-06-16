@@ -35,8 +35,8 @@ for id in buoy_id['buoy_id']:
     last_date_raw = last_date_raw[0][0]
 
 
-    time_interval = 24 # hours interval of data to be qualified
-    bmo_general = get_data_table_db(conn, id, last_date_raw, 'bmo_br','ALL')
+    time_interval = 168 # hours interval of data to be qualified - 7 days
+    bmo_general = get_data_table_db(conn, id, last_date_raw, 'bmo_br', time_interval)
     bmo_general.set_index('date_time', inplace = True)
 
 
@@ -80,6 +80,9 @@ for id in buoy_id['buoy_id']:
 
     # Inserting new qualified data...
     insert_bmo_qc_data(conn_qc, bmo_qc_data)
+
+    last_date_inserted = bmo_qc_data.index[-1]
+    print(f"Date of most recent data: {last_date_inserted}")
 
     print("Closing database connection...")
     conn_qc.close()
