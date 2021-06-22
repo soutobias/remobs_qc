@@ -56,7 +56,7 @@ def conn_qc_db(server):
 
 
 
-def get_data_spotter(conn, buoy_id, table, last_date, interval_hour):
+def get_data_spotter(conn, buoy_id, table, start_date, last_date, interval_hour):
 
     import pandas as pd
     from datetime import timedelta
@@ -73,7 +73,7 @@ def get_data_spotter(conn, buoy_id, table, last_date, interval_hour):
     if interval_hour == "ALL":
 
         query = f"""SELECT {spotter_vars_str} FROM {table} WHERE buoy_id = {buoy_id} AND 
-        date_time > '2021-04-18';"""
+        date_time > '{start_date}';"""
 
         data_spotter = pd.read_sql_query(query, conn)
 
@@ -184,8 +184,8 @@ def get_data_axys(conn, buoy_id, last_date, table, interval_hour):
 
 
 
-def spotter_txt(df_spotter):
-	df_spotter.to_csv(EMAIL_SPOTTER_FILE, index = False)
+def spotter_txt(df_spotter, file_name):
+	df_spotter.to_csv(file_name, index = False)
 
 
 def bmo_txt(df_bmo):
