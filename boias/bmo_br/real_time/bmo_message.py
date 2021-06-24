@@ -121,9 +121,9 @@ def message_bmo(df):
         bmo_df = pd.DataFrame([bmo_values], columns = columns_bmo)
         bmo_br = bmo_br.append(bmo_df)
 
-        # REMOVING EXTRA COLUMN DATA
-        bmo_df.drop(columns="WHAT_IS", inplace=True)
-
+    # REMOVING EXTRA COLUMN DATA
+    bmo_br.drop(columns="WHAT_IS", inplace=True) # temporary
+    ###
     bmo_br = bmo_br.reset_index(drop = True)
 
         #Treating values
