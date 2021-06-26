@@ -54,7 +54,7 @@ hav_bmo = haversine(bmo_spot, bmo_now)
 
 
 
-watch_circle_radius = 1500
+watch_circle_radius = 2200
 
 if hav_bmo['meters'] > watch_circle_radius:
 
