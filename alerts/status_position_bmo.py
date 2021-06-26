@@ -141,4 +141,5 @@ if hav_bmo['meters'] > watch_circle_radius:
 
 else:
     print("BMO em posição: " + str(hav_bmo['meters']) + " metros do ponto de fundeio, OK!")
+    print("Dado de " + str(date_time_now))
 
