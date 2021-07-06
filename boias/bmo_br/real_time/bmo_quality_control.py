@@ -94,9 +94,9 @@ def qualitycontrol(df, buoy):
     parameters = ["wspd1", "wspd2", "wdir1", "wdir2", "gust1", "gust2"]
     #flag_data = qc.ascat_anemometer_comparison(df, flag_data, parameters, buoy["nome"])
 
-    df = qc.convert_10_meters(df, flag_data, 3.6, "wspd1", "gust1")
+    df = qc.convert_10_meters(df, flag_data, 3.2, "wspd1", "gust1")
 
-    df = qc.convert_10_meters(df, flag_data, 3.2, "wspd2", "gust2")
+    df = qc.convert_10_meters(df, flag_data, 3.6, "wspd2", "gust2")
 
     (df, flag_data) = qc.related_meas_check(df, flag_data, parameters)
 
