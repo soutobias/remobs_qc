@@ -94,7 +94,7 @@ def message_bmo(df):
     # Dataframe columns
     columns_bmo = ['buoy_id', 'year', 'month', 'day', 'hour', 'minute',
                    'latitude',
-                   'longitude', 'battery', 'WHAT_IS','wspd1', 'gust1', 'wdir1',
+                   'longitude', 'battery', 'temp_datalogger','wspd1', 'gust1', 'wdir1',
                    'wspd2', 'gust2', 'wdir2', 'atmp', 'rh', 'dewpt',
                    'press', 'sst', 'compass', 'arad', 'cspd1', 'cdir1',
                    'cspd2', 'cdir2', 'cspd3', 'cdir3', 'cspd4', 'cdir4',
@@ -122,7 +122,7 @@ def message_bmo(df):
         bmo_br = bmo_br.append(bmo_df)
 
     # REMOVING EXTRA COLUMN DATA
-    bmo_br.drop(columns="WHAT_IS", inplace=True) # temporary
+    #bmo_br.drop(columns="WHAT_IS", inplace=True) # temporary
     ###
     bmo_br = bmo_br.reset_index(drop = True)
 

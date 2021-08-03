@@ -288,7 +288,8 @@ def insert_data_bmo_message(conn, bmo_message_df, buoy_id):
                             'wvspread1' : row['wvspread1'],
                             'swvht2' : row['swvht2'],
                             'tp2' : row['tp2'],
-                            'wvdir2' : row['wvdir2']
+                            'wvdir2' : row['wvdir2'],
+                            'temp_datalogger': row['temp_datalogger']
                             }
 
         query_insert_data = """INSERT INTO bmo_message (buoy_id, date_time,
@@ -298,7 +299,7 @@ def insert_data_bmo_message(conn, bmo_message_df, buoy_id):
         cspd6, cdir6, cspd7, cdir7, cspd8, cdir8, cspd9, cdir9, cspd10, cdir10,
         cspd11, cdir11, cspd12, cdir12, cspd13, cdir13, cspd14, cdir14, cspd15,
         cdir15, cspd16, cdir16, cspd17, cdir17, cspd18, cdir18, swvht1, tp1,
-        mxwvht1, wvdir1, wvspread1, swvht2, tp2, wvdir2) VALUES
+        mxwvht1, wvdir1, wvspread1, swvht2, tp2, wvdir2, temp_datalogger) VALUES
         (%(buoy_id)s, %(date_time)s, %(year)s, %(month)s, %(day)s, %(hour)s, %(minute)s,
         %(lat)s, %(lon)s, %(bat)s, %(wspd1)s, %(gust1)s, %(wdir1)s, %(wspd2)s,
         %(gust2)s, %(wdir2)s, %(atmp)s, %(rh)s, %(dewpt)s, %(press)s, %(sst)s,
@@ -310,7 +311,7 @@ def insert_data_bmo_message(conn, bmo_message_df, buoy_id):
         %(cspd14)s, %(cdir14)s, %(cspd15)s, %(cdir15)s, %(cspd16)s, %(cdir16)s,
         %(cspd17)s, %(cdir17)s, %(cspd18)s, %(cdir18)s,
         %(swvht1)s, %(tp1)s, %(mxwvht1)s, %(wvdir1)s, %(wvspread1)s, %(swvht2)s,
-        %(tp2)s, %(wvdir2)s);"""
+        %(tp2)s, %(wvdir2)s, %(temp_datalogger)s);"""
 
         try:
             cursor.execute(query_insert_data, bmo_message_data)
