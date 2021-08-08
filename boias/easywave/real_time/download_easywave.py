@@ -9,8 +9,7 @@ sys.path.append(os.environ['HOME'])
 home_path = os.environ['HOME']
 from user_config import *
 cwd_path = home_path + '/remobs_qc/boias/easywave/real_time/'
-bd_path = home_path + '/remobs_qc/boias/easywave/bd'
-
+bd_path = home_path + '/remobs_qc/boias/easywave/bd/'
 sys.path.append(cwd_path)
 sys.path.append(bd_path)
 
@@ -95,30 +94,31 @@ conn = db.remobs_db(host=HOST_RAW, db=DATABASE_RAW, usr=USER_RAW, pwd=PASSWORD_R
 
 last_data = conn.get_last_time(21)
 
-
 # new_data...
 
-dumb_date_str = "2021-08-04 00:00:00"
-dumb_date = datetime.strptime(dumb_date_str, "%Y-%m-%d %H:%M:%S")
+final_df_ew = df_ew[df_ew['date_time'] > last_data]
 
-final_df_ew = df_ew[df_ew['date_time']>dumb_date]
+if final_df_ew.empty:
+	print("No new data to insert")
+	print(f"Last data from {last_data}")
+	print("Script finished.")
+else:
+	# inserting new data
 
+	#check NAN 
+	final_dw_ew =  final_df_ew.replace("NAN", np.NaN)
 
-# inserting new data
-
-#check NAN 
-final_dw_ew =  final_df_ew.replace("NAN", np.NaN)
-
-# ordering by date 
-final_dw_ew = final_df_ew.sort_values(by='date_time')
-
-
-status = conn.insert_ew_data(final_dw_ew , 21)
+	# ordering by date 
+	final_dw_ew = final_df_ew.sort_values(by='date_time')
 
 
-if status == 1:
-	"EasyWave data inserted on database."
-elif status == 0:
-	print("Some problem occurred. EasyWave data not inserted.")
+	status = conn.insert_ew_data(final_dw_ew , 21)
+
+
+	if status == 1:
+		"EasyWave data inserted on database."
+	elif status == 0:
+		print("Some problem occurred. EasyWave data not inserted.")
+
 
 
