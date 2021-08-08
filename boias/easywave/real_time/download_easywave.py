@@ -6,12 +6,13 @@ import requests
 
 import os, sys
 sys.path.append(os.environ['HOME'])
+home_path = os.environ['HOME']
 from user_config import *
-#cwd_path = home_path + '/remobs_qc/boias/easywave/real_time/'
-#bd_path = home_path + '/remobs_qc/boias/easywave/bd'
+cwd_path = home_path + '/remobs_qc/boias/easywave/real_time/'
+bd_path = home_path + '/remobs_qc/boias/easywave/bd'
 
-#sys.path.append(cwd_path)
-#sys.path.append(bd_path)
+sys.path.append(cwd_path)
+sys.path.append(bd_path)
 
 import db_functions as db
 

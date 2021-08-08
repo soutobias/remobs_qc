@@ -29,13 +29,6 @@ def definition_flag_pandas(df):
 
     return flag_data
 
-def definition_flag_pandas_adcp(df):
-
-    flag_data = df [list(df.columns[4:-1])] * 0
-
-    flag_data = flag_data.replace(np.nan, 0).astype(int)
-
-    return flag_data
 
 
 def qualitycontrol(df, buoy):
