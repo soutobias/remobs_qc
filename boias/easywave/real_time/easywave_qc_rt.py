@@ -32,7 +32,8 @@ for id in ons['buoy_id']:
 	raw_easywave.set_index('date_time', inplace = True)
 
 	print("Qualifying General data...")
-    flag, ew_qualified = eqc.qualitycontrol(raw_easywave, id)
+
+	flag,ew_qualified = eqc.qualitycontrol(raw_easywave, id)
 
     print("Rotating....")
     ew_qualified = rotate_data(conn, ew_qualified, flag, id)
