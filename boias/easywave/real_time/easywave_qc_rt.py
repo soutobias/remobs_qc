@@ -35,44 +35,45 @@ for id in ons['buoy_id']:
 
 	flag,ew_qualified = eqc.qualitycontrol(raw_easywave, id)
 
-    print("Rotating....")
-    ew_qualified = rotate_data(conn, ew_qualified, flag, id)
-    print("Done!")
 
-    flag = rename_flag_data(flag)
+	print("Rotating....")
+	ew_qualified = rotate_data(conn, ew_qualified, flag, id)
+	print("Done!")
 
-    ew_merged = pd.merge(ew_qualified, flag, how = 'outer', on = 'date_time',
-                          validate = 'one_to_one')
+	flag = rename_flag_data(flag)
 
-
-    print("EasyWave Data ready.")
-    print('\n'*2)
-
-    print("Closing connection with Raw Database\n")
-    conn._db.close() # Closing connection with raw database
-    print("Connection closed.\n")
-
-    # Adjusting data...
-    ew_qc_data = adjust_ew_qc(ew_merged)
-
-    # IDs Key values to delete "old" qualified data...
-    ids_pk = ew_qc_data[['id', 'buoy_id']]
-
-    ew_qc_data = zulu_time(ew_qc_data)
-    ew_qc_data = check_size_values(ew_qc_data)
-
-    # Connecting to the qc database 
-
-    conn_qc = db.remobs_qc_db(host=HOST_QC, db=DATABASE_QC, usr=USER_QC, pwd=PASSWORD_QC)
-
-    # Deleting old data before insert ...
+	ew_merged = pd.merge(ew_qualified, flag, how = 'outer', on = 'date_time',
+                      validate = 'one_to_one')
 
 
-    conn_qc.delete_ew_qc_data(ids_pk)
+	print("EasyWave Data ready.")
+	print('\n'*2)
 
-    # inserting new data...
+	print("Closing connection with Raw Database\n")
+	conn._db.close() # Closing connection with raw database
+	print("Connection closed.\n")
 
-    conn_qc.insert_ew_qc_data(ew_qc_data)
+	# Adjusting data...
+	ew_qc_data = adjust_ew_qc(ew_merged)
+
+	# IDs Key values to delete "old" qualified data...
+	ids_pk = ew_qc_data[['id', 'buoy_id']]
+
+	ew_qc_data = zulu_time(ew_qc_data)
+	ew_qc_data = check_size_values(ew_qc_data)
+
+	# Connecting to the qc database 
+
+	conn_qc = db.remobs_qc_db(host=HOST_QC, db=DATABASE_QC, usr=USER_QC, pwd=PASSWORD_QC)
+
+	# Deleting old data before insert ...
+
+
+	conn_qc.delete_ew_qc_data(ids_pk)
+
+	# inserting new data...
+
+	conn_qc.insert_ew_qc_data(ew_qc_data)
 
 
 
