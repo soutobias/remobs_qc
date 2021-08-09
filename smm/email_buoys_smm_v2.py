@@ -19,17 +19,17 @@ from user_config import EMAIL_FROM, EMAIL_TO, EMAIL_BUOYS_SUBJECT, EMAIL_BUOYS_C
 ###################################################
 #### SPOTTER TRINDADE
 
-file_spotter_trindade = pd.read_csv(EMAIL_BUOYS_FILES[1])
+#file_spotter_trindade = pd.read_csv(EMAIL_BUOYS_FILES[1])
 
-start_date_spotter_trindade = min(file_spotter_trindade['Datetime'])
-last_date_spotter_trindade = max(file_spotter_trindade['Datetime'])
+#start_date_spotter_trindade = min(file_spotter_trindade['Datetime'])
+#last_date_spotter_trindade = max(file_spotter_trindade['Datetime'])
 
 
 
 ###################################################
 #### SPOTTER ABROLHOS
 
-file_spotter_abrolhos = pd.read_csv(EMAIL_BUOYS_FILES[2])
+file_spotter_abrolhos = pd.read_csv(EMAIL_BUOYS_FILES[1])
 
 start_date_spotter_abrolhos = min(file_spotter_abrolhos['Datetime'])
 last_date_spotter_abrolhos = max(file_spotter_abrolhos['Datetime'])
@@ -47,8 +47,8 @@ last_date_bmo = max(file_bmo['Datetime'])
 
 CONTENT = EMAIL_BUOYS_CONTENT.format(start_date_bmo = start_date_bmo,
                                       end_date_bmo = last_date_bmo,
-                                      start_date_spotter_trindade=start_date_spotter_trindade,
-                                      end_date_spotter_trindade=last_date_spotter_trindade,
+                                    #  start_date_spotter_trindade=start_date_spotter_trindade,
+                                    #  end_date_spotter_trindade=last_date_spotter_trindade,
                                       start_date_spotter_abrolhos=start_date_spotter_abrolhos,
                                       end_date_spotter_abrolhos=last_date_spotter_abrolhos)
 

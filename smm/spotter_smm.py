@@ -7,7 +7,7 @@ sys.path.append(home_path)
 import bd_function as bd
 import pandas as pd
 
-from user_config import EMAIL_SPOTTER_TRINDADE_FILE, EMAIL_SPOTTER_ABROLHOS_FILE
+from user_config import EMAIL_SPOTTER_ABROLHOS_FILE
 
 
 def get_synoptic_data(df):
@@ -40,38 +40,38 @@ def get_full_hour(df):
 # spotter
 
 # Trindade Buoy
-conn = bd.conn_qc_db('PRI')
+#conn = bd.conn_qc_db('PRI')
 
-df_spotter_qc_trindade = bd.get_data_spotter(conn=conn, buoy_id=19, table='data_buoys', start_date="2021-04-18",last_date=None, interval_hour='ALL')
-df_spotter_qc_trindade.sort_values(by = 'date_time', inplace = True)
-
-
-
-
-df_spotter_trindade = df_spotter_qc_trindade[['date_time', 'lat', 'lon', 'wspd', 'wdir','sst',
-							'swvht1','tp1', 'wvdir1','wvspread1', 'pk_dir',
-							'pk_wvspread','mean_tp']].copy()
+#df_spotter_qc_trindade = bd.get_data_spotter(conn=conn, buoy_id=19, table='data_buoys', start_date="2021-04-18",last_date=None, interval_hour='ALL')
+#df_spotter_qc_trindade.sort_values(by = 'date_time', inplace = True)
 
 
 
 
-df_spotter_trindade.rename(columns = {'date_time':'Datetime',
-							 'sst':'wtmp',
-							 'swvht1': 'wvht',
-							 'tp1': 'dpd',
-							 'mean_tp':'mean_dpd',
-							 'wvdir1':'mwd',
-							 'pk_dir':'peak_mwd',
-							 'wvspread1':'spred',
-							 'pk_wvspread':'peak_spred'}, inplace = True)
-
-
-df_spotter_trindade = get_full_hour(df_spotter_trindade)
-df_spotter_trindade = get_synoptic_data(df_spotter_trindade)
+#df_spotter_trindade = df_spotter_qc_trindade[['date_time', 'lat', 'lon', 'wspd', 'wdir','sst',
+#							'swvht1','tp1', 'wvdir1','wvspread1', 'pk_dir',
+#							'pk_wvspread','mean_tp']].copy()
 
 
 
-bd.spotter_txt(df_spotter_trindade, EMAIL_SPOTTER_TRINDADE_FILE)
+
+#df_spotter_trindade.rename(columns = {'date_time':'Datetime',
+#							 'sst':'wtmp',
+#							 'swvht1': 'wvht',
+#							 'tp1': 'dpd',
+#							 'mean_tp':'mean_dpd',
+#							 'wvdir1':'mwd',
+#							 'pk_dir':'peak_mwd',
+#							 'wvspread1':'spred',
+#							 'pk_wvspread':'peak_spred'}, inplace = True)
+
+
+#df_spotter_trindade = get_full_hour(df_spotter_trindade)
+#df_spotter_trindade = get_synoptic_data(df_spotter_trindade)
+
+
+
+#bd.spotter_txt(df_spotter_trindade, EMAIL_SPOTTER_TRINDADE_FILE)
 
 
 # Abrolhos Buoy
