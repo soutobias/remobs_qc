@@ -35,6 +35,10 @@ for id in ons['buoy_id']:
 
 	flag,ew_qualified = eqc.qualitycontrol(raw_easywave, id)
 
+		# remove duplicates...
+	ew_qualified = ew_qualified[~ew_qualified.index.duplicated(keep='first')]
+	flag = flag[~flag.index.duplicated(keep='first')]
+
 
 	print("Rotating....")
 	ew_qualified = rotate_data(conn, ew_qualified, flag, id)
@@ -42,9 +46,6 @@ for id in ons['buoy_id']:
 
 	flag = rename_flag_data(flag)
 
-	# remove duplicates...
-	ew_qualified = ew_qualified[~ew_qualified.index.duplicated(keep='first')]
-	flag = flag[~flag.index.duplicated(keep='first')]
 
 	ew_merged = pd.merge(ew_qualified, flag, how = 'outer', on = 'date_time',
                       validate = 'one_to_one')
