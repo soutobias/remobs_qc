@@ -1,16 +1,19 @@
 
+import pandas as pd
+import json
+import requests
+
+def get_token(url_token, payload, headers):
+
+    response = requests.post(url_token, headers=headers, data=payload)
+
+    return response.json()['token']
 
 
-
-def get_xml_from_url(url, id):
-    from bs4 import BeautifulSoup as BS
-    #from bs4.element import Comment
-    import pandas as pd
-    import requests
-
+def get_data_from_url(URL_TOKEN, PAYLOAD_TOKEN, HEADERS_TOKEN, URL_BMO, id):
 
     page = 0
-    final_message = []
+    final_message = pd.DataFrame(columns=['id','date', 'type','data'])
     ids = []
     while page == 0 or len(ids) == 200:
 
@@ -18,71 +21,51 @@ def get_xml_from_url(url, id):
             id_message = 0
 
         elif id and page == 0:
-            id_message = id + 1
+            id_message = id
         else:
-            id_message = ids[-1].text
-            id_message = int(id_message) + 1
+            id_message = ids[-1]
+            id_message = id_message
 
-        xml_bmo = requests.get(url + str(id_message))
+        payload= {
+            "id":id_message
+            }
 
-        if xml_bmo.status_code != 200:
-            print("Error connection.")
-            print("Script Finished")
-            #return
+        payload = json.dumps(payload)
 
-        document = xml_bmo.content
-        raw_xml = BS(document, 'xml')
+        token = get_token(URL_TOKEN, PAYLOAD_TOKEN, HEADERS_TOKEN)
 
-        ids = raw_xml.find_all('id')
-        messages = raw_xml.messages.contents
-        messages = [message for message in messages if message != ' ']
-        [final_message.append(message) for message in messages]
+        HEADERS_BMO = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {token}'
+        }
+
+
+        message_bmo = requests.post(URL_BMO, headers=HEADERS_BMO, data=payload)
+
+        if message_bmo.status_code == 401:
+            raise Exception("401. Not authorized.")
+  
+        elif message_bmo.status_code != 200:
+            raise Exception("Error connection. Script Finished")
+
+        raw_message = pd.json_normalize(message_bmo.json())
+
+        if raw_message.empty:
+            return final_message
+
+        filter_cols = ['id','dh_registro', 'data_type','data']
+        bmo_message = raw_message[filter_cols].copy()
+
+        bmo_message.rename(columns={'dh_registro':'date', 'data_type':'type'}, inplace=True)
+
+        ids = bmo_message.id.tolist()
+        final_message = final_message.append(bmo_message)
 
         page += 1
+        print("Page " + str(page))
 
+    return final_message
 
-
-
-
-    id_list = []
-    date_list = []
-    type_list = []
-    data_list = []
-
-
-
-
-    n_messages = len(final_message)
-
-    for i in range(n_messages):
-
-        message_data = final_message[i]
-
-        id_num = message_data.id
-
-        message = id_num.parent
-
-        id = message.id.text
-        date = message.date.text
-        type = message.type.text
-        data = message.data.text
-        data = data.replace("\n", "")
-
-        id_list.append(id)
-        date_list.append(date)
-        type_list.append(type)
-        data_list.append(data)
-
-
-
-    df = pd.DataFrame({'id':id_list,
-                       'date': date_list,
-                       'type': type_list,
-                       'data': data_list})
-
-
-
-    return df
 
 
 def message_bmo(df):
