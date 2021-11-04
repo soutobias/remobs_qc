@@ -15,7 +15,7 @@ from user_config import URL_TOKEN, PAYLOAD_TOKEN, HEADERS_TOKEN, URL_BMO
 
 conn = connect_database_remo('PRI')
 
-last_id_message = get_id_sat_message(conn, '01088903SKY9DE0')
+last_id_message = get_id_sat_message(conn)
 id_message = last_id_message[0][0]
 
 
@@ -64,7 +64,3 @@ else:
     print("Closing database connection...")
     conn.close()
     print("Finished BMO Message Script.")
-
-
-
-
