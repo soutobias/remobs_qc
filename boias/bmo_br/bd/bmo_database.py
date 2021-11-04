@@ -53,7 +53,7 @@ def connect_database_remo(server):
 def bmo_on(conn):
     import pandas as pd
 
-    query = "SELECT buoy_id FROM buoys WHERE model = 'BMO-BR' AND" \
+    query = "SELECT buoy_id, sat_number FROM buoys WHERE model = 'BMO-BR' AND" \
             " status = 1;"
 
     buoy_ids = pd.read_sql_query(query, conn)
