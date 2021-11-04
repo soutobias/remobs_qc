@@ -13,7 +13,7 @@ def get_token(url_token, payload, headers):
 def get_data_from_url(URL_TOKEN, PAYLOAD_TOKEN, HEADERS_TOKEN, URL_BMO, id):
 
     page = 0
-    final_message = pd.DataFrame(columns=['id','date', 'type','data'])
+    final_message = pd.DataFrame(columns=['id','date', 'mobile', 'type','data'])
     ids = []
     while page == 0 or len(ids) == 200:
 
@@ -44,7 +44,7 @@ def get_data_from_url(URL_TOKEN, PAYLOAD_TOKEN, HEADERS_TOKEN, URL_BMO, id):
 
         if message_bmo.status_code == 401:
             raise Exception("401. Not authorized.")
-  
+
         elif message_bmo.status_code != 200:
             raise Exception("Error connection. Script Finished")
 
@@ -53,7 +53,7 @@ def get_data_from_url(URL_TOKEN, PAYLOAD_TOKEN, HEADERS_TOKEN, URL_BMO, id):
         if raw_message.empty:
             return final_message
 
-        filter_cols = ['id','dh_registro', 'data_type','data']
+        filter_cols = ['id','dh_registro', 'mobile', 'data_type','data']
         bmo_message = raw_message[filter_cols].copy()
 
         bmo_message.rename(columns={'dh_registro':'date', 'data_type':'type'}, inplace=True)

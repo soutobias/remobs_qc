@@ -89,13 +89,11 @@ def check_buoy_id(conn, bmo_name):
 
 ###############################################################################
 
-def get_id_sat_message(conn, sat_number):
+def get_id_sat_message(conn):
 
     cursor = conn.cursor()
 
-    cursor.execute(f"SELECT max(id) as id FROM satellite_message"
-                   f" WHERE buoy_id = (SELECT buoy_id FROM buoys WHERE"
-				    f" sat_number = '{sat_number}')")
+    cursor.execute(f"SELECT max(id) as id FROM satellite_message")
 
     last_id = cursor.fetchall()
 
