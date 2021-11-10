@@ -22,7 +22,7 @@ bmo_ons = bmo_on(conn)
 
 if bmo_ons.empty:
     print("No BMO buoys actived. Script finished.")
-    break
+    sys.exit()
 
 else:
 
