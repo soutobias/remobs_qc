@@ -38,7 +38,7 @@ last_date_spotter_abrolhos = max(file_spotter_abrolhos['Datetime'])
 ###################################################
 #### SPOTTER MEXILHAO
 
-file_spotter_mexilhao = pd.read_csv(EMAIL_BUOYS_FILES[0])
+file_spotter_mexilhao = pd.read_csv(EMAIL_BUOYS_FILES[1])
 
 start_date_spotter_mexilhao = min(file_spotter_mexilhao['Datetime'])
 last_date_spotter_mexilhao = max(file_spotter_mexilhao['Datetime'])
