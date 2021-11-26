@@ -7,7 +7,7 @@ sys.path.append(home_path)
 import bd_function as bd
 import pandas as pd
 
-from user_config import EMAIL_SPOTTER_ABROLHOS_FILE
+from user_config import EMAIL_SPOTTER_ABROLHOS_FILE, EMAIL_SPOTTER_MEXILHAO_FILE
 
 
 def get_synoptic_data(df):
