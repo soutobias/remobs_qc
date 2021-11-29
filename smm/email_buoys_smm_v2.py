@@ -38,10 +38,10 @@ last_date_spotter_abrolhos = max(file_spotter_abrolhos['Datetime'])
 ###################################################
 #### SPOTTER MEXILHAO
 
-file_spotter_mexilhao = pd.read_csv(EMAIL_BUOYS_FILES[1])
+# file_spotter_mexilhao = pd.read_csv(EMAIL_BUOYS_FILES[1])
 
-start_date_spotter_mexilhao = min(file_spotter_mexilhao['Datetime'])
-last_date_spotter_mexilhao = max(file_spotter_mexilhao['Datetime'])
+# start_date_spotter_mexilhao = min(file_spotter_mexilhao['Datetime'])
+# last_date_spotter_mexilhao = max(file_spotter_mexilhao['Datetime'])
 
 
 
@@ -59,9 +59,9 @@ CONTENT = EMAIL_BUOYS_CONTENT.format(#start_date_bmo = start_date_bmo,
                                     #  start_date_spotter_trindade=start_date_spotter_trindade,
                                     #  end_date_spotter_trindade=last_date_spotter_trindade,
                                       start_date_spotter_abrolhos=start_date_spotter_abrolhos,
-                                      end_date_spotter_abrolhos=last_date_spotter_abrolhos,
-                                      start_date_spotter_mexilhao=start_date_spotter_mexilhao,
-                                      end_date_spotter_mexilhao=last_date_spotter_mexilhao)
+                                      end_date_spotter_abrolhos=last_date_spotter_abrolhos)
+                                    #  start_date_spotter_mexilhao=start_date_spotter_mexilhao,
+                                    #  end_date_spotter_mexilhao=last_date_spotter_mexilhao)
 
 
 
