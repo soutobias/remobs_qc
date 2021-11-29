@@ -108,35 +108,35 @@ df_spotter_abrolhos = get_synoptic_data(df_spotter_abrolhos)
 bd.spotter_txt(df_spotter_abrolhos, EMAIL_SPOTTER_ABROLHOS_FILE)
 
 
-# Mexilao Buoy
-conn = bd.conn_qc_db('PRI')
+# # Mexilao Buoy
+# conn = bd.conn_qc_db('PRI')
 
-df_spotter_qc_mexilhao = bd.get_data_spotter(conn=conn, buoy_id=23, table='data_buoys', start_date="2021-11-24",last_date=None, interval_hour='ALL')
-df_spotter_qc_mexilhao.sort_values(by = 'date_time', inplace = True)
-
-
-
-
-df_spotter_mexilhao = df_spotter_qc_mexilhao[['date_time', 'lat', 'lon', 'wspd', 'wdir','sst',
-							'swvht1','tp1', 'wvdir1','wvspread1', 'pk_dir',
-							'pk_wvspread','mean_tp']].copy()
+# df_spotter_qc_mexilhao = bd.get_data_spotter(conn=conn, buoy_id=23, table='data_buoys', start_date="2021-11-24",last_date=None, interval_hour='ALL')
+# df_spotter_qc_mexilhao.sort_values(by = 'date_time', inplace = True)
 
 
 
 
-df_spotter_mexilhao.rename(columns = {'date_time':'Datetime',
-							 'sst':'wtmp',
-							 'swvht1': 'wvht',
-							 'tp1': 'dpd',
-							 'mean_tp':'mean_dpd',
-							 'wvdir1':'mwd',
-							 'pk_dir':'peak_mwd',
-							 'wvspread1':'spred',
-							 'pk_wvspread':'peak_spred'}, inplace = True)
-
-df_spotter_mexilhao = get_full_hour(df_spotter_mexilhao)
-df_spotter_mexilhao = get_synoptic_data(df_spotter_mexilhao)
+# df_spotter_mexilhao = df_spotter_qc_mexilhao[['date_time', 'lat', 'lon', 'wspd', 'wdir','sst',
+# 							'swvht1','tp1', 'wvdir1','wvspread1', 'pk_dir',
+# 							'pk_wvspread','mean_tp']].copy()
 
 
 
-bd.spotter_txt(df_spotter_mexilhao, EMAIL_SPOTTER_MEXILHAO_FILE)
+
+# df_spotter_mexilhao.rename(columns = {'date_time':'Datetime',
+# 							 'sst':'wtmp',
+# 							 'swvht1': 'wvht',
+# 							 'tp1': 'dpd',
+# 							 'mean_tp':'mean_dpd',
+# 							 'wvdir1':'mwd',
+# 							 'pk_dir':'peak_mwd',
+# 							 'wvspread1':'spred',
+# 							 'pk_wvspread':'peak_spred'}, inplace = True)
+
+# df_spotter_mexilhao = get_full_hour(df_spotter_mexilhao)
+# df_spotter_mexilhao = get_synoptic_data(df_spotter_mexilhao)
+
+
+
+# bd.spotter_txt(df_spotter_mexilhao, EMAIL_SPOTTER_MEXILHAO_FILE)
