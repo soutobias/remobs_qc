@@ -61,3 +61,6 @@ simcosta_estacao.csv
 smm_spotter_operantar.txt
 # Token Gmail Api
 token.pickle
+
+#Env
+.env
