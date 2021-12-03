@@ -24,7 +24,7 @@ sys.path.append(limits_path)
 from spotter_database import *
 
 
-APIS = ['CHM','INPE_NOT_ACTIVE']
+APIS = ['CHM','INPE']
 
 for user_token in APIS:
     
@@ -35,7 +35,8 @@ for user_token in APIS:
     
     elif user_token == "INPE":
         print("Connecting to INPE Spotters API...")
-        api = SofarApi(custom_token=os.getenv("INPE_TOKEN"))
+        os.environ['WF_API_TOKEN'] = os.getenv("INPE_TOKEN")
+        api = SofarApi()
     else:
         break
 
