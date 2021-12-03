@@ -48,6 +48,11 @@ for user_token in APIS:
     # Connecting to database
     conn = connect_database_remo('PRI')
 
+    try:
+        devices.remove('SPOT-0334')
+    except:
+        print('no data')
+
     for n_buoy in range(len(devices)):
 
         # spotter buoy data
