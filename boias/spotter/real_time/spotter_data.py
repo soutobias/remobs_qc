@@ -50,7 +50,9 @@ for user_token in APIS:
     conn = connect_database_remo('PRI')
 
     try:
+        idx_device_off = devices.index('SPOT-0334')
         devices.remove('SPOT-0334')
+        del spotter_grid[idx_device_off]
     except:
         print('no data')
 
