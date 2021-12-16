@@ -46,16 +46,16 @@ last_date_spotter_pinguim = max(file_spotter_pinguim['Datetime'])
 ###################################################
 #### SPOTTER POTTER - OPERANTAR 
 
-file_spotter_potter = pd.read_csv(EMAIL_BUOYS_FILES[2])
+# file_spotter_potter = pd.read_csv(EMAIL_BUOYS_FILES[2])
 
-start_date_spotter_potter = min(file_spotter_potter['Datetime'])
-last_date_spotter_potter = max(file_spotter_potter['Datetime'])
+# start_date_spotter_potter = min(file_spotter_potter['Datetime'])
+# last_date_spotter_potter = max(file_spotter_potter['Datetime'])
 
 
 ###################################################
 #### SPOTTER KELLER - OPERANTAR 
 
-file_spotter_keller = pd.read_csv(EMAIL_BUOYS_FILES[3])
+file_spotter_keller = pd.read_csv(EMAIL_BUOYS_FILES[2])
 
 start_date_spotter_keller = min(file_spotter_keller['Datetime'])
 last_date_spotter_keller = max(file_spotter_keller['Datetime'])
@@ -88,8 +88,8 @@ CONTENT = EMAIL_BUOYS_CONTENT.format(#start_date_bmo = start_date_bmo,
                                       end_date_spotter_abrolhos=last_date_spotter_abrolhos,
                                       start_date_spotter_pinguim=start_date_spotter_pinguim,
                                       end_date_spotter_pinguim=last_date_spotter_pinguim,
-                                      start_date_spotter_potter=start_date_spotter_potter,
-                                      end_date_spotter_potter=last_date_spotter_potter,                                     
+                                    #  start_date_spotter_potter=start_date_spotter_potter,
+                                    #  end_date_spotter_potter=last_date_spotter_potter,                                     
                                       start_date_spotter_keller=start_date_spotter_keller,
                                       end_date_spotter_keller=last_date_spotter_keller)
                                     #  start_date_spotter_mexilhao=start_date_spotter_mexilhao,
