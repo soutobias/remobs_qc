@@ -180,7 +180,7 @@ def rotate_data(conn, df, flag, buoy_id):
 
 
 
-    df.loc[flag['wdir'] == 0, "wdir"] = df['wdir'] + add_diff_dec_sbg
+    df.loc[flag['wdir'] == 0, "wdir"] = df['wdir'] + df['tmp_dec']
     df.loc[df["wdir"] < 0, "wdir"] = df["wdir"] + 360
     df.loc[df["wdir"] > 360, "wdir"] = df["wdir"] - 360
 
@@ -194,7 +194,7 @@ def rotate_data(conn, df, flag, buoy_id):
 
 
 
-    df.loc[flag['wvdir2'] == 0, "wvdir2"] = df['wvdir2'] + add_diff_dec_sbg
+    df.loc[flag['wvdir2'] == 0, "wvdir2"] = df['wvdir2'] + df['tmp_dec']
     df.loc[df["wvdir2"] < 0, "wvdir2"] = df["wvdir2"] + 360
     df.loc[df["wvdir2"] > 360, "wvdir2"] = df["wvdir2"] - 360
 
