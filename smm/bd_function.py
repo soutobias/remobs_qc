@@ -118,7 +118,7 @@ def get_data_bmo(conn, buoy_id, last_date, table, interval_hour):
     # Getting data from the last x hours
     if interval_hour == "ALL":
 
-        query = f"SELECT {bmo_vars_str} FROM {table} WHERE date_time > '2020-12-10' " \
+        query = f"SELECT {bmo_vars_str} FROM {table} WHERE date_time > '2022-02-08' " \
                 f" AND buoy_id = {buoy_id};"
 
         bmo_data = pd.read_sql_query(query, conn)
@@ -189,7 +189,7 @@ def spotter_txt(df_spotter, file_name):
 
 
 def bmo_txt(df_bmo):
-	df_bmo.to_csv(EMAIL_BMO_FILE, index = False)
+	df_bmo.to_csv('dados_bmo_bc1.txt', index = False)
 
 
 

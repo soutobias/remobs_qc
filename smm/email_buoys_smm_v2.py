@@ -74,14 +74,14 @@ last_date_spotter_keller = max(file_spotter_keller['Datetime'])
 ###################################################
 #### BMO BR
 
-# file_bmo = pd.read_csv(EMAIL_BUOYS_FILES[0])
-#
-# start_date_bmo = min(file_bmo['Datetime'])
-# last_date_bmo = max(file_bmo['Datetime'])
+file_bmo = pd.read_csv('dados_bmo_bc1.txt')
+
+start_date_bmo = min(file_bmo['Datetime'])
+last_date_bmo = max(file_bmo['Datetime'])
 
 
-CONTENT = EMAIL_BUOYS_CONTENT.format(#start_date_bmo = start_date_bmo,
-                                     # end_date_bmo = last_date_bmo,
+CONTENT = EMAIL_BUOYS_CONTENT.format(start_date_bmo = start_date_bmo,
+                                     end_date_bmo = last_date_bmo,
                                     #  start_date_spotter_trindade=start_date_spotter_trindade,
                                     #  end_date_spotter_trindade=last_date_spotter_trindade,
                                       start_date_spotter_abrolhos=start_date_spotter_abrolhos,

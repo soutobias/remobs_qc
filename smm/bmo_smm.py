@@ -28,7 +28,7 @@ def get_synoptic_data(df):
 
 conn = bd.conn_qc_db('PRI')
 
-df_bmo_qc = bd.get_data_bmo(conn, 2, '','data_buoys', 'ALL')
+df_bmo_qc = bd.get_data_bmo(conn, 22, '','data_buoys', 'ALL')
 df_bmo_qc.sort_values(by = 'date_time', inplace = True)
 
 # removing flags:
@@ -74,12 +74,12 @@ df_bmo = df_bmo.rename({'date_time':'Datetime'}, axis = 'columns')
 df_bmo = df_bmo.rename({'battery':'Battery'}, axis = 'columns')
 
 # Flags on data after comission
-index_date = df_bmo['Datetime'] > '2021-06-24'
+#index_date = df_bmo['Datetime'] > '2021-06-24'
 
-df_bmo['wdir'][index_date] = np.nan
-df_bmo['swvht2'][index_date] = np.nan
-df_bmo['wvdir2'][index_date] = np.nan
-df_bmo['tp2'][index_date] = np.nan
+# df_bmo['wdir'][index_date] = np.nan
+# df_bmo['swvht2'][index_date] = np.nan
+# df_bmo['wvdir2'][index_date] = np.nan
+# df_bmo['tp2'][index_date] = np.nan
 
 
 
