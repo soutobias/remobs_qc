@@ -100,6 +100,22 @@ def get_id_sat_message(conn):
     cursor.close()
     return last_id
 
+##### prime api 2.0 - mar.2022 ####
+
+def get_last_date_message(conn, buoy_id):
+    
+    cursor = conn.cursor()
+
+    cursor.execute(f"SELECT max(date_time) as date_time FROM satellite_message WHERE buoy_id = {buoy_id}")
+
+    last_date = cursor.fetchall()
+
+    cursor.close()
+    return last_date
+    
+    
+    
+
 
 def insert_sat_message_xml(conn, buoy_id, df_xml):
 
