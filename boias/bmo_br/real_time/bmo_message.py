@@ -2,6 +2,7 @@
 import pandas as pd
 import json
 import requests
+from datetime import datetime, timedelta
 
 def get_token(url_token, payload, headers):
 
@@ -10,24 +11,26 @@ def get_token(url_token, payload, headers):
     return response.json()['token']
 
 
-def get_data_from_url(URL_TOKEN, PAYLOAD_TOKEN, HEADERS_TOKEN, URL_BMO, id):
+def get_data_from_url(URL_TOKEN, PAYLOAD_TOKEN, HEADERS_TOKEN, URL_BMO, last_date, id_antenna):
 
     page = 0
     final_message = pd.DataFrame(columns=['id','date', 'mobile', 'type','data'])
     ids = []
     while page == 0 or len(ids) == 200:
-
-        if ids == [] and page == 0 and id == None:
-            id_message = 0
-
-        elif id and page == 0:
-            id_message = id
+        
+        if page == 0:
+            start_date = last_date
+            
         else:
-            id_message = ids[-1]
-            id_message = id_message
+            last_date_dt = datetime.strptime(last_message_page, "%Y-%m-%dT%H:%M:%S.%f") - timedelta(minutes=1)
+            last_date_str = last_date_dt.strftime(format="%Y-%m-%dT%H:%M")
+            
+            start_date = last_date_str
 
         payload= {
-            "id":id_message
+            "mobile": [id_antenna],
+            "start_date":start_date,
+            "end_date":(datetime.utcnow() + timedelta(hours=5)).strftime(format="%Y-%m-%dT%H:%M")
             }
 
         payload = json.dumps(payload)
@@ -59,6 +62,7 @@ def get_data_from_url(URL_TOKEN, PAYLOAD_TOKEN, HEADERS_TOKEN, URL_BMO, id):
         bmo_message.rename(columns={'dh_registro':'date', 'data_type':'type'}, inplace=True)
 
         ids = bmo_message.id.tolist()
+        last_message_page = bmo_message.date.tolist()[-1]
         final_message = final_message.append(bmo_message)
 
         page += 1
