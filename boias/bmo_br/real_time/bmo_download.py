@@ -35,7 +35,7 @@ else:
          # Add two seconds
         last_date = last_date + timedelta(seconds=2)
         
-        last_date_str = last_date.strftime(format="%Y-%m-%dT%H:%M")
+        last_date_str = last_date.strftime(format="%Y-%m-%dT%H:%M:%S")
         
         df_bmo_raw = get_data_from_url(URL_TOKEN, PAYLOAD_TOKEN, HEADERS_TOKEN, URL_BMO,  last_date_str, antenna_id)
         
