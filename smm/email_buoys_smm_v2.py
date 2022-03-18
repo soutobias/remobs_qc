@@ -37,10 +37,10 @@ last_date_spotter_abrolhos = max(file_spotter_abrolhos['Datetime'])
 ###################################################
 #### SPOTTER PINGUIM - OPERANTAR 
 
-file_spotter_pinguim = pd.read_csv(EMAIL_BUOYS_FILES[1])
+# file_spotter_pinguim = pd.read_csv(EMAIL_BUOYS_FILES[1])
 
-start_date_spotter_pinguim = min(file_spotter_pinguim['Datetime'])
-last_date_spotter_pinguim = max(file_spotter_pinguim['Datetime'])
+# start_date_spotter_pinguim = min(file_spotter_pinguim['Datetime'])
+# last_date_spotter_pinguim = max(file_spotter_pinguim['Datetime'])
 
 
 ###################################################
@@ -55,10 +55,10 @@ last_date_spotter_pinguim = max(file_spotter_pinguim['Datetime'])
 ###################################################
 #### SPOTTER KELLER - OPERANTAR 
 
-file_spotter_keller = pd.read_csv(EMAIL_BUOYS_FILES[2])
+# file_spotter_keller = pd.read_csv(EMAIL_BUOYS_FILES[2])
 
-start_date_spotter_keller = min(file_spotter_keller['Datetime'])
-last_date_spotter_keller = max(file_spotter_keller['Datetime'])
+# start_date_spotter_keller = min(file_spotter_keller['Datetime'])
+# last_date_spotter_keller = max(file_spotter_keller['Datetime'])
 
 
 ###################################################
@@ -86,12 +86,12 @@ CONTENT = EMAIL_BUOYS_CONTENT.format(start_date_bmo = start_date_bmo,
                                     #  end_date_spotter_trindade=last_date_spotter_trindade,
                                       start_date_spotter_abrolhos=start_date_spotter_abrolhos,
                                       end_date_spotter_abrolhos=last_date_spotter_abrolhos,
-                                      start_date_spotter_pinguim=start_date_spotter_pinguim,
-                                      end_date_spotter_pinguim=last_date_spotter_pinguim,
+                                    #  start_date_spotter_pinguim=start_date_spotter_pinguim,
+                                    #  end_date_spotter_pinguim=last_date_spotter_pinguim,
                                     #  start_date_spotter_potter=start_date_spotter_potter,
                                     #  end_date_spotter_potter=last_date_spotter_potter,                                     
-                                      start_date_spotter_keller=start_date_spotter_keller,
-                                      end_date_spotter_keller=last_date_spotter_keller)
+                                    #  start_date_spotter_keller=start_date_spotter_keller,
+                                    #  end_date_spotter_keller=last_date_spotter_keller)
                                     #  start_date_spotter_mexilhao=start_date_spotter_mexilhao,
                                     #  end_date_spotter_mexilhao=last_date_spotter_mexilhao)
 
