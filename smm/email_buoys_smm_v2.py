@@ -35,6 +35,14 @@ start_date_spotter_abrolhos = min(file_spotter_abrolhos['Datetime'])
 last_date_spotter_abrolhos = max(file_spotter_abrolhos['Datetime'])
 
 ###################################################
+#### SPOTTER ALCATRAZES
+
+file_spotter_alcatrazes = pd.read_csv(EMAIL_BUOYS_FILES[1])
+
+start_date_spotter_alcatrazes = min(file_spotter_alcatrazes['Datetime'])
+last_date_spotter_alcatrazes = max(file_spotter_alcatrazes['Datetime'])
+
+###################################################
 #### SPOTTER PINGUIM - OPERANTAR 
 
 # file_spotter_pinguim = pd.read_csv(EMAIL_BUOYS_FILES[1])
@@ -74,18 +82,20 @@ last_date_spotter_abrolhos = max(file_spotter_abrolhos['Datetime'])
 ###################################################
 #### BMO BR
 
-file_bmo = pd.read_csv('dados_bmo_bc1.txt')
+# file_bmo = pd.read_csv('dados_bmo_bc1.txt')
 
-start_date_bmo = min(file_bmo['Datetime'])
-last_date_bmo = max(file_bmo['Datetime'])
+# start_date_bmo = min(file_bmo['Datetime'])
+# last_date_bmo = max(file_bmo['Datetime'])
 
 
-CONTENT = EMAIL_BUOYS_CONTENT.format(start_date_bmo = start_date_bmo,
-                                     end_date_bmo = last_date_bmo,
+CONTENT = EMAIL_BUOYS_CONTENT.format(#start_date_bmo = start_date_bmo,
+                                     #end_date_bmo = last_date_bmo,
                                     #  start_date_spotter_trindade=start_date_spotter_trindade,
                                     #  end_date_spotter_trindade=last_date_spotter_trindade,
                                       start_date_spotter_abrolhos=start_date_spotter_abrolhos,
-                                      end_date_spotter_abrolhos=last_date_spotter_abrolhos)
+                                      end_date_spotter_abrolhos=last_date_spotter_abrolhos,
+                                      start_date_spotter_alcatrazes=start_date_spotter_alcatrazes,
+                                      end_date_spotter_alcatrazes=last_date_spotter_alcatrazes)
                                     #  start_date_spotter_pinguim=start_date_spotter_pinguim,
                                     #  end_date_spotter_pinguim=last_date_spotter_pinguim,
                                     #  start_date_spotter_potter=start_date_spotter_potter,
