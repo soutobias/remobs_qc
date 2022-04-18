@@ -145,72 +145,72 @@ print("Abrolhos buoy file ready.")
 
 # Pinguim Buoy
 
-print("Pinguim buoy...")
-df_spotter_qc_pinguim = bd.get_data_spotter(conn=conn, buoy_id=26, table='data_buoys', start_date="2021-12-04",last_date=None, interval_hour='ALL')
-df_spotter_qc_pinguim.sort_values(by = 'date_time', inplace = True)
+# print("Pinguim buoy...")
+# df_spotter_qc_pinguim = bd.get_data_spotter(conn=conn, buoy_id=26, table='data_buoys', start_date="2021-12-04",last_date=None, interval_hour='ALL')
+# df_spotter_qc_pinguim.sort_values(by = 'date_time', inplace = True)
 
 
 
 
-df_spotter_pinguim = df_spotter_qc_pinguim[['date_time', 'lat', 'lon', 'wspd', 'wdir','sst',
-							'swvht1','tp1', 'wvdir1','wvspread1', 'pk_dir',
-							'pk_wvspread','mean_tp']].copy()
+# df_spotter_pinguim = df_spotter_qc_pinguim[['date_time', 'lat', 'lon', 'wspd', 'wdir','sst',
+# 							'swvht1','tp1', 'wvdir1','wvspread1', 'pk_dir',
+# 							'pk_wvspread','mean_tp']].copy()
 
 
 
 
-df_spotter_pinguim.rename(columns = {'date_time':'Datetime',
-							 'sst':'wtmp',
-							 'swvht1': 'wvht',
-							 'tp1': 'dpd',
-							 'mean_tp':'mean_dpd',
-							 'wvdir1':'mwd',
-							 'pk_dir':'peak_mwd',
-							 'wvspread1':'spred',
-							 'pk_wvspread':'peak_spred'}, inplace = True)
+# df_spotter_pinguim.rename(columns = {'date_time':'Datetime',
+# 							 'sst':'wtmp',
+# 							 'swvht1': 'wvht',
+# 							 'tp1': 'dpd',
+# 							 'mean_tp':'mean_dpd',
+# 							 'wvdir1':'mwd',
+# 							 'pk_dir':'peak_mwd',
+# 							 'wvspread1':'spred',
+# 							 'pk_wvspread':'peak_spred'}, inplace = True)
 
-df_spotter_pinguim = get_full_hour(df_spotter_pinguim)
-df_spotter_pinguim = get_synoptic_data(df_spotter_pinguim)
+# df_spotter_pinguim = get_full_hour(df_spotter_pinguim)
+# df_spotter_pinguim = get_synoptic_data(df_spotter_pinguim)
 
 
 
-bd.spotter_txt(df_spotter_pinguim, 'dados_spotter_pinguim.txt')
-print("Pinguim buoy file ready.")
+# bd.spotter_txt(df_spotter_pinguim, 'dados_spotter_pinguim.txt')
+# print("Pinguim buoy file ready.")
 
 
 # Keller Buoy
 
-print("Keller buoy...")
-df_spotter_qc_keller = bd.get_data_spotter(conn=conn, buoy_id=24, table='data_buoys', start_date="2021-12-04",last_date=None, interval_hour='ALL')
-df_spotter_qc_keller.sort_values(by = 'date_time', inplace = True)
+# print("Keller buoy...")
+# df_spotter_qc_keller = bd.get_data_spotter(conn=conn, buoy_id=24, table='data_buoys', start_date="2021-12-04",last_date=None, interval_hour='ALL')
+# df_spotter_qc_keller.sort_values(by = 'date_time', inplace = True)
 
 
 
 
-df_spotter_keller = df_spotter_qc_keller[['date_time', 'lat', 'lon', 'wspd', 'wdir','sst',
-							'swvht1','tp1', 'wvdir1','wvspread1', 'pk_dir',
-							'pk_wvspread','mean_tp']].copy()
+# df_spotter_keller = df_spotter_qc_keller[['date_time', 'lat', 'lon', 'wspd', 'wdir','sst',
+# 							'swvht1','tp1', 'wvdir1','wvspread1', 'pk_dir',
+# 							'pk_wvspread','mean_tp']].copy()
 
 
 
 
-df_spotter_keller.rename(columns = {'date_time':'Datetime',
-							 'sst':'wtmp',
-							 'swvht1': 'wvht',
-							 'tp1': 'dpd',
-							 'mean_tp':'mean_dpd',
-							 'wvdir1':'mwd',
-							 'pk_dir':'peak_mwd',
-							 'wvspread1':'spred',
-							 'pk_wvspread':'peak_spred'}, inplace = True)
+# df_spotter_keller.rename(columns = {'date_time':'Datetime',
+# 							 'sst':'wtmp',
+# 							 'swvht1': 'wvht',
+# 							 'tp1': 'dpd',
+# 							 'mean_tp':'mean_dpd',
+# 							 'wvdir1':'mwd',
+# 							 'pk_dir':'peak_mwd',
+# 							 'wvspread1':'spred',
+# 							 'pk_wvspread':'peak_spred'}, inplace = True)
 
-df_spotter_keller = get_full_hour(df_spotter_keller)
-df_spotter_keller = get_synoptic_data(df_spotter_keller)
+# df_spotter_keller = get_full_hour(df_spotter_keller)
+# df_spotter_keller = get_synoptic_data(df_spotter_keller)
 
 
 
-bd.spotter_txt(df_spotter_keller, 'dados_spotter_keller.txt')
-print("Keller buoy file ready.")
+# bd.spotter_txt(df_spotter_keller, 'dados_spotter_keller.txt')
+# print("Keller buoy file ready.")
 
 # # Mexilao Buoy
 # conn = bd.conn_qc_db('PRI')
@@ -241,6 +241,40 @@ print("Keller buoy file ready.")
 # df_spotter_mexilhao = get_full_hour(df_spotter_mexilhao)
 # df_spotter_mexilhao = get_synoptic_data(df_spotter_mexilhao)
 
+
+# ALCATRAZES buoy
+
+print("Alcatrazes buoy...")
+df_spotter_qc_alcatrazes = bd.get_data_spotter(conn=conn, buoy_id=27, table='data_buoys', start_date="2022-04-07 14:00", last_date=None, interval_hour='ALL')
+df_spotter_qc_alcatrazes.sort_values(by = 'date_time', inplace = True)
+
+
+
+
+df_spotter_alcatrazes = df_spotter_qc_alcatrazes[['date_time', 'lat', 'lon', 'wspd', 'wdir','sst',
+							'swvht1','tp1', 'wvdir1','wvspread1', 'pk_dir',
+							'pk_wvspread','mean_tp']].copy()
+
+
+
+
+df_spotter_alcatrazes.rename(columns = {'date_time':'Datetime',
+							 'sst':'wtmp',
+							 'swvht1': 'wvht',
+							 'tp1': 'dpd',
+							 'mean_tp':'mean_dpd',
+							 'wvdir1':'mwd',
+							 'pk_dir':'peak_mwd',
+							 'wvspread1':'spred',
+							 'pk_wvspread':'peak_spred'}, inplace = True)
+
+df_spotter_alcatrazes = get_full_hour(df_spotter_alcatrazes)
+df_spotter_alcatrazes = get_synoptic_data(df_spotter_alcatrazes)
+
+
+
+bd.spotter_txt(df_spotter_alcatrazes, 'dados_spotter_alcatrazes.txt')
+print("Alcatrazes buoy file ready.")
 
 
 # bd.spotter_txt(df_spotter_mexilhao, EMAIL_SPOTTER_MEXILHAO_FILE)
