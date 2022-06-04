@@ -36,7 +36,7 @@ for buoy_id in spotters_on_ids['buoy_id']:
     last_date = check_last_date(conn, 'spotter_general', buoy_id)
     last_date = last_date[0][0]
 
-    raw_data = get_data_table_db(conn, buoy_id, last_date, 'spotter_general', 'ALL')
+    raw_data = get_data_table_db(conn, buoy_id, last_date, 'spotter_general', 72)
 
     # Treating values and index
     raw_data.set_index("date_time", inplace = True)
