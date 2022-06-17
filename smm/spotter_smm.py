@@ -277,4 +277,36 @@ bd.spotter_txt(df_spotter_alcatrazes, 'dados_spotter_alcatrazes.txt')
 print("Alcatrazes buoy file ready.")
 
 
-# bd.spotter_txt(df_spotter_mexilhao, EMAIL_SPOTTER_MEXILHAO_FILE)
+# NORONHA buoy
+
+print("Noronha buoy...")
+df_spotter_qc_noronha = bd.get_data_spotter(conn=conn, buoy_id=28, table='data_buoys', start_date="2022-06-07 00:00", last_date=None, interval_hour='ALL')
+df_spotter_qc_noronha.sort_values(by = 'date_time', inplace = True)
+
+
+
+
+df_spotter_noronha = df_spotter_qc_noronha[['date_time', 'lat', 'lon', 'wspd', 'wdir','sst',
+							'swvht1','tp1', 'wvdir1','wvspread1', 'pk_dir',
+							'pk_wvspread','mean_tp']].copy()
+
+
+
+
+df_spotter_noronha.rename(columns = {'date_time':'Datetime',
+							 'sst':'wtmp',
+							 'swvht1': 'wvht',
+							 'tp1': 'dpd',
+							 'mean_tp':'mean_dpd',
+							 'wvdir1':'mwd',
+							 'pk_dir':'peak_mwd',
+							 'wvspread1':'spred',
+							 'pk_wvspread':'peak_spred'}, inplace = True)
+
+df_spotter_noronha = get_full_hour(df_spotter_noronha)
+df_spotter_noronha = get_synoptic_data(df_spotter_noronha)
+
+
+
+bd.spotter_txt(df_spotter_noronha, 'dados_spotter_noronha.txt')
+print("Noronha buoy file ready.")
