@@ -42,6 +42,17 @@ file_spotter_alcatrazes = pd.read_csv(EMAIL_BUOYS_FILES[1])
 start_date_spotter_alcatrazes = min(file_spotter_alcatrazes['Datetime'])
 last_date_spotter_alcatrazes = max(file_spotter_alcatrazes['Datetime'])
 
+
+###################################################
+#### SPOTTER NORONHA
+
+file_spotter_noronha = pd.read_csv(EMAIL_BUOYS_FILES[2])
+
+start_date_spotter_noronha = min(file_spotter_noronha['Datetime'])
+last_date_spotter_noronha = max(file_spotter_noronha['Datetime'])
+
+
+
 ###################################################
 #### SPOTTER PINGUIM - OPERANTAR 
 
@@ -95,7 +106,9 @@ CONTENT = EMAIL_BUOYS_CONTENT.format(#start_date_bmo = start_date_bmo,
                                       start_date_spotter_abrolhos=start_date_spotter_abrolhos,
                                       end_date_spotter_abrolhos=last_date_spotter_abrolhos,
                                       start_date_spotter_alcatrazes=start_date_spotter_alcatrazes,
-                                      end_date_spotter_alcatrazes=last_date_spotter_alcatrazes)
+                                      end_date_spotter_alcatrazes=last_date_spotter_alcatrazes,
+                                      start_date_spotter_noronha=start_date_spotter_noronha,
+                                      end_date_spotter_noronha=last_date_spotter_noronha)
                                     #  start_date_spotter_pinguim=start_date_spotter_pinguim,
                                     #  end_date_spotter_pinguim=last_date_spotter_pinguim,
                                     #  start_date_spotter_potter=start_date_spotter_potter,
