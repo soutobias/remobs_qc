@@ -310,3 +310,36 @@ df_spotter_noronha = get_synoptic_data(df_spotter_noronha)
 
 bd.spotter_txt(df_spotter_noronha, 'dados_spotter_noronha.txt')
 print("Noronha buoy file ready.")
+
+### Imbituba buoy...
+print("Imbituba buoy...")
+df_spotter_qc_imbituba = bd.get_data_spotter(conn=conn, buoy_id=29, table='data_buoys', start_date="2022-07-27",last_date=None, interval_hour='ALL')
+df_spotter_qc_imbituba.sort_values(by = 'date_time', inplace = True)
+
+
+
+
+df_spotter_imbituba = df_spotter_qc_imbituba[['date_time', 'lat', 'lon', 'wspd', 'wdir','sst',
+							'swvht1','tp1', 'wvdir1','wvspread1', 'pk_dir',
+							'pk_wvspread','mean_tp']].copy()
+
+
+
+
+df_spotter_imbituba.rename(columns = {'date_time':'Datetime',
+							 'sst':'wtmp',
+							 'swvht1': 'wvht',
+							 'tp1': 'dpd',
+							 'mean_tp':'mean_dpd',
+							 'wvdir1':'mwd',
+							 'pk_dir':'peak_mwd',
+							 'wvspread1':'spred',
+							 'pk_wvspread':'peak_spred'}, inplace = True)
+
+df_spotter_imbituba = get_full_hour(df_spotter_imbituba)
+df_spotter_imbituba = get_synoptic_data(df_spotter_imbituba)
+
+
+
+bd.spotter_txt(df_spotter_imbituba, 'dados_spotter_imbituba.txt')
+print("Imbituba buoy file ready.")
