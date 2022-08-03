@@ -79,7 +79,7 @@ CONTENT = EMAIL_BUOYS_CONTENT.format(#start_date_bmo = start_date_bmo,
                                       start_date_spotter_alcatrazes=start_date_spotter_alcatrazes,
                                       end_date_spotter_alcatrazes=last_date_spotter_alcatrazes,
                                       start_date_spotter_noronha=start_date_spotter_noronha,
-                                      end_date_spotter_noronha=last_date_spotter_noronha
+                                      end_date_spotter_noronha=last_date_spotter_noronha,
                                       start_date_spotter_imbituba=start_date_spotter_imbituba,
                                       end_date_spotter_imbituba=last_date_spotter_imbituba)
 
